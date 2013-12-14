@@ -10,6 +10,10 @@ TODO: Plan a way to have default settings (somewhere) + user overrides
 """
 import os, sys
 
+
+class InvalidSetting(ValueError, Exception):
+    pass
+
 SETTINGS_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
     'data', 'settings'
@@ -35,10 +39,10 @@ def _get_setting(
     s = _SETTINGS_DICT.get(setting_name)
     if s is None:
         if default:
-            s = _SETTINGS_DICT[setting_name] = default
-            return s
+            _SETTINGS_DICT[setting_name] = default
+            return default
         if required:
-            raise Exception("ONOES")    # TODO: specialized exc and explicit msg
+            raise InvalidSetting("ONOES")    # TODO: explicit msg
     # TODO: type checking
     return s
 
