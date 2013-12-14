@@ -13,15 +13,17 @@ ASSETS_ROOT = os.path.join(
     'assets'
 )
 
-
 def get_path(*args, **kwargs):
     """
     Return an absolute path to the requested asset file.
 
-    Will consider the `data` irectory as the root for all files.
+    Will consider the `assets` directory as the root for all files.
 
     args can be either a regular path (relative to the `data` directory),
     or a set of path fragments that will be joined together.
+
+    An optional `assets_root` keyword argument can override the default
+    root directory.
 
     """
     assets_root = kwargs.get('assets_root', ASSETS_ROOT)

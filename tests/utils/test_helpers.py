@@ -51,7 +51,7 @@ class TestAssets(unittest.TestCase):
 
     TEST_ASSETS_ROOT = os.path.join(
         os.path.dirname(os.path.dirname(__file__)), 'dummy_assets')
-    print TEST_ASSETS_ROOT
+    )
 
     def get_path(self, *args):
         """
@@ -72,7 +72,7 @@ class TestAssets(unittest.TestCase):
         self.assertEqual(path, self.get_path(path))
         self.assertTrue(os.path.exists(self.get_path(path)))
 
-    def test_assets_ifragmented_path(self):
+    def test_assets_fragmented_path(self):
         """Check assets.get_path with an path fragments"""
         path = os.path.join(self.TEST_ASSETS_ROOT, 'libtcod/fonts/terminal.png')
         args = ('libtcod', 'fonts', 'terminal.png')
