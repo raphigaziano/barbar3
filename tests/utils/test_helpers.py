@@ -19,22 +19,27 @@ class TestSettings(unittest.TestCase):
 
 
 class TestAssets(unittest.TestCase):
-    # TODO: use dummy assets (same as above)
-    ROOT_PATH = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-        'data'
-    )
+
+    def setUp(self):
+        assets.ROOT_DIR = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), 'dummy_assets'
+        )
 
     def test_assets_explicit_path(self):
         """Check assets.get_path with an explicit path"""
-        self.assertEqual(
-            os.path.join(self.ROOT_PATH, 'terminal.png'),
-            assets.get_path('terminal.png')
-        )
-        # TODO: nested paths
+        path = os.path.join(assets.ROOT_DIR, 'dummy')
+        self.assertEqual(path, assets.get_path('dummy'))
+        self.assertTrue(os.path.exists(assets.get_path(path)))
+
+        path = os.path.join(assets.ROOT_DIR, 'libtcod/fonts/terminal.png')
+        self.assertEqual(path, assets.get_path(path))
+        self.assertTrue(os.path.exists(assets.get_path(path)))
 
     def test_assets_ifragmented_path(self):
         """Check assets.get_path with an path fragments"""
-        self.fail("TODO")
-        # TODO: nested paths (not nested makes no sense here)
+        path = os.path.join(assets.ROOT_DIR, 'libtcod/fonts/terminal.png')
+        args = ('libtcod', 'fonts', 'terminal.png')
+        self.assertEqual(path, assets.get_path(*args))
+        self.assertTrue(os.path.exists(assets.get_path(*args)))
+
 
