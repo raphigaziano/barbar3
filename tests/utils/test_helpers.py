@@ -4,8 +4,8 @@
 import os
 import unittest
 
-import settings
-import assets
+from utils import settings
+from utils import assets
 
 
 class TestSettings(unittest.TestCase):

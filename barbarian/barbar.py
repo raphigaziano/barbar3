@@ -1,14 +1,14 @@
 """
-Dummy test file.
+barbarian.barbar.py
+===================
 
-Geting back up to speed with libtcod =)
+Game entry point.
 
 """
-import os
+# pylint: disable=E1101
 import libtcodpy as libtcod
 
-import settings
-import assets
+from utils import settings, assets
 
 # Dummy console
 FONT = assets.get_path('terminal.png')

@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 """
-Assets manager.
+barbarian.utils.assets.py
+=========================
 
 Define a few convenience function to load assets for the game.
 
@@ -8,7 +9,7 @@ Define a few convenience function to load assets for the game.
 import os
 
 ROOT_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
     'data'
 )
 
