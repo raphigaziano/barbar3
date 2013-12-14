@@ -10,4 +10,4 @@ Game entry point.
 from renderers import renderer
 
 while True:
-    renderer.dummy_draw()
+    renderer.dummy_main_menu()

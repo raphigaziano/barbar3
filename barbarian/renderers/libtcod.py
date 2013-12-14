@@ -14,7 +14,7 @@ libtcod.console_init_root(
 
 libtcod.sys_set_fps(settings.LIMIT_FPS)
 
-def dummy_draw():
+def dummy_main_menu():
     libtcod.console_set_default_foreground(0, libtcod.light_yellow)
     libtcod.console_print_ex(0,
             settings.SCREEN_W/2, settings.SCREEN_H/2-12,
