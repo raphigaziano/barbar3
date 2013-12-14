@@ -8,13 +8,13 @@ Define a few convenience function to load assets for the game.
 """
 import os
 
-ROOT_DIR = os.path.join(
+ASSETS_ROOT = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
     'assets'
 )
 
 
-def get_path(*args):
+def get_path(*args, **kwargs):
     """
     Return an absolute path to the requested asset file.
 
@@ -24,7 +24,9 @@ def get_path(*args):
     or a set of path fragments that will be joined together.
 
     """
-    explicit_path = os.path.join(ROOT_DIR, args[0])
+    assets_root = kwargs.get('assets_root', ASSETS_ROOT)
+
+    explicit_path = os.path.join(assets_root, args[0])
     if os.path.isfile(explicit_path):
         return explicit_path
-    return os.path.join(ROOT_DIR, *args)
+    return os.path.join(assets_root, *args)

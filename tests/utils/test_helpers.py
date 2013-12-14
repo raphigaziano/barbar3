@@ -49,26 +49,34 @@ class TestSettings(unittest.TestCase):
 
 class TestAssets(unittest.TestCase):
 
-    def setUp(self):
-        assets.ROOT_DIR = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), 'dummy_assets'
-        )
+    TEST_ASSETS_ROOT = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), 'dummy_assets')
+    print TEST_ASSETS_ROOT
+
+    def get_path(self, *args):
+        """
+        Mock for assets.get_path.
+
+        Simply set the `assets_root` argument to the test assets directory.
+
+        """
+        return assets.get_path( *args, assets_root=self.TEST_ASSETS_ROOT)
 
     def test_assets_explicit_path(self):
         """Check assets.get_path with an explicit path"""
-        path = os.path.join(assets.ROOT_DIR, 'dummy')
-        self.assertEqual(path, assets.get_path('dummy'))
-        self.assertTrue(os.path.exists(assets.get_path(path)))
+        path = os.path.join(self.TEST_ASSETS_ROOT, 'dummy')
+        self.assertEqual(path, self.get_path('dummy'))
+        self.assertTrue(os.path.exists(self.get_path(path)))
 
-        path = os.path.join(assets.ROOT_DIR, 'libtcod/fonts/terminal.png')
-        self.assertEqual(path, assets.get_path(path))
-        self.assertTrue(os.path.exists(assets.get_path(path)))
+        path = os.path.join(self.TEST_ASSETS_ROOT, 'libtcod/fonts/terminal.png')
+        self.assertEqual(path, self.get_path(path))
+        self.assertTrue(os.path.exists(self.get_path(path)))
 
     def test_assets_ifragmented_path(self):
         """Check assets.get_path with an path fragments"""
-        path = os.path.join(assets.ROOT_DIR, 'libtcod/fonts/terminal.png')
+        path = os.path.join(self.TEST_ASSETS_ROOT, 'libtcod/fonts/terminal.png')
         args = ('libtcod', 'fonts', 'terminal.png')
-        self.assertEqual(path, assets.get_path(*args))
-        self.assertTrue(os.path.exists(assets.get_path(*args)))
+        self.assertEqual(path, self.get_path(*args))
+        self.assertTrue(os.path.exists(self.get_path(*args)))
 
 
