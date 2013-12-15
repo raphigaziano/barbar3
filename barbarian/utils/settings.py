@@ -51,3 +51,13 @@ SCREEN_W = _get_setting('SCREEN_W', required=True)
 SCREEN_H = _get_setting('SCREEN_H', required=True)
 
 RENDERER = _get_setting('RENDERER', default='libtcod')
+
+ASSETS_ROOT = _get_setting(
+    'ASSETS_ROOT',
+    default=os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        'assets'
+    ),
+    required=True
+)
+

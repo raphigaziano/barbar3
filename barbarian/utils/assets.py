@@ -8,10 +8,9 @@ Define a few convenience function to load assets for the game.
 """
 import os
 
-ASSETS_ROOT = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-    'assets'
-)
+from utils.settings import ASSETS_ROOT, RENDERER
+
+ASSETS_ROOT = os.path.join(ASSETS_ROOT, RENDERER)
 
 def get_path(*args, **kwargs):
     """

@@ -3,7 +3,7 @@ import libtcodpy as libtcod
 from utils import settings, assets
 
 # Dummy console
-FONT = assets.get_path('libtcod', 'fonts', 'terminal.png')
+FONT = assets.get_path('fonts', 'terminal.png')
 # FONT = 'barbarian/terminal10x10_gs_tc.png'
 # glob.con = libtcod.console_new(CAM_WIDTH, CAM_HEIGHT)
 
