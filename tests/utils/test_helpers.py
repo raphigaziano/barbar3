@@ -8,6 +8,7 @@ from utils import settings
 from utils import assets
 
 
+# TODO: use a dummy setting file to avoid hardcoding test values
 class TestSettings(unittest.TestCase):
 
     def setUp(self):
@@ -16,10 +17,9 @@ class TestSettings(unittest.TestCase):
     def clear_settings(self):
         settings._SETTINGS_DICT = {}
 
-    # TODO: use a dummy setting file to avoid hardcoding test values
-    # TODO: check more types
     def test_settings(self):
         """Assert settings loaded correctly"""
+        # TODO: check more types
         self.assertTrue(hasattr(settings, 'SCREEN_W'))
         self.assertEqual(80, settings.SCREEN_W)
         self.assertEqual(int, type(settings.SCREEN_W))
@@ -33,7 +33,7 @@ class TestSettings(unittest.TestCase):
         self.assertRaises(
             settings.InvalidSetting,
             settings._get_setting,
-            ('MISSING_SETTING'),
+            ('MISSING_SETTING',),
             required=True
         )
 
@@ -50,7 +50,7 @@ class TestSettings(unittest.TestCase):
 class TestAssets(unittest.TestCase):
 
     TEST_ASSETS_ROOT = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), 'dummy_assets')
+        os.path.dirname(os.path.dirname(__file__)), 'dummy_assets'
     )
 
     def get_path(self, *args):
