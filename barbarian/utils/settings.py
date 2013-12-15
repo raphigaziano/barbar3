@@ -32,7 +32,11 @@ def _read_settings(settings_file=SETTINGS_PATH):
             _SETTINGS_DICT[k] = eval(v)     # TODO: secure this
 
 def _get_setting(
-    setting_name, default=None, required=False, settings_file=SETTINGS_PATH
+    setting_name,
+    py_type=None,
+    default=None,
+    required=False,
+    settings_file=SETTINGS_PATH
 ):
     if not _SETTINGS_DICT:
         _read_settings(settings_file)
@@ -42,18 +46,23 @@ def _get_setting(
             _SETTINGS_DICT[setting_name] = default
             return default
         if required:
-            raise InvalidSetting("ONOES")    # TODO: explicit msg
-    # TODO: type checking
+            raise InvalidSetting("Missing required setting: %s" % setting_name)
+    # TODO: Callback validators ?
+    if py_type is not None and py_type is not type(s):
+        raise InvalidSetting(
+            "Invalid setting: %s must be of type %s" % (setting_name, py_type)
+        )
     return s
 
-LIMIT_FPS = _get_setting('LIMIT_FPS')
-SCREEN_W = _get_setting('SCREEN_W', required=True)
-SCREEN_H = _get_setting('SCREEN_H', required=True)
 
-RENDERER = _get_setting('RENDERER', default='libtcod')
+LIMIT_FPS = _get_setting('LIMIT_FPS', py_type=int)
+SCREEN_W = _get_setting('SCREEN_W', py_type=int, required=True)
+SCREEN_H = _get_setting('SCREEN_H', py_type=int, required=True)
+
+RENDERER = _get_setting('RENDERER', py_type=str, default='libtcod')
 
 ASSETS_ROOT = _get_setting(
-    'ASSETS_ROOT',
+    'ASSETS_ROOT', py_type=str,
     default=os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
         'assets'

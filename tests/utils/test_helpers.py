@@ -8,8 +8,12 @@ from utils import settings
 from utils import assets
 
 
-# TODO: use a dummy setting file to avoid hardcoding test values
 class TestSettings(unittest.TestCase):
+
+    SETTING_FILE = os.path.join(
+        os.path.dirname(__file__),
+        'dummy_settings', 'settings'
+    )
 
     def setUp(self):
         self.clear_settings()
@@ -17,22 +21,26 @@ class TestSettings(unittest.TestCase):
     def clear_settings(self):
         settings._SETTINGS_DICT = {}
 
-    def test_settings(self):
-        """Assert settings loaded correctly"""
-        # TODO: check more types
-        self.assertTrue(hasattr(settings, 'SCREEN_W'))
-        self.assertEqual(80, settings.SCREEN_W)
-        self.assertEqual(int, type(settings.SCREEN_W))
+    def get_setting(self, *args, **kwargs):
+        """
+        Mock for settings._get_setting.
+
+        Simply set the `settings_file` argument to the dummy settings file.
+
+        """
+        return settings._get_setting(
+            settings_file=self.SETTING_FILE, *args, **kwargs
+        )
 
     def test_missing_setting(self):
         """ Missing (but not required) setting should default to None. """
-        self.assertEqual(None, settings._get_setting('MISSING_SETTING'))
+        self.assertEqual(None, self.get_setting('MISSING_SETTING'))
 
     def test_missing_required_setting(self):
         """ Missing and required setting should raise an exception. """
         self.assertRaises(
             settings.InvalidSetting,
-            settings._get_setting,
+            self.get_setting,
             ('MISSING_SETTING',),
             required=True
         )
@@ -40,18 +48,27 @@ class TestSettings(unittest.TestCase):
     def test_missing_default_setting(self):
         """ Missing setting should default to its default value if specified. """
         self.assertEqual(
-            'FOO', settings._get_setting('MISSING_SETTING', default='FOO')
+            'FOO', self.get_setting('MISSING_SETTING', default='FOO')
         )
         self.clear_settings()
         self.assertEqual(
-            666, settings._get_setting('MISSING_SETTING', default=666)
+            666, self.get_setting('MISSING_SETTING', default=666)
+        )
+
+    def test_invalid_type(self):
+        """ Invalidly typed settings should raise an exception. """
+        self.assertRaises(
+            settings.InvalidSetting, self.get_setting,
+            ('STR',), py_type=int
+        )
+        self.assertRaises(
+            settings.InvalidSetting, self.get_setting,
+            ('INT',), py_type=str
         )
 
 class TestAssets(unittest.TestCase):
 
-    TEST_ASSETS_ROOT = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), 'dummy_assets'
-    )
+    TEST_ASSETS_ROOT = os.path.join(os.path.dirname(__file__), 'dummy_assets')
 
     def get_path(self, *args):
         """
