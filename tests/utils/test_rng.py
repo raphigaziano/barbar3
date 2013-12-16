@@ -36,6 +36,14 @@ class TestRng(unittest.TestCase):
         self.assertNotEqual(startl, res)
         self.assertFalse(startl is res)
 
+    def test_coin_flip(self):
+        """ Testing rng.coin_flip() """
+        self.assertEqual(0, rng.coin_flip())
+        self.assertEqual(1, rng.coin_flip())
+        self.assertEqual(0, rng.coin_flip())
+        self.assertEqual(1, rng.coin_flip())
+        self.assertEqual(1, rng.coin_flip())
+
     def test_rolldice(self):
         """Testing rng.roll_dice"""
         self.assertEqual(9,  rng.roll_dice('2D6'))

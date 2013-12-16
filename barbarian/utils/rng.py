@@ -40,6 +40,7 @@ class DiceError(RngError, ValueError):
 # renaming the random.uniform function to a more explicit name
 rand_double = uniform
 
+
 def shuffle_copy(seq, gen=random):
     """
     Returns a shuffled copy of the passed sequence.
@@ -55,17 +56,22 @@ def shuffle_copy(seq, gen=random):
 ##  ROGUE/RPG SPECIFIC FUNCTIONS  ##
 ####################################
 
+def coin_flip():
+    """ Flip a coin & return either 1 or 0 (True or False). """
+    return randint(0, 1)
+
+
 def roll_dice(dice):
     """
     Dice Rolling function.
 
     The dice parameter must be a string of the classic RPG format:
     "1D12", "3d6", "2D4+2", "1D7"...
-    Both "d" and D will work. The dice type doesn't have to exist in the 
+    Both "d" and D will work. The dice type doesn't have to exist in the
     real world (-> 1D7).
 
     """
-    try: 
+    try:
         num, faces = dice.upper().split('D')
     except ValueError:
         raise DiceError("Invalid dice values: %s" % dice)
@@ -87,7 +93,7 @@ def roll_dice(dice):
     for _ in range(num):
         res += randint(1, faces)
     res += bonus
-    if res < 1: 
+    if res < 1:
         res = 1
 
     return res
@@ -95,7 +101,7 @@ def roll_dice(dice):
 
 def check_roll(dice, dif):
     """
-    Call `roll_dice` and returns a boolean indicating if the result was 
+    Call `roll_dice` and returns a boolean indicating if the result was
     greater or equal to the specified dificulty.
 
     True -> Check passed, otherwise False.
@@ -109,7 +115,7 @@ def random_table(table):
     Pick a random item from the passed weighted table.
 
     Table must be a dictionnary where keys are the available items
-    (any type should be ok), and their associated values are each item's 
+    (any type should be ok), and their associated values are each item's
     chances of being selected.
 
     """
@@ -126,8 +132,8 @@ def random_table(table):
 
 def randomize_items(item_types, aspects):
     """
-    Associate random names & colors (aspects) from a list of 
-    (descr, color) tupples to corresponding item types (passed as a 
+    Associate random names & colors (aspects) from a list of
+    (descr, color) tupples to corresponding item types (passed as a
     list).
 
     Returns a dict of type: (descr, color) items.
