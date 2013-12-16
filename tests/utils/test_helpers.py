@@ -11,8 +11,7 @@ from utils import assets
 class TestSettings(unittest.TestCase):
 
     SETTING_FILE = os.path.join(
-        os.path.dirname(__file__),
-        'dummy_settings', 'settings'
+        os.path.dirname(__file__), 'dummy_settings', 'settings'
     )
 
     def setUp(self):
@@ -31,6 +30,11 @@ class TestSettings(unittest.TestCase):
         return settings._get_setting(
             settings_file=self.SETTING_FILE, *args, **kwargs
         )
+
+    def test_get_setting(self):
+        """ Testing simple setting retrieval """
+        self.assertEqual('foo', self.get_setting('STR'))
+        self.assertEqual(666, self.get_setting('INT'))
 
     def test_missing_setting(self):
         """ Missing (but not required) setting should default to None. """
