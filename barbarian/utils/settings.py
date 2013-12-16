@@ -59,6 +59,9 @@ LIMIT_FPS = _get_setting('LIMIT_FPS', py_type=int)
 SCREEN_W = _get_setting('SCREEN_W', py_type=int, required=True)
 SCREEN_H = _get_setting('SCREEN_H', py_type=int, required=True)
 
+MAP_W = _get_setting('MAP_W', py_type=int, required=True)
+MAP_H = _get_setting('MAP_H', py_type=int, required=True)
+
 RENDERER = _get_setting('RENDERER', py_type=str, default='libtcod')
 
 ASSETS_ROOT = _get_setting(

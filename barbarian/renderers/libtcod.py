@@ -32,15 +32,13 @@ def dummy_main_menu():
     libtcod.console_flush()
 
 
-from map import MAP
-def dummy_draw():
-    for x, row in enumerate(MAP):
-        for y, cell in enumerate(row):
-            if cell == 0:
-                col = libtcod.light_blue
-            elif cell == 1:
-                col = libtcod.dark_blue
-            # print x, y, col
-            libtcod.console_set_char_background(0, x, y, col)
+def dummy_draw_map(map):
+    for (x, y), cell in map:
+        if cell == 0:
+            col = libtcod.light_blue
+        elif cell == 1:
+            col = libtcod.dark_blue
+        # print x, y, col
+        libtcod.console_set_char_background(0, x, y, col)
 
     libtcod.console_flush()

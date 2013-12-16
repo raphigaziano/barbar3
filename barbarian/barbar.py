@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 """
 barbarian.barbar.py
 ===================
@@ -9,5 +10,7 @@ Game entry point.
 
 from renderers import renderer
 
+import map
+m = map.Map(map.dummy_generator)
 while True:
-    renderer.dummy_draw()
+    renderer.dummy_draw_map(m)
