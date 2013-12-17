@@ -2,17 +2,20 @@ import libtcodpy as libtcod
 
 from utils import settings, assets
 
-# Dummy console
-FONT = assets.get_path('fonts', 'terminal.png')
-# FONT = 'barbarian/terminal10x10_gs_tc.png'
-# glob.con = libtcod.console_new(CAM_WIDTH, CAM_HEIGHT)
+def init():
+    # Dummy console
+    # FONT = assets.get_path('fonts', 'terminal.png')
+    FONT = assets.get_path('fonts', 'terminal10x10_gs_tc.png')
+    # glob.con = libtcod.console_new(CAM_WIDTH, CAM_HEIGHT)
 
-libtcod.console_set_custom_font(FONT)
-libtcod.console_init_root(
-    settings.SCREEN_W, settings.SCREEN_H, 'Barbarian Quest III', False
-)
+    libtcod.console_set_custom_font(
+        FONT, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD
+    )
+    libtcod.console_init_root(
+        settings.SCREEN_W, settings.SCREEN_H, 'Barbarian Quest III', False
+    )
 
-libtcod.sys_set_fps(settings.LIMIT_FPS)
+    libtcod.sys_set_fps(settings.LIMIT_FPS)
 
 def dummy_main_menu():
     libtcod.console_set_default_foreground(0, libtcod.light_yellow)
