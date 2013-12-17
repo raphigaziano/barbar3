@@ -8,18 +8,21 @@ Game entry point.
 """
 # pylint: disable=E1101
 
+from gamestates import StateManager, DungeonState
 from renderers import renderer
 
-import map
-m = map.Map(80, 40, map.dummy_generator)
+state_manager = StateManager()
+state_manager.push(DungeonState())
 
-from utils import rng
-px, py = rng.randrange(0, 80), rng.randrange(0, 40)
-while m.get_cell(px, py):
-    px, py = rng.randrange(0, 80), rng.randrange(0, 40)
+renderer.init()
 
 while True:
-    renderer.dummy_draw_map(m)
-    renderer.dummy_draw_player(px, py)
+
+    state_manager.update()
+    cs = state_manager.current_state
+    cs.process_input()
+
+    renderer.dummy_draw_map(cs.m)
+    renderer.dummy_draw_player(cs.px, cs.py)
 
     renderer.flush()
