@@ -7,12 +7,11 @@ Basic Map data structure.
 
 """
 
-from utils import settings, rng
-
 
 def dummy_generator():
+    from utils import rng
     return [
-        rng.coin_flip() for i in range(settings.MAP_W * settings.MAP_H)
+        rng.coin_flip() for i in range(80 * 40)
     ]
 
 
@@ -23,7 +22,10 @@ class Map(object):
 
     """ Basic Map object """
 
-    def __init__(self, generator):
+    def __init__(self, width, height, generator):
+        # Placeholders w & h
+        self.w = width
+        self.h = height
         # Dummy map gen
         self.cells = generator()
 
@@ -37,16 +39,20 @@ class Map(object):
 
     def __iter__(self):
         for i, c in enumerate(self.cells):
-            yield self._idx_to_cartesian(i), c
+            x, y = self._idx_to_cartesian(i)
+            yield x, y, c
         raise StopIteration
+
+    def slice(self, x, y, w, h):
+        cells = [0, 0, 0]
+        return self.__class__(w, h, lambda: cells)
 
     ### Internal Utils ###
     ######################
 
     def _idx_to_cartesian(self, idx):
-        return idx / settings.MAP_H, idx % settings.MAP_H
+        return idx % self.w, idx / self.w
 
     def _cartesian_to_idx(self, x, y):
-        # WRONG
-        return x+y
+        return x + (y * self.w)
 

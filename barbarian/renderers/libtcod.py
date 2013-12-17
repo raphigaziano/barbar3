@@ -33,12 +33,21 @@ def dummy_main_menu():
 
 
 def dummy_draw_map(map):
-    for (x, y), cell in map:
+    for x, y, cell in map:
         if cell == 0:
             col = libtcod.light_blue
+            ch  = '.'
         elif cell == 1:
             col = libtcod.dark_blue
+            ch  = '#'
         # print x, y, col
         libtcod.console_set_char_background(0, x, y, col)
+        # libtcod.console_set_char_foreground(0, x, y, col)
+        # libtcod.console_set_char(0, x, y, ch)
 
+def dummy_draw_player(x, y):
+    libtcod.console_set_char_foreground(0, x, y, libtcod.red)
+    libtcod.console_set_char(0, x, y, '@')
+
+def flush():
     libtcod.console_flush()

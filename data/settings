@@ -3,3 +3,8 @@ LIMIT_FPS = 30
 # Screen size in cells
 SCREEN_W = 80
 SCREEN_H = 50
+
+MAP_W = 80
+MAP_H = 40
+
+# RENDERER = "foobar"
