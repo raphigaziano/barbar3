@@ -1,6 +1,6 @@
 import sys
 
-from utils import settings
+from gameio import settings
 
 renderer = settings.RENDERER
 

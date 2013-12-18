@@ -19,6 +19,7 @@ def dummy_generator():
 class OutOfBoundMapError(IndexError, Exception):
     pass
 
+
 class Map(object):
 
     """ Basic Map object """

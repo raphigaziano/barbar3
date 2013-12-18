@@ -4,8 +4,8 @@
 import os
 import unittest
 
-from utils import settings
-from utils import assets
+from gameio import settings
+from gameio import assets
 
 
 class TestSettings(unittest.TestCase):

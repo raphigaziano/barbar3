@@ -2,7 +2,6 @@
 import libtcodpy as tcod
 from renderers import renderer
 
-
 class StateManager(object):
 
     """
@@ -35,6 +34,7 @@ class StateManager(object):
     def push(self, s):
         self._states.append(s)
         tcod.console_clear(0)   # TODO: let concerned states handle this
+                                # TODO: NO DIRECT DRAW >:(
 
     def update(self):
 
@@ -51,7 +51,6 @@ class StateManager(object):
             self.pop()
         if next_state is not None:
             self.push(next_state)
-
 
 class GameState(object):
 
@@ -80,7 +79,6 @@ class GameState(object):
     # => http://blog.nuclex-games.com/tutorials/cxx/game-state-management/
 
     # ...
-
 
 class DungeonState(GameState):
 
@@ -121,6 +119,7 @@ class DungeonState(GameState):
         renderer.dummy_draw_map(self.m)
         renderer.dummy_draw_player(self.px, self.py)
 
+
 ### Dummy States ###
 ####################
 
@@ -132,12 +131,10 @@ class InitState(GameState):
         self._pop()
         self._push(MainMenuState())
 
-
 class ShutDownState(GameState):
 
     def update(self):
         self._pop()
-
 
 class MainMenuState(GameState):
 

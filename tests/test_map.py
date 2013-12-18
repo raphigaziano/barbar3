@@ -3,11 +3,7 @@
 """ Unit tests for the map data structure. """
 import unittest
 
-# TODO: Check actual map values
-from utils.settings import MAP_W, MAP_H
-
 import map
-
 
 class TestMap(unittest.TestCase):
 

@@ -1,6 +1,6 @@
 import libtcodpy as libtcod
 
-from utils import settings, assets
+from gameio import settings, assets
 
 def init():
     # Dummy console
