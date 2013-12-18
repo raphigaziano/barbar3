@@ -1,14 +1,14 @@
 # -*- coding: utf8 -*-
 """
-barbarian.utils.assets.py
-=========================
+barbarian.gameio.assets.py
+==========================
 
 Define a few convenience function to load assets for the game.
 
 """
 import os
 
-from utils.settings import ASSETS_ROOT, RENDERER
+from gameio.settings import ASSETS_ROOT, RENDERER
 
 ASSETS_ROOT = os.path.join(ASSETS_ROOT, RENDERER)
 
