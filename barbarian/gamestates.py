@@ -65,6 +65,11 @@ class GameState(object):
     def _push(self, s):
         self.next_state = s
 
+    def _replace_with(self, s):
+        """ Shortcut for pop & push. """
+        self._pop()
+        self._push(s)
+
     def update(self):
         pass
 
@@ -108,8 +113,7 @@ class DungeonState(GameState):
         elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
             self.px += 1
         elif key.vk == tcod.KEY_ESCAPE:
-            self._pop()
-            self._push(ShutDownState())
+            self._replace_with(ShutDownState())
 
     def update(self):
         self.process_input()
@@ -128,8 +132,7 @@ class InitState(GameState):
     def update(self):
         renderer.init()
 
-        self._pop()
-        self._push(MainMenuState())
+        self._replace_with(MainMenuState())
 
 class ShutDownState(GameState):
 
@@ -141,8 +144,7 @@ class MainMenuState(GameState):
     def update(self):
         k = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
         if k.vk is not tcod.KEY_NONE:
-            self._pop()
-            self._push(DungeonState())
+            self._replace_with(DungeonState())
 
     def render(self):
         renderer.dummy_main_menu()
