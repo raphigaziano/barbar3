@@ -54,3 +54,6 @@ def dummy_draw_player(x, y):
 
 def flush():
     libtcod.console_flush()
+
+def clear(con=0):
+    libtcod.console_clear(con)

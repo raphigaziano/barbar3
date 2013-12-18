@@ -33,8 +33,7 @@ class StateManager(object):
 
     def push(self, s):
         self._states.append(s)
-        tcod.console_clear(0)   # TODO: let concerned states handle this
-                                # TODO: NO DIRECT DRAW >:(
+        renderer.clear()        # TODO: let concerned states handle this
 
     def update(self):
 
@@ -116,6 +115,7 @@ class DungeonState(GameState):
         self.process_input()
 
     def render(self):
+        renderer.clear()      # TODO: Clear only whats needed...
         renderer.dummy_draw_map(self.m)
         renderer.dummy_draw_player(self.px, self.py)
 
