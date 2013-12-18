@@ -1,4 +1,12 @@
-""" UNTESTED """
+"""
+barbarian.gamestates.py
+=======================
+
+Game state objects & their manager.
+
+TODO: UNITTESTME!
+
+"""
 import libtcodpy as tcod
 from renderers import renderer
 
@@ -7,7 +15,8 @@ class StateManager(object):
     """
     Main Controller.
 
-    Holds a stack of state objects and a pointer to the currently active one.
+    Stack-like container of state objects, holding pointer to the currently
+    active one.
 
     blaaa
 
@@ -36,8 +45,7 @@ class StateManager(object):
         renderer.clear()        # TODO: let concerned states handle this
 
     def update(self):
-
-        # Event loop
+        """ Main event loop. """
         self.current_state.update()
         self.current_state.render()
 
@@ -53,16 +61,24 @@ class StateManager(object):
 
 class GameState(object):
 
-    """ Base State. """
+    """
+    Base Game State.
+
+    Implements requesting the state manager state tranitions, which will
+    be needed by all state objects, and a few stub methods.
+
+    """
 
     def __init__(self):
         self.done = False
         self.next_state = None
 
     def _pop(self):
+        """ Signal the state manager to pop self. """
         self.done = True
 
     def _push(self, s):
+        """ Signal to state manager to push s onto self. """
         self.next_state = s
 
     def _replace_with(self, s):
@@ -71,12 +87,15 @@ class GameState(object):
         self._push(s)
 
     def update(self):
+        """ Stub update method. No-op. """
         pass
 
     def render(self):
+        """ Stub render method. No-op. """
         pass
 
     def process_input(self):
+        """ Stub input processing method. No-op. """
         pass
 
     # event methods: on_init, on_leave, ...
