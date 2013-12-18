@@ -34,6 +34,7 @@ class StateManager(object):
 
     def push(self, s):
         self._states.append(s)
+        tcod.console_clear(0)   # TODO: let concerned states handle this
 
     def update(self):
 
@@ -129,10 +130,23 @@ class InitState(GameState):
         renderer.init()
 
         self._pop()
-        self._push(DungeonState())
+        self._push(MainMenuState())
 
 
 class ShutDownState(GameState):
 
     def update(self):
         self._pop()
+
+
+class MainMenuState(GameState):
+
+    def update(self):
+        k = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
+        if k.vk is not tcod.KEY_NONE:
+            self._pop()
+            self._push(DungeonState())
+
+    def render(self):
+        renderer.dummy_main_menu()
+
