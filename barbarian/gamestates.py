@@ -1,37 +1,89 @@
+""" UNTESTED """
 import libtcodpy as tcod
+from renderers import renderer
 
 
 class StateManager(object):
 
-    def __init__(self):
+    """
+    Main Controller.
+
+    Holds a stack of state objects and a pointer to the currently active one.
+
+    blaaa
+
+    """
+
+    def __init__(self, initial_state=None):
         self._states = []
-        self._next_state = None
+
+        if initial_state is not None:
+            self._states.append(initial_state)
 
     @property
     def current_state(self):
         return self._states[-1]
 
+    @property
+    def is_done(self):
+        # TODO: better name
+        return not len(self._states) >= 1
+
     def pop(self):
         self._states.pop()
 
     def push(self, s):
-        self._next_state = s
+        self._states.append(s)
 
     def update(self):
-        if self._next_state:
-            self._states.append(self._next_state)
-            self._next_state = None
+
+        # Event loop
+        self.current_state.update()
+        self.current_state.render()
+
+        renderer.flush()
+
+        # Switch state if requested
+        next_state = self.current_state.next_state
+
+        if self.current_state.done:
+            self.pop()
+        if next_state is not None:
+            self.push(next_state)
 
 
 class GameState(object):
 
-    def process_input():
+    """ Base State. """
+
+    def __init__(self):
+        self.done = False
+        self.next_state = None
+
+    def _pop(self):
+        self.done = True
+
+    def _push(self, s):
+        self.next_state = s
+
+    def update(self):
         pass
+
+    def render(self):
+        pass
+
+    def process_input(self):
+        pass
+
+    # event methods: on_init, on_leave, ...
+    # => http://blog.nuclex-games.com/tutorials/cxx/game-state-management/
 
     # ...
 
 
 class DungeonState(GameState):
+
+    """ Dummy Gameplay State """
 
     def __init__(self):
         import map
@@ -42,6 +94,8 @@ class DungeonState(GameState):
         self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
         while self.m.get_cell(self.px, self.py):
             self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
+
+        super(DungeonState, self).__init__()
 
     def process_input(self):
 
@@ -56,5 +110,29 @@ class DungeonState(GameState):
         elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
             self.px += 1
         elif key.vk == tcod.KEY_ESCAPE:
-            pass # How to we break the outside loop ?
+            self._pop()
+            self._push(ShutDownState())
 
+    def update(self):
+        self.process_input()
+
+    def render(self):
+        renderer.dummy_draw_map(self.m)
+        renderer.dummy_draw_player(self.px, self.py)
+
+### Dummy States ###
+####################
+
+class InitState(GameState):
+
+    def update(self):
+        renderer.init()
+
+        self._pop()
+        self._push(DungeonState())
+
+
+class ShutDownState(GameState):
+
+    def update(self):
+        self._pop()
