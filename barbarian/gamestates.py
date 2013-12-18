@@ -30,10 +30,12 @@ class StateManager(object):
 
     @property
     def current_state(self):
+        """ Currently active state is the one sitting on top of the stack. """
         return self._states[-1]
 
     @property
     def is_done(self):
+        """ We'll be done when there are no more state objs on the stack. """
         # TODO: better name
         return not len(self._states) >= 1
 
@@ -42,7 +44,6 @@ class StateManager(object):
 
     def push(self, s):
         self._states.append(s)
-        renderer.clear()        # TODO: let concerned states handle this
 
     def update(self):
         """ Main event loop. """
@@ -118,6 +119,7 @@ class DungeonState(GameState):
             self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
 
         super(DungeonState, self).__init__()
+        renderer.clear()
 
     def process_input(self):
 
