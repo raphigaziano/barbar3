@@ -8,111 +8,111 @@ import gamestates
 class TestStateManager(unittest.TestCase):
 
     def setUp(self):
-        self.cs = gamestates.StateManager()
+        self.sm = gamestates.StateManager()
 
     def test_initial_state(self):
         """ Instanciating a StateManager with an initial state """
         state = object()
-        cs = gamestates.StateManager(state)
-        self.assertEqual(1, len(cs._states))
-        self.assertTrue(cs.current_state is state)
+        sm = gamestates.StateManager(state)
+        self.assertEqual(1, len(sm._states))
+        self.assertTrue(sm.current_state is state)
 
 
     def test_current_state(self):
         """ StateManager.current_state points to the top of the stack """
         dummy_state = object()
-        self.cs.push(dummy_state)
-        self.assertTrue(dummy_state is self.cs.current_state)
+        self.sm.push(dummy_state)
+        self.assertTrue(dummy_state is self.sm.current_state)
 
         another_state = object()
-        self.cs.push(another_state)
-        self.assertTrue(another_state is self.cs.current_state)
+        self.sm.push(another_state)
+        self.assertTrue(another_state is self.sm.current_state)
 
-        self.cs.pop()
-        self.assertTrue(dummy_state is self.cs.current_state)
+        self.sm.pop()
+        self.assertTrue(dummy_state is self.sm.current_state)
 
     def test_invalid_current_state(self):
         """ StateManager.current_state raise an Exception if no states in the stack """
         # NOTE: this is the current behaviour, not necesserally the desired
         # one.
-        self.assertRaises(IndexError, getattr, self.cs, 'current_state')
+        self.assertRaises(IndexError, getattr, self.sm, 'current_state')
 
     def test_is_done(self):
         """ StateManager.is_done should return True of no states are on the stack, False otherwise """
-        self.assertTrue(self.cs.is_done)
-        self.cs.push(object())
-        self.assertFalse(self.cs.is_done)
-        self.cs.pop()
-        self.assertTrue(self.cs.is_done)
+        self.assertTrue(self.sm.is_done)
+        self.sm.push(object())
+        self.assertFalse(self.sm.is_done)
+        self.sm.pop()
+        self.assertTrue(self.sm.is_done)
 
     def test_push(self):
         """ Stack like methods - Pushing """
         s1, s2, s3 = object(), object(), object()
-        self.cs.push(s1)
-        self.assertEqual(1, len(self.cs._states))
-        self.assertTrue(self.cs._states[0] is s1)
-        self.cs.push(s2)
-        self.assertEqual(2, len(self.cs._states))
-        self.assertTrue(self.cs._states[0] is s1)
-        self.assertTrue(self.cs._states[1] is s2)
-        self.cs.push(s3)
-        self.assertEqual(3, len(self.cs._states))
-        self.assertTrue(self.cs._states[0] is s1)
-        self.assertTrue(self.cs._states[1] is s2)
-        self.assertTrue(self.cs._states[2] is s3)
+        self.sm.push(s1)
+        self.assertEqual(1, len(self.sm._states))
+        self.assertTrue(self.sm._states[0] is s1)
+        self.sm.push(s2)
+        self.assertEqual(2, len(self.sm._states))
+        self.assertTrue(self.sm._states[0] is s1)
+        self.assertTrue(self.sm._states[1] is s2)
+        self.sm.push(s3)
+        self.assertEqual(3, len(self.sm._states))
+        self.assertTrue(self.sm._states[0] is s1)
+        self.assertTrue(self.sm._states[1] is s2)
+        self.assertTrue(self.sm._states[2] is s3)
 
     def test_pop(self):
         """ Stack like methods - Poping """
         s1, s2, s3 = object(), object(), object()
-        self.cs.push(s1)
-        self.cs.push(s2)
-        self.cs.push(s3)
+        self.sm.push(s1)
+        self.sm.push(s2)
+        self.sm.push(s3)
 
-        self.assertEqual(3, len(self.cs._states))
-        self.assertTrue(self.cs._states[-1] is s3)
-        self.assertTrue(self.cs._states[0] is s1)
-        self.assertTrue(self.cs._states[1] is s2)
-        self.assertTrue(self.cs._states[2] is s3)
+        self.assertEqual(3, len(self.sm._states))
+        self.assertTrue(self.sm._states[-1] is s3)
+        self.assertTrue(self.sm._states[0] is s1)
+        self.assertTrue(self.sm._states[1] is s2)
+        self.assertTrue(self.sm._states[2] is s3)
 
-        self.cs.pop()
-        self.assertEqual(2, len(self.cs._states))
-        self.assertTrue(self.cs._states[-1] is s2)
-        self.assertTrue(self.cs._states[0] is s1)
-        self.assertTrue(self.cs._states[1] is s2)
+        self.sm.pop()
+        self.assertEqual(2, len(self.sm._states))
+        self.assertTrue(self.sm._states[-1] is s2)
+        self.assertTrue(self.sm._states[0] is s1)
+        self.assertTrue(self.sm._states[1] is s2)
 
-        self.cs.pop()
-        self.assertEqual(1, len(self.cs._states))
-        self.assertTrue(self.cs._states[-1] is s1)
-        self.assertTrue(self.cs._states[0] is s1)
+        self.sm.pop()
+        self.assertEqual(1, len(self.sm._states))
+        self.assertTrue(self.sm._states[-1] is s1)
+        self.assertTrue(self.sm._states[0] is s1)
 
-        self.cs.pop()
-        self.assertEqual(0, len(self.cs._states))
-        self.assertRaises(IndexError, self.cs.pop)
+        self.sm.pop()
+        self.assertEqual(0, len(self.sm._states))
+        self.assertRaises(IndexError, self.sm.pop)
 
     # Updating tests:
-    # - mock contained test to assert their update and render methods are
+    # - mock contained states to assert their update and render methods are
     # called?
 
     def test_push_next_state_on_update(self):
         s = gamestates.GameState()
         new_state = gamestates.GameState()
         s.next_state = new_state
-        self.cs.push(s)
-        self.cs.update()
+        self.sm.push(s)
+        self.sm.update()
 
-        self.assertEqual(2, len(self.cs._states))
-        self.assertTrue(new_state is self.cs.current_state)
+        self.assertEqual(2, len(self.sm._states))
+        self.assertTrue(new_state is self.sm.current_state)
 
     def test_pop_state_on_update(self):
         old_state = gamestates.GameState()
         cur_state = gamestates.GameState()
         cur_state.done = True
-        self.cs.push(old_state)
-        self.cs.push(cur_state)
-        self.cs.update()
+        self.sm.push(old_state)
+        self.sm.push(cur_state)
+        self.sm.update()
 
-        self.assertEqual(1, len(self.cs._states))
-        self.assertTrue(old_state is self.cs.current_state)
+        self.assertEqual(1, len(self.sm._states))
+        self.assertTrue(old_state is self.sm.current_state)
 
     # ... pop & push. Try some more complex scenarios.
 
