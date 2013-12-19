@@ -48,6 +48,8 @@ class TestStateManager(unittest.TestCase):
     def test_push(self):
         """ Stack like methods - Pushing """
         s1, s2, s3 = object(), object(), object()
+        self.assertEqual(0, len(self.sm._states))
+
         self.sm.push(s1)
         self.assertEqual(1, len(self.sm._states))
         self.assertTrue(self.sm._states[0] is s1)
@@ -69,25 +71,18 @@ class TestStateManager(unittest.TestCase):
         self.sm.push(s3)
 
         self.assertEqual(3, len(self.sm._states))
-        self.assertTrue(self.sm._states[-1] is s3)
-        self.assertTrue(self.sm._states[0] is s1)
-        self.assertTrue(self.sm._states[1] is s2)
-        self.assertTrue(self.sm._states[2] is s3)
+        self.assertTrue(self.sm.current_state is s3)
 
         self.sm.pop()
         self.assertEqual(2, len(self.sm._states))
-        self.assertTrue(self.sm._states[-1] is s2)
-        self.assertTrue(self.sm._states[0] is s1)
-        self.assertTrue(self.sm._states[1] is s2)
+        self.assertTrue(self.sm.current_state is s2)
 
         self.sm.pop()
         self.assertEqual(1, len(self.sm._states))
-        self.assertTrue(self.sm._states[-1] is s1)
-        self.assertTrue(self.sm._states[0] is s1)
+        self.assertTrue(self.sm.current_state is s1)
 
         self.sm.pop()
         self.assertEqual(0, len(self.sm._states))
-        self.assertRaises(IndexError, self.sm.pop)
 
     # Updating tests:
     # - mock contained states to assert their update and render methods are
