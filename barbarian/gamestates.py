@@ -31,6 +31,7 @@ class StateManager(object):
     @property
     def current_state(self):
         """ Currently active state is the one sitting on top of the stack. """
+        # TODO: Bettr error handling. Raise a specific exception ?
         return self._states[-1]
 
     @property
@@ -83,7 +84,7 @@ class GameState(object):
         self.next_state = s
 
     def _replace_with(self, s):
-        """ Shortcut for pop & push. """
+        """ Shortcut: pop self & push s, effectively replacing self with s. """
         self._pop()
         self._push(s)
 
@@ -152,7 +153,6 @@ class InitState(GameState):
 
     def update(self):
         renderer.init()
-
         self._replace_with(MainMenuState())
 
 class ShutDownState(GameState):
