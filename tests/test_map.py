@@ -85,3 +85,4 @@ class TestMap(unittest.TestCase):
         # Dummy failing test
         m = map.Map(10, 10, [1] * 100)
         self.assertListEqual([0, 0, 0], m.slice(10, 10, 10, 10).cells)
+        self.fail('FIXME')
