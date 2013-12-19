@@ -66,7 +66,7 @@ class GameState(object):
     """
     Base Game State.
 
-    Implements requesting the state manager state tranitions, which will
+    Implements requesting the state manager state for transitions, which will
     be needed by all state objects, and a few stub methods.
 
     """
