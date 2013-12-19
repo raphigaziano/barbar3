@@ -53,9 +53,12 @@ class TestStateManager(unittest.TestCase):
         self.assertTrue(self.cs._states[0] is s1)
         self.cs.push(s2)
         self.assertEqual(2, len(self.cs._states))
+        self.assertTrue(self.cs._states[0] is s1)
         self.assertTrue(self.cs._states[1] is s2)
         self.cs.push(s3)
         self.assertEqual(3, len(self.cs._states))
+        self.assertTrue(self.cs._states[0] is s1)
+        self.assertTrue(self.cs._states[1] is s2)
         self.assertTrue(self.cs._states[2] is s3)
 
     def test_pop(self):
@@ -67,25 +70,52 @@ class TestStateManager(unittest.TestCase):
 
         self.assertEqual(3, len(self.cs._states))
         self.assertTrue(self.cs._states[-1] is s3)
+        self.assertTrue(self.cs._states[0] is s1)
+        self.assertTrue(self.cs._states[1] is s2)
+        self.assertTrue(self.cs._states[2] is s3)
 
         self.cs.pop()
         self.assertEqual(2, len(self.cs._states))
         self.assertTrue(self.cs._states[-1] is s2)
+        self.assertTrue(self.cs._states[0] is s1)
+        self.assertTrue(self.cs._states[1] is s2)
 
         self.cs.pop()
         self.assertEqual(1, len(self.cs._states))
         self.assertTrue(self.cs._states[-1] is s1)
+        self.assertTrue(self.cs._states[0] is s1)
 
         self.cs.pop()
         self.assertEqual(0, len(self.cs._states))
-
         self.assertRaises(IndexError, self.cs.pop)
 
     # Updating tests:
     # - mock contained test to assert their update and render methods are
     # called?
-    # - simulate request for pushing or poping... This is the big one.
-    #   Some of that will be handled by GameStateTest.
+
+    def test_push_next_state_on_update(self):
+        s = gamestates.GameState()
+        new_state = gamestates.GameState()
+        s.next_state = new_state
+        self.cs.push(s)
+        self.cs.update()
+
+        self.assertEqual(2, len(self.cs._states))
+        self.assertTrue(new_state is self.cs.current_state)
+
+    def test_pop_state_on_update(self):
+        old_state = gamestates.GameState()
+        cur_state = gamestates.GameState()
+        cur_state.done = True
+        self.cs.push(old_state)
+        self.cs.push(cur_state)
+        self.cs.update()
+
+        self.assertEqual(1, len(self.cs._states))
+        self.assertTrue(old_state is self.cs.current_state)
+
+    # ... pop & push. Try some more complex scenarios.
+
 
 # BaseGamseState Tests
 # ...
