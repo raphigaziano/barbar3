@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 """
-barbarian.gameio.settings.py
-============================
+barbarian.io.settings.py
+========================
 
 Simple settings collecter.
 
