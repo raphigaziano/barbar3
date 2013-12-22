@@ -1,7 +1,4 @@
-- Finish State tests
-
-- relative imports
-  * rename gameio back to io >:(
+- Finish State tests (Left: Dungeon state)
 
 - log all the things
 
