@@ -1,6 +1,6 @@
 import sys
 
-from barbarian.gameio import settings
+from barbarian.io import settings
 
 renderer = settings.RENDERER
 
