@@ -7,8 +7,8 @@ Game state objects & their manager.
 TODO: UNITTESTME!
 
 """
-import libtcodpy as tcod
-from renderers import renderer
+from barbarian import libtcodpy as tcod
+from barbarian.renderers import renderer
 
 class StateManager(object):
 
