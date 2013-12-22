@@ -5,7 +5,7 @@
 import unittest
 
 import random
-from utils import rng
+from barbarian.utils import rng
 
 class TestRng(unittest.TestCase):
     """Test class for the random functions"""

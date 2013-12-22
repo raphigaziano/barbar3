@@ -4,8 +4,8 @@
 import os
 import unittest
 
-from gameio import settings
-from gameio import assets
+from barbarian.io import settings
+from barbarian.io import assets
 
 
 class TestSettings(unittest.TestCase):

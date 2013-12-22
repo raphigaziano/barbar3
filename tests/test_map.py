@@ -3,7 +3,7 @@
 """ Unit tests for the map data structure. """
 import unittest
 
-import map
+from barbarian import map
 
 class TestMap(unittest.TestCase):
 
