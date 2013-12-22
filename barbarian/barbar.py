@@ -8,7 +8,7 @@ Game entry point.
 """
 # pylint: disable=E1101
 
-from gamestates import StateManager, InitState
+from barbarian.gamestates import StateManager, InitState
 
 state_manager = StateManager(InitState())
 

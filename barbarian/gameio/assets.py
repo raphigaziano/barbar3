@@ -8,7 +8,7 @@ Define a few convenience function to load assets for the game.
 """
 import os
 
-from gameio.settings import ASSETS_ROOT, RENDERER
+from barbarian.gameio.settings import ASSETS_ROOT, RENDERER
 
 ASSETS_ROOT = os.path.join(ASSETS_ROOT, RENDERER)
 

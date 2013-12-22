@@ -1,8 +1,8 @@
 import sys
 
-from gameio import settings
+from barbarian.gameio import settings
 
 renderer = settings.RENDERER
 
-__import__('renderers.%s' % renderer)
-renderer = sys.modules['renderers.%s' % renderer]
+__import__('barbarian.renderers.%s' % renderer)
+renderer = sys.modules['barbarian.renderers.%s' % renderer]

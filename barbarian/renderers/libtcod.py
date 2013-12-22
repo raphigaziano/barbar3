@@ -1,6 +1,6 @@
-import libtcodpy as libtcod
+from barbarian import libtcodpy as libtcod
 
-from gameio import settings, assets
+from barbarian.gameio import settings, assets
 
 def init():
     # Dummy console
