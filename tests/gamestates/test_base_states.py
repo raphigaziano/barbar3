@@ -89,6 +89,7 @@ class TestStateManager(unittest.TestCase):
     # called?
 
     def test_push_next_state_on_update(self):
+        """ Pushing next scheduled state on the stack """
         s = gamestates.GameState()
         new_state = gamestates.GameState()
         s.next_state = new_state
@@ -99,6 +100,7 @@ class TestStateManager(unittest.TestCase):
         self.assertTrue(new_state is self.sm.current_state)
 
     def test_pop_state_on_update(self):
+        """ Popping current state off the stack if requested """
         old_state = gamestates.GameState()
         cur_state = gamestates.GameState()
         cur_state.done = True
@@ -109,8 +111,48 @@ class TestStateManager(unittest.TestCase):
         self.assertEqual(1, len(self.sm._states))
         self.assertTrue(old_state is self.sm.current_state)
 
-    # ... pop & push. Try some more complex scenarios.
+    def test_replace_on_update(self):
+        """ Pop & Push ie State replacement """
+        s = gamestates.GameState()
+        new_state = gamestates.GameState()
+        s.done = True
+        s.next_state = new_state
+        self.sm.push(s)
+        self.sm.update()
 
+        self.assertEqual(1, len(self.sm._states))
+        self.assertTrue(new_state is self.sm.current_state)
 
-# BaseGamseState Tests
-# ...
+class TestBaseState(unittest.TestCase):
+
+    def setUp(self):
+        self.sm = gamestates.StateManager()
+        self.state = gamestates.GameState()
+        self.sm.push(self.state)
+
+    def test_pop(self):
+        """ Pop trigger """
+        self.state._pop()
+        self.assertTrue(self.state.done)
+        self.sm.update()
+        self.assertEqual(0, len(self.sm._states))
+
+    def test_push(self):
+        """ Push trigger """
+        next_state = gamestates.GameState()
+        self.state._push(next_state)
+        self.assertTrue(next_state is self.state.next_state)
+        self.sm.update()
+        self.assertEqual(2, len(self.sm._states))
+        self.assertTrue(self.sm._states[0] is self.state)
+        self.assertTrue(self.sm._states[1] is next_state)
+
+    def test_replace(self):
+        """ State replacement trigger """
+        next_state = gamestates.GameState()
+        self.state._replace_with(next_state)
+        self.assertTrue(next_state is self.state.next_state)
+        self.sm.update()
+        self.assertEqual(1, len(self.sm._states))
+        self.assertTrue(self.sm._states[0] is next_state)
+
