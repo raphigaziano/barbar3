@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-#-*- coding:utf-8 -*-
 """
 barbarian.gui.widgets.py
 ========================
@@ -10,9 +9,6 @@ themselves.
 
 See renderers.gui modules for GUI displaying.
 """
-
-#import textwrap
-
 # from libtGUI.components import *
 
 #########################
@@ -43,9 +39,9 @@ class Widget(object):
         #     # adjust dimension to include the frame:
         #     self.w += 1
         #     self.h += 1
-        if self.title and len(self.title) > self.w:
-            # +4 => 2 more cells on each side
-            self.w = len(self.title) + 4
+        # if self.title and len(self.title) > self.w:
+        #     # +4 => 2 more cells on each side
+        #     self.w = len(self.title) + 4
 
         self.visible = True
         #self.dirty = True
@@ -54,24 +50,3 @@ class Widget(object):
 
     # TODO: move to renderers
     # def display(self, x, y, blit_on=0):
-    #     """
-    #     Blits the widget to the console passed as parameter (defaults to
-    #     the root console), with its top-left corner at the specified
-    #     x:y position.
-    #     This is the bare minimum any widget will have to do to draw
-    #     itself.
-    #     """
-    #     if not self.visible: return
-    #     if self.framed:
-    #         # draw an old school looking frame around the window \o/
-    #         tcod.console_set_foreground_color(self.con, self.frame_color)
-    #         tcod.console_print_frame(self.con, 0, 0, self.w, self.h,
-    #                                  False, tcod.BKGND_NONE, self.title)
-    #     # blit any children on the widget's console
-    #     for child in self.children:
-    #         child.display()
-    #     # Blit self
-    #     tcod.console_blit(self.con, 0, 0, self.w, self.h, blit_on, x, y,
-    #                       self.forealpha, self.backalpha)
-
-    #     #tcod.console_flush()
