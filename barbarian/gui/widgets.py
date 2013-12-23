@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+# -*- coding: utf8 -*-
 """
 barbarian.gui.widgets.py
 ========================
@@ -48,5 +48,10 @@ class Widget(object):
 
         self.children = children or []
 
-    # TODO: move to renderers
-    # def display(self, x, y, blit_on=0):
+class Console(Widget):
+    def __init__(self, *args, **kwargs):
+        super(Console, self).__init__(*args, **kwargs)
+        self.msgs = []
+
+    def add_msg(self, msg):
+        self.msgs.append(msg)

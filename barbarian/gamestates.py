@@ -105,46 +105,6 @@ class GameState(object):
 
     # ...
 
-class DungeonState(GameState):
-
-    """ Dummy Gameplay State """
-
-    def __init__(self):
-        import map
-        from utils import rng
-
-        self.m = map.Map(80, 40, map.dummy_generator())
-
-        self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
-        while self.m.get_cell(self.px, self.py):
-            self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
-
-        super(DungeonState, self).__init__()
-        renderer.clear()
-
-    def process_input(self):
-
-        key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
-
-        if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
-            self.py -= 1
-        elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
-            self.py += 1
-        elif key.vk in (tcod.KEY_LEFT, tcod.KEY_KP4):
-            self.px -= 1
-        elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
-            self.px += 1
-        elif key.vk == tcod.KEY_ESCAPE:
-            self._replace_with(ShutDownState())
-
-    def update(self):
-        self.process_input()
-
-    def render(self):
-        renderer.clear()      # TODO: Clear only whats needed...
-        renderer.dummy_draw_map(self.m)
-        renderer.dummy_draw_player(self.px, self.py)
-
 
 ### Dummy States ###
 ####################
@@ -169,4 +129,52 @@ class MainMenuState(GameState):
 
     def render(self):
         renderer.dummy_main_menu()
+
+class DungeonState(GameState):
+
+    """ Dummy Gameplay State """
+
+    def __init__(self):
+        import map
+        from utils import rng
+        from gui.widgets import Console
+
+        self.m = map.Map(80, 40, map.dummy_generator())
+
+        self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
+        while self.m.get_cell(self.px, self.py):
+            self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
+
+        self.console = Console(80, 10)
+        super(DungeonState, self).__init__()
+        renderer.clear()
+
+    def process_input(self):
+
+        key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
+
+        # if key.vk is not tcod.KEY_NONE:
+        #     print key.c
+
+        if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
+            self.py -= 1
+        elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
+            self.py += 1
+        elif key.vk in (tcod.KEY_LEFT, tcod.KEY_KP4):
+            self.px -= 1
+        elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
+            self.px += 1
+        elif key.c == ord('m'):
+            self.console.add_msg('foo')
+        elif key.vk == tcod.KEY_ESCAPE:
+            self._replace_with(ShutDownState())
+
+    def update(self):
+        self.process_input()
+
+    def render(self):
+        renderer.clear()      # TODO: Clear only whats needed...
+        renderer.dummy_draw_map(self.m)
+        renderer.dummy_draw_player(self.px, self.py)
+        renderer.dummy_draw_console(self.console, 0, 40)
 

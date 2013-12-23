@@ -52,7 +52,7 @@ def dummy_draw_player(x, y):
     libtcod.console_set_char_foreground(0, x, y, libtcod.red)
     libtcod.console_set_char(0, x, y, '@')
 
-def dummy_draw_console(con, blit_on=0):
+def dummy_draw_console(con, x, y, blit_on=0):
     """
     Blits the widget to the console passed as parameter (defaults to
     the root console), with its top-left corner at the specified
@@ -71,10 +71,20 @@ def dummy_draw_console(con, blit_on=0):
     # for child in con.children:
     #     child.display()
     # Blit self
-    libtcod.console_blit(con, 0, 0, con.w, con.h, blit_on, con.x, con.y,)
-                        # self.forealpha, self.backalpha)
+    # !TEMPO!
+    tcod_cons = libtcod.console_new(con.w, con.h)
+    libtcod.console_set_default_foreground(tcod_cons, libtcod.white)
+    libtcod.console_print_frame(tcod_cons, 0, 0, con.w, con.h)
+    libtcod.console_set_default_background(tcod_cons, libtcod.blue)
+    libtcod.console_set_default_foreground(tcod_cons, libtcod.red)
+    # /TEMPO!
 
-    #tcod.console_flush()
+    for i, msg in enumerate(con.msgs[-8:]):
+        libtcod.console_print_rect(tcod_cons, 1, 1+i, con.w, con.h, msg)
+
+    libtcod.console_blit(tcod_cons, 0, 0, con.w, con.h, blit_on, x, y,)
+                        # self.forealpha, self.backalpha)
+    # libtcod.console_flush()
 
 def flush():
     libtcod.console_flush()
