@@ -5,7 +5,7 @@
 import unittest
 
 import random
-from utils import rng
+from barbarian.utils import rng
 
 class TestRng(unittest.TestCase):
     """Test class for the random functions"""
@@ -35,6 +35,14 @@ class TestRng(unittest.TestCase):
         res = rng.shuffle_copy(startl)
         self.assertNotEqual(startl, res)
         self.assertFalse(startl is res)
+
+    def test_coin_flip(self):
+        """ Testing rng.coin_flip() """
+        self.assertEqual(0, rng.coin_flip())
+        self.assertEqual(1, rng.coin_flip())
+        self.assertEqual(0, rng.coin_flip())
+        self.assertEqual(1, rng.coin_flip())
+        self.assertEqual(1, rng.coin_flip())
 
     def test_rolldice(self):
         """Testing rng.roll_dice"""
