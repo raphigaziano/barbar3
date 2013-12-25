@@ -8,6 +8,7 @@ TODO: UNITTESTME!
 
 """
 from barbarian import libtcodpy as tcod
+from barbarian import gui
 from barbarian.renderers import renderer
 
 class StateManager(object):
@@ -132,25 +133,23 @@ class MainMenuState(GameState):
 
 class DebugConsoleState(GameState):
     """ Show dbg console. """
-    def __init__(self, cons):
-        from gui.widgets import Console
-        self.console = cons
-        self.console.visible = True
+    def __init__(self):
         super(DebugConsoleState, self).__init__()
+        gui.manager.show_widget('debug_console')
 
     def render(self):
-        renderer.dummy_draw_console(self.console, 5, 5)
+        gui.manager.draw()
 
     def process_input(self):
 
         key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
 
         if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
-            self.console.offset -= 1
+            gui.manager.debug_console.offset -= 1
         elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
-            self.console.offset += 1
-        elif key.vk == tcod.KEY_ESCAPE or key.c == ord('d'):
-            self.console.visible = False
+            gui.manager.debug_console.offset += 1
+        if key.vk == tcod.KEY_ESCAPE or key.c == ord('d'):
+            gui.manager.hide_widget('debug_console')
             self._pop()
 
     def update(self):
@@ -163,7 +162,6 @@ class DungeonState(GameState):
     def __init__(self):
         from mapgen import make_map
         from utils import rng
-        from gui.widgets import Console
 
         self.m = make_map()
 
@@ -171,8 +169,6 @@ class DungeonState(GameState):
         while self.m.get_cell(self.px, self.py):
             self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
 
-        self.console = Console(80, 10)
-        self.dbgcons = Console(70, 40)
         super(DungeonState, self).__init__()
         renderer.clear()
 
@@ -185,21 +181,21 @@ class DungeonState(GameState):
 
         if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
             self.py -= 1
-            self.dbgcons.add_msg('[DEBUG] moovinUP')
+            gui.manager['debug_console'].add_msg('[DEBUG] moovinUP')
         elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
             self.py += 1
-            self.dbgcons.add_msg('[DEBUG] goinDOWN')
+            gui.manager['debug_console'].add_msg('[DEBUG] goinDOWN')
         elif key.vk in (tcod.KEY_LEFT, tcod.KEY_KP4):
             self.px -= 1
-            self.dbgcons.add_msg('[DEBUG] goleft')
+            gui.manager['debug_console'].add_msg('[DEBUG] goleft')
         elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
             self.px += 1
-            self.dbgcons.add_msg('[DEBUG] booright')
+            gui.manager['debug_console'].add_msg('[DEBUG] booright')
         elif key.c == ord('m'):
             from barbarian.utils import rng
-            self.console.add_msg(rng.choice(('foo', 'bar', 'baz', 'moop')))
+            gui.manager['event_console'].add_msg(rng.choice(('foo', 'bar', 'baz', 'moop')))
         elif key.c == ord('d'):
-            self._push(DebugConsoleState(self.dbgcons))
+            self._push(DebugConsoleState())
         elif key.vk == tcod.KEY_ESCAPE:
             self._replace_with(ShutDownState())
 
@@ -210,5 +206,5 @@ class DungeonState(GameState):
         renderer.clear()      # TODO: Clear only whats needed...
         renderer.dummy_draw_map(self.m)
         renderer.dummy_draw_player(self.px, self.py)
-        renderer.dummy_draw_console(self.console, 0, 40)
+        gui.manager.draw()
 

@@ -7,6 +7,7 @@ from barbarian.map import Map
 from barbarian.utils import rng
 
 def make_map():
+
     def dummy_generator():
         """ Dummy map gen """
         return [
