@@ -79,7 +79,8 @@ def dummy_draw_console(con, x, y, blit_on=0):
     libtcod.console_set_default_foreground(tcod_cons, libtcod.red)
     # /TEMPO!
 
-    for i, msg in enumerate(con.msgs[-8:]):
+    # for i, msg in enumerate(con.msgs[-(8+offset):-(offset)]):
+    for i, msg in enumerate(con.last_msgs):
         libtcod.console_print_rect(tcod_cons, 1, 1+i, con.w, con.h, msg)
 
     libtcod.console_blit(tcod_cons, 0, 0, con.w, con.h, blit_on, x, y,)

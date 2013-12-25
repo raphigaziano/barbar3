@@ -8,17 +8,8 @@ Basic Map data structure.
 """
 
 
-def dummy_generator():
-    """ Dummy map gen """
-    from utils import rng
-    return [
-        rng.coin_flip() for i in range(80 * 40)
-    ]
-
-
 class OutOfBoundMapError(IndexError, Exception):
     pass
-
 
 class Map(object):
 

@@ -130,22 +130,49 @@ class MainMenuState(GameState):
     def render(self):
         renderer.dummy_main_menu()
 
+class DebugConsoleState(GameState):
+    """ Show dbg console. """
+    def __init__(self, cons):
+        from gui.widgets import Console
+        self.console = cons
+        self.console.visible = True
+        super(DebugConsoleState, self).__init__()
+
+    def render(self):
+        renderer.dummy_draw_console(self.console, 5, 5)
+
+    def process_input(self):
+
+        key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
+
+        if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
+            self.console.offset -= 1
+        elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
+            self.console.offset += 1
+        elif key.vk == tcod.KEY_ESCAPE or key.c == ord('d'):
+            self.console.visible = False
+            self._pop()
+
+    def update(self):
+        self.process_input()
+
 class DungeonState(GameState):
 
     """ Dummy Gameplay State """
 
     def __init__(self):
-        import map
+        from mapgen import make_map
         from utils import rng
         from gui.widgets import Console
 
-        self.m = map.Map(80, 40, map.dummy_generator())
+        self.m = make_map()
 
         self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
         while self.m.get_cell(self.px, self.py):
             self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
 
         self.console = Console(80, 10)
+        self.dbgcons = Console(70, 40)
         super(DungeonState, self).__init__()
         renderer.clear()
 
@@ -154,18 +181,25 @@ class DungeonState(GameState):
         key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
 
         # if key.vk is not tcod.KEY_NONE:
-        #     print key.c
+        #     self.dbgcons.add_msg('[DEBUG] key %c was pressed' % key.c)
 
         if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
             self.py -= 1
+            self.dbgcons.add_msg('[DEBUG] moovinUP')
         elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
             self.py += 1
+            self.dbgcons.add_msg('[DEBUG] goinDOWN')
         elif key.vk in (tcod.KEY_LEFT, tcod.KEY_KP4):
             self.px -= 1
+            self.dbgcons.add_msg('[DEBUG] goleft')
         elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
             self.px += 1
+            self.dbgcons.add_msg('[DEBUG] booright')
         elif key.c == ord('m'):
-            self.console.add_msg('foo')
+            from barbarian.utils import rng
+            self.console.add_msg(rng.choice(('foo', 'bar', 'baz', 'moop')))
+        elif key.c == ord('d'):
+            self._push(DebugConsoleState(self.dbgcons))
         elif key.vk == tcod.KEY_ESCAPE:
             self._replace_with(ShutDownState())
 

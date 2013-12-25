@@ -21,6 +21,7 @@ class Widget(object):
 
     Hold basic attributes common to all widget like position, whether it should
     be shown, etc...
+
     """
     def __init__(self, width, height, title=None, children=None):
 
@@ -49,9 +50,36 @@ class Widget(object):
         self.children = children or []
 
 class Console(Widget):
+
+    """ Scrolling (or rather, offseted) Messages Container. """
+
     def __init__(self, *args, **kwargs):
         super(Console, self).__init__(*args, **kwargs)
         self.msgs = []
+        self._offset = 0
 
+    @property
+    def offset(self):
+        return self._offset
+
+    @offset.setter
+    def offset(self, v):
+        if self._offset == 0 and v > 0:
+            return
+        self._offset = v
+
+    @property
+    def last_msgs(self, n=None):
+        if n is None:
+            n = self.h
+        start = -(n-self._offset)
+        if abs(start) < self.h:
+            start += start - self.h
+        end = self._offset if self._offset < 0 else -1
+        return self.msgs[start:end]
+
+    # TODO: rename to write for file like behaviour
     def add_msg(self, msg):
         self.msgs.append(msg)
+        if len(self.msgs) >= self.h:
+            self._offset += 1
