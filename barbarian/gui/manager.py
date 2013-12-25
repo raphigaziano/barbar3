@@ -39,3 +39,12 @@ class GUIManager(object):
         for _, (x, y, w) in self.widgets.items():
             if w.visible:
                 renderer.dummy_draw_console(w, x, y)
+
+    def msg(self, msg):
+        self._msg('event_console', msg)
+
+    def debug(self, msg):
+        self._msg('debug_console', msg)
+
+    def _msg(self, widget_name, msg):
+        self.widgets[widget_name][2].add_msg(msg)
