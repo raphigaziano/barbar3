@@ -5,7 +5,7 @@ barbarian.gui.manager.py
 
 """
 from barbarian.gui.widgets import Console
-from barbarian.renderers import renderer
+# from barbarian.renderers import renderer
 
 
 class GUIManager(object):
@@ -19,6 +19,7 @@ class GUIManager(object):
             'debug_console': (5, 5,  Console(70, 40)),
         }
         self.widgets['debug_console'][2].visible = False
+        # TODO: separate "static" and modals
 
     def __getitem__(self, key):
         return self.widgets[key][2]
@@ -34,11 +35,6 @@ class GUIManager(object):
 
     def hide_widget(self, widget_name):
         self.widgets[widget_name][2].visible = False
-
-    def draw(self):
-        for _, (x, y, w) in self.widgets.items():
-            if w.visible:
-                renderer.dummy_draw_console(w, x, y)
 
     def msg(self, msg):
         self._msg('event_console', msg)

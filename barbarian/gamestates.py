@@ -138,7 +138,7 @@ class DebugConsoleState(GameState):
         gui.manager.show_widget('debug_console')
 
     def render(self):
-        gui.manager.draw()
+        renderer.dummy_draw_gui()
 
     def process_input(self):
 
@@ -206,5 +206,5 @@ class DungeonState(GameState):
         renderer.clear()      # TODO: Clear only whats needed...
         renderer.dummy_draw_map(self.m)
         renderer.dummy_draw_player(self.px, self.py)
-        gui.manager.draw()
+        renderer.dummy_draw_gui()
 

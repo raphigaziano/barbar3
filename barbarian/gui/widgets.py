@@ -9,6 +9,7 @@ themselves.
 
 See renderers.gui modules for GUI displaying.
 """
+from barbarian.gui.uicomponents import Line
 # from libtGUI.components import *
 
 #########################
@@ -49,6 +50,10 @@ class Widget(object):
 
         self.children = children or []
 
+    def process_input(self):
+        """ Stub Method. """
+        pass
+
 class Console(Widget):
 
     """ Scrolling (or rather, offseted) Messages Container. """
@@ -64,7 +69,8 @@ class Console(Widget):
 
     @offset.setter
     def offset(self, v):
-        if self._offset == 0 and v > 0:
+        """ Disallow setting offset below zero. """
+        if self._offset == 0 and v < 0:
             return
         self._offset = v
 
@@ -79,7 +85,7 @@ class Console(Widget):
         return self.msgs[start:end]
 
     # TODO: rename to write for file like behaviour
-    def add_msg(self, msg):
-        self.msgs.append(msg)
+    def add_msg(self, msg, col='default'):
+        self.msgs.append(Line(msg, col))
         if len(self.msgs) >= self.h:
             self._offset += 1
