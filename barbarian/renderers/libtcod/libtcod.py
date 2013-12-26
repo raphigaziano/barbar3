@@ -1,6 +1,7 @@
 from barbarian import libtcodpy as libtcod
 from barbarian import gui
 
+from barbarian.renderers.libtcod import colors
 from barbarian.io import settings, assets
 
 def init():
@@ -94,7 +95,8 @@ def dummy_draw_gui():
 
         # for i, msg in enumerate(con.msgs[-(8+offset):-(offset)]):
         for i, msg in enumerate(con.last_msgs):
-            libtcod.console_set_default_foreground(tcod_cons, msg.col)
+            libtcod.console_set_default_foreground(tcod_cons,
+                                                   getattr(colors, msg.col))
             libtcod.console_print_rect(tcod_cons, 1, 1+i, con.w, con.h, msg.txt)
 
         libtcod.console_blit(tcod_cons, 0, 0, con.w, con.h, blit_on, x, y,)
