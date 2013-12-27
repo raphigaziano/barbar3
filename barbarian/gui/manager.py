@@ -43,4 +43,4 @@ class GUIManager(object):
         self._msg('debug_console', msg)
 
     def _msg(self, widget_name, msg):
-        self.widgets[widget_name][2].add_msg(msg)
+        self.widgets[widget_name][2].write(msg)
