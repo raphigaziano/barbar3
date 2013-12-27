@@ -52,6 +52,10 @@ class TestRng(unittest.TestCase):
         self.assertEqual(5,  rng.roll_dice('3D4-5'))
         # TODO: check ranges ?
 
+    def test_rolldice_at_least_one(self):
+        """rng.roll_dice should always return at least one"""
+        self.assertEqual(1, rng.roll_dice('0D0'))
+
     def test_rolldice_exception(self):
         """Testing if rng.roll_dice raises an exception on bad input"""
         self.assertRaises(rng.DiceError, rng.roll_dice, "aDp+yui")
