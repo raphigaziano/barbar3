@@ -7,9 +7,13 @@ Game state objects & their manager.
 TODO: UNITTESTME!
 
 """
+import logging
+
 from barbarian import libtcodpy as tcod
 from barbarian import gui
 from barbarian.renderers import renderer
+
+logger = logging.getLogger(__name__)
 
 class StateManager(object):
 
@@ -173,9 +177,6 @@ class DungeonState(GameState):
         renderer.clear()
 
     def process_input(self):
-
-        import logging
-        logger = logging.getLogger(__name__)
 
         key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
 
