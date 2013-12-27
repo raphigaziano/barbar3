@@ -181,19 +181,22 @@ class DungeonState(GameState):
 
         if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
             self.py -= 1
-            gui.manager.debug('[DEBUG] moovinUP')
+            gui.manager.debug('[DEBUG] moovinUP', 'red')
         elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
             self.py += 1
-            gui.manager.debug('[DEBUG] goinDOWN')
+            gui.manager.debug('[DEBUG] goinDOWN', 'red')
         elif key.vk in (tcod.KEY_LEFT, tcod.KEY_KP4):
             self.px -= 1
-            gui.manager.debug('[DEBUG] goleft')
+            gui.manager.debug('[DEBUG] goleft', 'red')
         elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
             self.px += 1
-            gui.manager.debug('[DEBUG] booright')
+            gui.manager.debug('[DEBUG] booright', 'red')
         elif key.c == ord('m'):
             from barbarian.utils import rng
-            gui.manager.msg(rng.choice(('foo', 'bar', 'baz', 'moop')))
+            gui.manager.msg(
+                rng.choice(('foo', 'bar', 'baz', 'moop')),
+                rng.choice(('red', 'white', 'green', 'gray'))
+            )
         elif key.c == ord('d'):
             self._push(DebugConsoleState())
         elif key.vk == tcod.KEY_ESCAPE:
