@@ -78,10 +78,10 @@ class Console(Widget):
     def last_msgs(self, n=None):
         if n is None:
             n = self.h
-        start = -(n-self._offset)
+        start = -n + self._offset
         if abs(start) < self.h:
             start += start - self.h
-        end = self._offset if self._offset < 0 else -1
+        end = -self._offset if self._offset > 0 else -1
         return self.msgs[start:end]
 
     # TODO: rename to write for file like behaviour

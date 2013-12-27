@@ -36,11 +36,11 @@ class GUIManager(object):
     def hide_widget(self, widget_name):
         self.widgets[widget_name][2].visible = False
 
-    def msg(self, msg):
-        self._msg('event_console', msg)
+    def msg(self, msg, color):
+        self._msg('event_console', msg, color)
 
-    def debug(self, msg):
-        self._msg('debug_console', msg)
+    def debug(self, msg, color):
+        self._msg('debug_console', msg, color)
 
-    def _msg(self, widget_name, msg):
-        self.widgets[widget_name][2].add_msg(msg)
+    def _msg(self, widget_name, msg, color):
+        self.widgets[widget_name][2].add_msg(msg, color)
