@@ -131,18 +131,6 @@ class MainMenuState(GameState):
     def render(self):
         renderer.dummy_main_menu()
 
-class DebugConsoleState(GameState):
-    """ Show dbg console. """
-    def __init__(self):
-        super(DebugConsoleState, self).__init__()
-        gui.manager.show_widget('debug_console')
-
-    def process_input(self):
-        pass
-
-    def update(self):
-        self.process_input()
-
 class DungeonState(GameState):
 
     """ Dummy Gameplay State """
