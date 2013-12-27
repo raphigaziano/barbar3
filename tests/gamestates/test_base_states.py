@@ -2,6 +2,7 @@
 #-*- coding:utf-8 -*-
 """ Unit tests for the map data structure. """
 import unittest
+from mock import Mock
 
 from barbarian import gamestates
 
@@ -84,9 +85,27 @@ class TestStateManager(unittest.TestCase):
         self.sm.pop()
         self.assertEqual(0, len(self.sm._states))
 
-    # Updating tests:
-    # - mock contained states to assert their update and render methods are
-    # called?
+    def test_update_states(self):
+        """ Current state gets updated by StateManager """
+        cur_state = Mock()
+        oth_state = Mock()
+        self.sm.push(oth_state)
+        self.sm.push(cur_state)
+
+        self.sm.update()
+        cur_state.update.assert_called_with()
+        oth_state.update.assert_not_called()
+
+    def test_render_states(self):
+        """ Current state gets rendered by StateManager """
+        cur_state = Mock()
+        oth_state = Mock()
+        self.sm.push(oth_state)
+        self.sm.push(cur_state)
+
+        self.sm.update()
+        cur_state.render.assert_called_with()
+        oth_state.render.assert_not_called()
 
     def test_push_next_state_on_update(self):
         """ Pushing next scheduled state on the stack """
