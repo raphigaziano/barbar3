@@ -24,7 +24,7 @@ class Widget(object):
     be shown, etc...
 
     """
-    def __init__(self, width, height, title=None, children=None):
+    def __init__(self, x, y, width, height, title=None, children=None):
 
         # Those values should be handled by the renderer:
         #
@@ -32,6 +32,8 @@ class Widget(object):
         # framed=True, frame_color=tcod.white,
         # forealpha=1, backalpha=0.6,
 
+        self.x = x
+        self.y = y
         self.w = width
         self.h = height
         self.title = title

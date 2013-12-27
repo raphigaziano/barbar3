@@ -15,14 +15,14 @@ class GUIManager(object):
     """
     def __init__(self):
         self.widgets = {
-            'event_console': (0, 40, Console(80, 10)),
-            'debug_console': (5, 5,  Console(70, 40)),
+            'event_console': Console(0, 40, 80, 10),
+            'debug_console': Console(5, 5, 70, 40),
         }
-        self.widgets['debug_console'][2].visible = False
+        self.widgets['debug_console'].visible = False
         # TODO: separate "static" and modals
 
     def __getitem__(self, key):
-        return self.widgets[key][2]
+        return self.widgets[key]
 
     def __getattr__(self, key):
         try:
@@ -31,10 +31,10 @@ class GUIManager(object):
             raise AttributeError()  # TODO: std err message
 
     def show_widget(self, widget_name):
-        self.widgets[widget_name][2].visible = True
+        self.widgets[widget_name].visible = True
 
     def hide_widget(self, widget_name):
-        self.widgets[widget_name][2].visible = False
+        self.widgets[widget_name].visible = False
 
     def msg(self, msg, color):
         self._msg('event_console', msg, color)
@@ -43,4 +43,4 @@ class GUIManager(object):
         self._msg('debug_console', msg, color)
 
     def _msg(self, widget_name, msg, color):
-        self.widgets[widget_name][2].add_msg(msg, color)
+        self.widgets[widget_name].add_msg(msg, color)

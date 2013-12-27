@@ -87,10 +87,10 @@ def dummy_draw_gui():
         # Blit self
         # !TEMPO!
         libtcod.console_set_default_foreground(tcod_cons, libtcod.white)
+        libtcod.console_set_default_background(tcod_cons, libtcod.blue)
         libtcod.console_print_frame(tcod_cons, 0, 0, con.w, con.h,
                                     False, # BACKGROUND_FLAG, title
                                     )
-        libtcod.console_set_default_background(tcod_cons, libtcod.blue)
         # /TEMPO!
 
         # for i, msg in enumerate(con.msgs[-(8+offset):-(offset)]):
@@ -103,8 +103,8 @@ def dummy_draw_gui():
                             # self.forealpha, self.backalpha)
         # libtcod.console_flush()
 
-    for name, (x, y, w) in gui.manager.widgets.items():
-        dummy_draw_console(w, tcod_consoles[name], x, y)
+    for name, w in gui.manager.widgets.items():
+        dummy_draw_console(w, tcod_consoles[name], w.x, w.y)
 
 def flush():
     libtcod.console_flush()
