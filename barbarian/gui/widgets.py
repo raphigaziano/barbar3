@@ -57,7 +57,7 @@ class Widget(object):
             for c in self.children:
                 c.render()
 
-    def process_input(self):
+    def process_input(self, key):
         """ Stub Method. """
         pass
 
@@ -96,3 +96,12 @@ class Console(Widget):
         self.msgs.append(Line(msg, col))
         if len(self.msgs) >= self.h:
             self._offset += 1
+
+    def process_input(self, key):
+        from barbarian import libtcodpy as tcod
+        if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
+            self._offset -= 1
+        elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
+            self._offset += 1
+        if key.vk == tcod.KEY_ESCAPE or key.c == ord('d'):
+            self.visible = False

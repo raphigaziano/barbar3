@@ -138,16 +138,7 @@ class DebugConsoleState(GameState):
         gui.manager.show_widget('debug_console')
 
     def process_input(self):
-
-        key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
-
-        if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
-            gui.manager.debug_console.offset -= 1
-        elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
-            gui.manager.debug_console.offset += 1
-        if key.vk == tcod.KEY_ESCAPE or key.c == ord('d'):
-            gui.manager.hide_widget('debug_console')
-            self._pop()
+        pass
 
     def update(self):
         self.process_input()
@@ -173,6 +164,8 @@ class DungeonState(GameState):
 
         key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
 
+        gui.manager.process_input(key)
+
         # if key.vk is not tcod.KEY_NONE:
         #     self.dbgcons.add_msg('[DEBUG] key %c was pressed' % key.c)
 
@@ -195,7 +188,7 @@ class DungeonState(GameState):
                 rng.choice(('red', 'white', 'green', 'gray'))
             )
         elif key.c == ord('d'):
-            self._push(DebugConsoleState())
+            gui.manager.show_widget('debug_console')
         elif key.vk == tcod.KEY_ESCAPE:
             self._replace_with(ShutDownState())
 

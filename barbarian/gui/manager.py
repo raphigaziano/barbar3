@@ -34,6 +34,11 @@ class GUIManager(object):
         for name, w in self.widgets.items():
             w.render()
 
+    def process_input(self, key):
+        if self.debug_console.visible:
+            self.debug_console.process_input(key)
+            key.vk = 0
+
     def show_widget(self, widget_name):
         self.widgets[widget_name].visible = True
 
