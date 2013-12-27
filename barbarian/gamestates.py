@@ -9,6 +9,7 @@ TODO: UNITTESTME!
 """
 from barbarian import libtcodpy as tcod
 from barbarian import gui
+from barbarian import input
 from barbarian.renderers import renderer
 
 class StateManager(object):
@@ -124,7 +125,7 @@ class ShutDownState(GameState):
 class MainMenuState(GameState):
 
     def update(self):
-        k = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
+        k = input.collect()
         if k.vk is not tcod.KEY_NONE:
             self._replace_with(DungeonState())
 
@@ -150,7 +151,7 @@ class DungeonState(GameState):
 
     def process_input(self):
 
-        key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
+        key = input.collect()
 
         gui.manager.process_input(key)
 
