@@ -1,5 +1,4 @@
 from barbarian import libtcodpy as libtcod
-from barbarian import gui
 
 from barbarian.renderers.libtcod import colors
 from barbarian.io import settings, assets
@@ -55,56 +54,45 @@ def dummy_draw_player(x, y):
     libtcod.console_set_char(0, x, y, '@')
 
 tcod_consoles = {
-    'event_console': libtcod.console_new(
-        gui.manager.event_console.w,
-        gui.manager.event_console.h
-    ),
-    'debug_console': libtcod.console_new(
-        gui.manager.debug_console.w,
-        gui.manager.debug_console.h
-    )
+    'event_console': libtcod.console_new(80, 40),
+    'debug_console': libtcod.console_new(70, 40)
 }
-def dummy_draw_gui():
+def dummy_draw_console(con, tcod_cons, x, y, blit_on=0):
+    """
+    Blits the widget to the console passed as parameter (defaults to
+    the root console), with its top-left corner at the specified
+    x:y position.
+    This is the bare minimum any widget will have to do to draw
+    itself.
+    """
+    if not con.visible:
+        return
+    # if self.framed:
+    #     # draw an old school looking frame around the window \o/
+    #     libtcod.console_set_foreground_color(con, self.frame_color)
+    #     libtcod.console_print_frame(self.con, 0, 0, self.w, self.h,
+    #                                 False, libtcod.BKGND_NONE, self.title)
+    # blit any children on the widget's console
+    # for child in con.children:
+    #     child.display()
+    # Blit self
+    # !TEMPO!
+    libtcod.console_set_default_foreground(tcod_cons, libtcod.white)
+    libtcod.console_set_default_background(tcod_cons, libtcod.blue)
+    libtcod.console_print_frame(tcod_cons, 0, 0, con.w, con.h,
+                                False, # BACKGROUND_FLAG, title
+                                )
+    # /TEMPO!
 
-    def dummy_draw_console(con, tcod_cons, x, y, blit_on=0):
-        """
-        Blits the widget to the console passed as parameter (defaults to
-        the root console), with its top-left corner at the specified
-        x:y position.
-        This is the bare minimum any widget will have to do to draw
-        itself.
-        """
-        if not con.visible:
-            return
-        # if self.framed:
-        #     # draw an old school looking frame around the window \o/
-        #     libtcod.console_set_foreground_color(con, self.frame_color)
-        #     libtcod.console_print_frame(self.con, 0, 0, self.w, self.h,
-        #                                 False, libtcod.BKGND_NONE, self.title)
-        # blit any children on the widget's console
-        # for child in con.children:
-        #     child.display()
-        # Blit self
-        # !TEMPO!
-        libtcod.console_set_default_foreground(tcod_cons, libtcod.white)
-        libtcod.console_set_default_background(tcod_cons, libtcod.blue)
-        libtcod.console_print_frame(tcod_cons, 0, 0, con.w, con.h,
-                                    False, # BACKGROUND_FLAG, title
-                                    )
-        # /TEMPO!
+    # for i, msg in enumerate(con.msgs[-(8+offset):-(offset)]):
+    for i, msg in enumerate(con.last_msgs):
+        libtcod.console_set_default_foreground(tcod_cons,
+                                                getattr(colors, msg.col))
+        libtcod.console_print_rect(tcod_cons, 1, 1+i, con.w, con.h, msg.txt)
 
-        # for i, msg in enumerate(con.msgs[-(8+offset):-(offset)]):
-        for i, msg in enumerate(con.last_msgs):
-            libtcod.console_set_default_foreground(tcod_cons,
-                                                   getattr(colors, msg.col))
-            libtcod.console_print_rect(tcod_cons, 1, 1+i, con.w, con.h, msg.txt)
-
-        libtcod.console_blit(tcod_cons, 0, 0, con.w, con.h, blit_on, x, y,)
-                            # self.forealpha, self.backalpha)
-        # libtcod.console_flush()
-
-    for name, w in gui.manager.widgets.items():
-        dummy_draw_console(w, tcod_consoles[name], w.x, w.y)
+    libtcod.console_blit(tcod_cons, 0, 0, con.w, con.h, blit_on, x, y,)
+                        # self.forealpha, self.backalpha)
+    # libtcod.console_flush()
 
 def flush():
     libtcod.console_flush()

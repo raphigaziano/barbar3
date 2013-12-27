@@ -190,7 +190,7 @@ class DungeonState(GameState):
             gui.manager.debug('[DEBUG] goleft', 'red')
         elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
             self.px += 1
-            gui.manager.debug('[DEBUG] booright', 'red')
+            gui.manager.debug('[DEBUG] gright', 'red')
         elif key.c == ord('m'):
             from barbarian.utils import rng
             gui.manager.msg(
@@ -209,5 +209,5 @@ class DungeonState(GameState):
         renderer.clear()      # TODO: Clear only whats needed...
         renderer.dummy_draw_map(self.m)
         renderer.dummy_draw_player(self.px, self.py)
-        renderer.dummy_draw_gui()
+        gui.manager.render()
 

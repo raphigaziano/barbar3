@@ -5,7 +5,7 @@ barbarian.gui.manager.py
 
 """
 from barbarian.gui.widgets import Console
-# from barbarian.renderers import renderer
+from barbarian.renderers import renderer
 
 
 class GUIManager(object):
@@ -29,6 +29,12 @@ class GUIManager(object):
             return self.__getitem__(key)
         except KeyError as e:
             raise AttributeError()  # TODO: std err message
+
+    def render(self):
+        for name, w in self.widgets.items():
+            renderer.dummy_draw_console(
+                w, renderer.tcod_consoles[name], w.x, w.y
+            )
 
     def show_widget(self, widget_name):
         self.widgets[widget_name].visible = True
