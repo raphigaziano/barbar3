@@ -174,6 +174,9 @@ class DungeonState(GameState):
 
     def process_input(self):
 
+        import logging
+        logger = logging.getLogger(__name__)
+
         key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
 
         # if key.vk is not tcod.KEY_NONE:
@@ -181,16 +184,16 @@ class DungeonState(GameState):
 
         if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
             self.py -= 1
-            gui.manager.debug('[DEBUG] moovinUP')
+            logger.debug('[DEBUG] moovinUP')
         elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
             self.py += 1
-            gui.manager.debug('[DEBUG] goinDOWN')
+            logger.debug('[DEBUG] goinDOWN')
         elif key.vk in (tcod.KEY_LEFT, tcod.KEY_KP4):
             self.px -= 1
-            gui.manager.debug('[DEBUG] goleft')
+            logger.debug('[DEBUG] goleft')
         elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
             self.px += 1
-            gui.manager.debug('[DEBUG] booright')
+            logger.debug('[DEBUG] booright')
         elif key.c == ord('m'):
             from barbarian.utils import rng
             gui.manager.msg(rng.choice(('foo', 'bar', 'baz', 'moop')))
