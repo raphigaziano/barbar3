@@ -32,9 +32,7 @@ class GUIManager(object):
 
     def render(self):
         for name, w in self.widgets.items():
-            renderer.dummy_draw_console(
-                w, renderer.tcod_consoles[name], w.x, w.y
-            )
+            w.render()
 
     def show_widget(self, widget_name):
         self.widgets[widget_name].visible = True

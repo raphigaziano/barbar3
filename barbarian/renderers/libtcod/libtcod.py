@@ -53,11 +53,8 @@ def dummy_draw_player(x, y):
     libtcod.console_set_char_foreground(0, x, y, libtcod.red)
     libtcod.console_set_char(0, x, y, '@')
 
-tcod_consoles = {
-    'event_console': libtcod.console_new(80, 40),
-    'debug_console': libtcod.console_new(70, 40)
-}
-def dummy_draw_console(con, tcod_cons, x, y, blit_on=0):
+tcod_consoles = {}
+def dummy_draw_console(con, x, y, blit_on=0):
     """
     Blits the widget to the console passed as parameter (defaults to
     the root console), with its top-left corner at the specified
@@ -65,8 +62,6 @@ def dummy_draw_console(con, tcod_cons, x, y, blit_on=0):
     This is the bare minimum any widget will have to do to draw
     itself.
     """
-    if not con.visible:
-        return
     # if self.framed:
     #     # draw an old school looking frame around the window \o/
     #     libtcod.console_set_foreground_color(con, self.frame_color)
@@ -77,10 +72,14 @@ def dummy_draw_console(con, tcod_cons, x, y, blit_on=0):
     #     child.display()
     # Blit self
     # !TEMPO!
+    if id(con) not in tcod_consoles:
+        tcod_consoles[id(con)] = libtcod.console_new(con.w, con.h)
+    tcod_cons = tcod_consoles[id(con)]
+
     libtcod.console_set_default_foreground(tcod_cons, libtcod.white)
     libtcod.console_set_default_background(tcod_cons, libtcod.blue)
     libtcod.console_print_frame(tcod_cons, 0, 0, con.w, con.h,
-                                False, # BACKGROUND_FLAG, title
+                                # False, # BACKGROUND_FLAG, title
                                 )
     # /TEMPO!
 

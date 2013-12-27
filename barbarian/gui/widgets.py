@@ -9,6 +9,7 @@ themselves.
 
 See renderers.gui modules for GUI displaying.
 """
+from barbarian.renderers import renderer
 from barbarian.gui.uicomponents import Line
 # from libtGUI.components import *
 
@@ -32,10 +33,8 @@ class Widget(object):
         # framed=True, frame_color=tcod.white,
         # forealpha=1, backalpha=0.6,
 
-        self.x = x
-        self.y = y
-        self.w = width
-        self.h = height
+        self.x, self.y = x, y
+        self.w, self.h = width, height
         self.title = title
         # self.framed = framed
         # if self.framed:
@@ -51,6 +50,12 @@ class Widget(object):
         #self.dirty = True
 
         self.children = children or []
+
+    def render(self):
+        if self.visible:
+            renderer.dummy_draw_console(self, self.x, self.y)
+            for c in self.children:
+                c.render()
 
     def process_input(self):
         """ Stub Method. """

@@ -137,9 +137,6 @@ class DebugConsoleState(GameState):
         super(DebugConsoleState, self).__init__()
         gui.manager.show_widget('debug_console')
 
-    def render(self):
-        renderer.dummy_draw_gui()
-
     def process_input(self):
 
         key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
