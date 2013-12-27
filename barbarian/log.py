@@ -11,9 +11,9 @@ import logging
 
 from barbarian import gui
 
-def init(logger_root_name):
+def init(logger_name):
     """ Root Logger Setup. """
-    logger = logging.getLogger(logger_root_name)
+    logger = logging.getLogger(logger_name)
     logger.level = logging.DEBUG
     logger.addHandler(logging.StreamHandler(sys.stderr))
     logger.addHandler(logging.StreamHandler(gui.manager.debug_console))
