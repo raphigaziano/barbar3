@@ -7,9 +7,13 @@ Game state objects & their manager.
 TODO: UNITTESTME!
 
 """
+import logging
+
 from barbarian import libtcodpy as tcod
 from barbarian import gui
 from barbarian.renderers import renderer
+
+logger = logging.getLogger(__name__)
 
 class StateManager(object):
 
@@ -29,6 +33,8 @@ class StateManager(object):
         if initial_state is not None:
             self._states.append(initial_state)
 
+        logger.debug("State Manager Initialized with states %s" % self._states)
+
     @property
     def current_state(self):
         """ Currently active state is the one sitting on top of the stack. """
@@ -42,12 +48,16 @@ class StateManager(object):
         return not len(self._states) >= 1
 
     def pop(self):
-        self._states.pop()
+        s = self._states.pop()
+        logger.debug("State %s popped off the stack" % s)
+        logger.debug("Current State Stack: %s" % self._states)
 
     def push(self, s):
         if self._states:
             self.current_state.next_state = None
         self._states.append(s)
+        logger.debug("State %s pushed on the stack" % self.current_state)
+        logger.debug("Current State Stack: %s" % self._states)
 
     def update(self):
         """ Main event loop. """
@@ -183,16 +193,16 @@ class DungeonState(GameState):
 
         if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
             self.py -= 1
-            gui.manager.debug('[DEBUG] moovinUP')
+            logger.debug('moovinUP')
         elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
             self.py += 1
-            gui.manager.debug('[DEBUG] goinDOWN')
+            logger.info('goinDOWN')
         elif key.vk in (tcod.KEY_LEFT, tcod.KEY_KP4):
             self.px -= 1
-            gui.manager.debug('[DEBUG] goleft')
+            logger.warning('goleft')
         elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
             self.px += 1
-            gui.manager.debug('[DEBUG] booright')
+            logger.error('booright')
         elif key.c == ord('m'):
             from barbarian.utils import rng
             gui.manager.msg(rng.choice(('foo', 'bar', 'baz', 'moop')))
