@@ -11,6 +11,7 @@ import logging
 
 from barbarian import gui
 
+
 class BarbarGuiHandler(logging.StreamHandler):
 
     """ Custom Handler to send colorized log messages to our GUI console. """
@@ -45,6 +46,7 @@ def init(logger_name):
     """ Root Logger Setup. """
     logger = logging.getLogger(logger_name)
     logger.level = logging.DEBUG
+
     console_handler = logging.StreamHandler(sys.stderr)
     # console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(
