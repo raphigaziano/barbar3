@@ -34,8 +34,7 @@ class BarbarGuiHandler(logging.StreamHandler):
         """
         try:
             msg = self.format(record)
-            fs = "%s\n"
-            self.stream.write(fs % msg, self.LEVEL_COLORS[record.levelname])
+            self.stream.write(msg, self.LEVEL_COLORS[record.levelname])
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
