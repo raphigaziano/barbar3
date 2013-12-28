@@ -45,6 +45,8 @@ class StateManager(object):
         self._states.pop()
 
     def push(self, s):
+        if self._states:
+            self.current_state.next_state = None
         self._states.append(s)
 
     def update(self):
