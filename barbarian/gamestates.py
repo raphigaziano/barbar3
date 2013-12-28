@@ -33,6 +33,8 @@ class StateManager(object):
         if initial_state is not None:
             self._states.append(initial_state)
 
+        logger.debug("State Manager Initialized with states %s" % self._states)
+
     @property
     def current_state(self):
         """ Currently active state is the one sitting on top of the stack. """
@@ -46,10 +48,14 @@ class StateManager(object):
         return not len(self._states) >= 1
 
     def pop(self):
-        self._states.pop()
+        s = self._states.pop()
+        logger.debug("State %s popped off the stack" % s)
+        logger.debug("Current State Stack: %s" % self._states)
 
     def push(self, s):
         self._states.append(s)
+        logger.debug("State %s pushed on the stack" % self.current_state)
+        logger.debug("Current State Stack: %s" % self._states)
 
     def update(self):
         """ Main event loop. """
