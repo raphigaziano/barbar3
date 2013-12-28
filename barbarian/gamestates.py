@@ -185,16 +185,16 @@ class DungeonState(GameState):
 
         if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
             self.py -= 1
-            logger.debug('[DEBUG] moovinUP')
+            logger.debug('moovinUP')
         elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
             self.py += 1
-            logger.debug('[DEBUG] goinDOWN')
+            logger.info('goinDOWN')
         elif key.vk in (tcod.KEY_LEFT, tcod.KEY_KP4):
             self.px -= 1
-            logger.debug('[DEBUG] goleft')
+            logger.warning('goleft')
         elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
             self.px += 1
-            logger.debug('[DEBUG] booright')
+            logger.error('booright')
         elif key.c == ord('m'):
             from barbarian.utils import rng
             gui.manager.msg(rng.choice(('foo', 'bar', 'baz', 'moop')))
