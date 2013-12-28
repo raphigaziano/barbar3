@@ -91,8 +91,7 @@ class Console(Widget):
         end = -self._offset if self._offset > 0 else -1
         return self.msgs[start:end]
 
-    # TODO: rename to write for file like behaviour
-    def add_msg(self, msg, col='default'):
+    def write(self, msg, col='default'):
         self.msgs.append(Line(msg, col))
         if len(self.msgs) >= self.h:
             self._offset += 1

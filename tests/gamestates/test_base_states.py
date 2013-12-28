@@ -2,6 +2,7 @@
 #-*- coding:utf-8 -*-
 """ Unit tests for the map data structure. """
 import unittest
+from mock import Mock
 
 from barbarian import gamestates
 
@@ -12,7 +13,7 @@ class TestStateManager(unittest.TestCase):
 
     def test_initial_state(self):
         """ Instanciating a StateManager with an initial state """
-        state = object()
+        state = Mock()
         sm = gamestates.StateManager(state)
         self.assertEqual(1, len(sm._states))
         self.assertTrue(sm.current_state is state)
@@ -20,11 +21,11 @@ class TestStateManager(unittest.TestCase):
 
     def test_current_state(self):
         """ StateManager.current_state points to the top of the stack """
-        dummy_state = object()
+        dummy_state = Mock()
         self.sm.push(dummy_state)
         self.assertTrue(dummy_state is self.sm.current_state)
 
-        another_state = object()
+        another_state = Mock()
         self.sm.push(another_state)
         self.assertTrue(another_state is self.sm.current_state)
 
@@ -40,14 +41,14 @@ class TestStateManager(unittest.TestCase):
     def test_is_done(self):
         """ StateManager.is_done should return True of no states are on the stack, False otherwise """
         self.assertTrue(self.sm.is_done)
-        self.sm.push(object())
+        self.sm.push(Mock())
         self.assertFalse(self.sm.is_done)
         self.sm.pop()
         self.assertTrue(self.sm.is_done)
 
     def test_push(self):
         """ Stack like methods - Pushing """
-        s1, s2, s3 = object(), object(), object()
+        s1, s2, s3 = Mock(), Mock(), Mock()
         self.assertEqual(0, len(self.sm._states))
 
         self.sm.push(s1)
@@ -65,7 +66,7 @@ class TestStateManager(unittest.TestCase):
 
     def test_pop(self):
         """ Stack like methods - Poping """
-        s1, s2, s3 = object(), object(), object()
+        s1, s2, s3 = Mock(), Mock(), Mock()
         self.sm.push(s1)
         self.sm.push(s2)
         self.sm.push(s3)
@@ -84,9 +85,27 @@ class TestStateManager(unittest.TestCase):
         self.sm.pop()
         self.assertEqual(0, len(self.sm._states))
 
-    # Updating tests:
-    # - mock contained states to assert their update and render methods are
-    # called?
+    def test_update_states(self):
+        """ Current state gets updated by StateManager """
+        cur_state = Mock()
+        oth_state = Mock()
+        self.sm.push(oth_state)
+        self.sm.push(cur_state)
+
+        self.sm.update()
+        cur_state.update.assert_called_with()
+        oth_state.update.assert_not_called()
+
+    def test_render_states(self):
+        """ Current state gets rendered by StateManager """
+        cur_state = Mock()
+        oth_state = Mock()
+        self.sm.push(oth_state)
+        self.sm.push(cur_state)
+
+        self.sm.update()
+        cur_state.render.assert_called_with()
+        oth_state.render.assert_not_called()
 
     def test_push_next_state_on_update(self):
         """ Pushing next scheduled state on the stack """
@@ -122,6 +141,18 @@ class TestStateManager(unittest.TestCase):
 
         self.assertEqual(1, len(self.sm._states))
         self.assertTrue(new_state is self.sm.current_state)
+
+    def test_clean_next_state_when_pushing_a_new_state(self):
+        """ Set back the current state's "next_state" attr to avoid infinite
+        push-pop when the next_state is removed. """
+        cur_state = gamestates.GameState()
+        next_state = gamestates.GameState()
+        cur_state.next_state = next_state
+        self.sm.push(cur_state)
+        self.sm.update()
+
+        self.assertEqual(None, cur_state.next_state)
+
 
 class TestBaseState(unittest.TestCase):
 
