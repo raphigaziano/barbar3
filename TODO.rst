@@ -6,7 +6,7 @@
   * log to that
 
 TESTS!!!:
-  * base components
+  * base components (okayish for Mobile & Position)
   * entity common methods
   * Rect util class
   * ...
