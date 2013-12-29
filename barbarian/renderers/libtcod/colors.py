@@ -11,6 +11,7 @@ from barbarian import libtcodpy as tcod
 
 white = tcod.white
 gray = tcod.gray
+light_gray = tcod.light_gray
 green = tcod.green
 yellow = tcod.yellow
 orange = tcod.orange

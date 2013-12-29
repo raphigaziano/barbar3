@@ -73,21 +73,34 @@ def dummy_draw_console(con, x, y, blit_on=0):
     # Blit self
     # !TEMPO!
     if id(con) not in tcod_consoles:
-        tcod_consoles[id(con)] = libtcod.console_new(con.w, con.h)
+        new_console = libtcod.console_new(con.w, con.h)
+        libtcod.console_set_default_foreground(new_console, libtcod.white)
+        # libtcod.console_set_default_background(new_console, libtcod.blue)
+        libtcod.console_clear(new_console)
+        tcod_consoles[id(con)] = new_console
+
     tcod_cons = tcod_consoles[id(con)]
 
-    libtcod.console_set_default_foreground(tcod_cons, libtcod.white)
-    libtcod.console_set_default_background(tcod_cons, libtcod.blue)
+    # if con.dirty:
+    #     libtcod.console_clear(tcod_cons)
+    #     con.dirty = False
+
     libtcod.console_print_frame(tcod_cons, 0, 0, con.w, con.h,
                                 # False, # BACKGROUND_FLAG, title
                                 )
     # /TEMPO!
 
     # for i, msg in enumerate(con.msgs[-(8+offset):-(offset)]):
-    for i, msg in enumerate(con.last_msgs):
+    offset = 1 # TEMPO
+    for i, msg in enumerate(con.last_msgs[-(con.h-2):]):
         libtcod.console_set_default_foreground(tcod_cons,
                                                 getattr(colors, msg.col))
-        libtcod.console_print_rect(tcod_cons, 1, 1+i, con.w, con.h, msg.txt)
+        libtcod.console_print_rect(
+            tcod_cons, 1, offset, con.w-2, con.h-2, msg.txt
+        )
+        offset += libtcod.console_get_height_rect(
+            tcod_cons, 1, offset, con.w-2, con.h-2, msg.txt
+        )
 
     libtcod.console_blit(tcod_cons, 0, 0, con.w, con.h, blit_on, x, y,)
                         # self.forealpha, self.backalpha)

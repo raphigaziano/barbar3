@@ -47,7 +47,7 @@ class Widget(object):
         #     self.w = len(self.title) + 4
 
         self.visible = True
-        #self.dirty = True
+        self.dirty = True
 
         self.children = children or []
 
@@ -77,7 +77,9 @@ class Console(Widget):
     @offset.setter
     def offset(self, v):
         """ Disallow setting offset below zero. """
-        if self._offset == 0 and v < 0:
+        if v <= 0:
+            return
+        if v >= len(self.msgs):# - self.h:
             return
         self._offset = v
 
@@ -85,22 +87,23 @@ class Console(Widget):
     def last_msgs(self, n=None):
         if n is None:
             n = self.h
-        start = -n + self._offset
-        if abs(start) < self.h:
-            start += start - self.h
+        start = -(n + self._offset)
+        # if abs(start) > self.h:
+        #     start += self.h
         end = -self._offset if self._offset > 0 else -1
         return self.msgs[start:end]
 
     def write(self, msg, col='default'):
         self.msgs.append(Line(msg, col))
-        if len(self.msgs) >= self.h:
-            self._offset += 1
+        # if len(self.msgs) >= self.h:
+            # self.offset += 1
+        # self.dirty = True
 
     def process_input(self, key):
         from barbarian import libtcodpy as tcod
         if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
-            self._offset -= 1
+            self.offset += 1
         elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
-            self._offset += 1
+            self.offset -= 1
         if key.vk == tcod.KEY_ESCAPE or key.c == ord('d'):
             self.visible = False
