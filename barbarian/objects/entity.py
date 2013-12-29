@@ -10,6 +10,16 @@ from barbarian.objects import components
 
 logger = logging.getLogger(__name__)
 
+class NullProperty(object):
+
+    """ Oh my... """
+
+    def __getattr__(self, attr_name):
+        return NullProperty()
+
+    def __call__(self, *args, **kwargs):
+        pass
+
 class Entity(object):
 
     """ Base Entity Class. """
@@ -20,6 +30,8 @@ class Entity(object):
         """ Log invalid attribute access, but don't raise exceptions. """
         # NOTE: This might be an *AWFUL* idea \o/
         logger.warning('%s has no %s attribute' % (self, attr_name))
+        return NullProperty()
+
 
 class Actor(
     Entity,
