@@ -91,6 +91,27 @@ class MobileComponent(PositionComponent):
 
         # return new position ?
 
+    def move_towards(self, target_x, target_y, level):
+        """ Move one step towards the (target_x, target_y) cell. """
+        dx, dy = target_x - self.x, target_y - self.y
+        ddx = ddy = 0
+
+        if dx > 0:
+            ddx = 1
+        elif dx < 0:
+            ddx = -1
+
+        if dy > 0:
+            ddy = 1
+        elif dy < 0:
+            ddy = -1
+
+        self.move(ddy, ddy, level)
+
+    def move_towards_obj(self, obj, level):
+        """ Move one step towards `obj`. """
+        self.move_towards(obj.x, obj.y, level)
+
 class BumpComponent(PositionComponent):
 
     """
