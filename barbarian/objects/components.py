@@ -106,7 +106,7 @@ class MobileComponent(PositionComponent):
         elif dy < 0:
             ddy = -1
 
-        self.move(ddy, ddy, level)
+        self.move(ddx, ddy, level)
 
     def move_towards_obj(self, obj, level):
         """ Move one step towards `obj`. """
