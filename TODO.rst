@@ -5,7 +5,11 @@
 - basic gui (consoles)
   * log to that
 
-TESTS!!!
+TESTS!!!:
+  * base components
+  * entity common methods
+  * Rect util class
+  * ...
 
 - camera
 
