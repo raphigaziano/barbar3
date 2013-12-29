@@ -10,12 +10,39 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class PositionComponent(object):
+class MissingRequiredProperty(Exception):
+    pass
 
-    def __init__(self, x, y, *args, **kwargs):
-        self.x, self.y = x, y
-        self.blocks = kwargs.pop('blocks', True)
-        super(PositionComponent, self).__init__(*args, **kwargs)
+class BaseComponent(object):
+
+    def _get_required_arg(self, arg_name, args_dict):
+        """
+        Attempt to retrieve `arg_name` from a kwarg dict and raise a specific
+        exception in case of failure.
+
+        """
+        try:
+            return args_dict.pop(arg_name)
+        except KeyError as e:
+            # TODO: log & nicer err msg
+            raise MissingRequiredProperty(e)
+
+    def _get_default_arg(self, arg_name, args_dict, default=None):
+        """
+        Attempt to retrieve `arg_name` from a kwarg dict and return `default`
+        if it could not be found.
+
+        """
+        return args_dict.pop(arg_name, default)
+
+
+class PositionComponent(BaseComponent):
+
+    def __init__(self, **kwargs):
+        self.x = self._get_required_arg('x', kwargs)
+        self.y = self._get_required_arg('y', kwargs)
+        self.blocks = self._get_default_arg('blocks', kwargs, True)
+        super(PositionComponent, self).__init__(**kwargs)
 
 class MobileComponent(PositionComponent):
 
@@ -38,9 +65,9 @@ class BumpComponent(PositionComponent):
     def on_bump(self, bumper):
         logger.debug('BUMP!')
 
-class VisibleComponent(object):
+class VisibleComponent(BaseComponent):
 
-    def __init__(self, char, *args, **kwargs):
-        self.char = char
-        super(VisibleComponent, self).__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        self.char = self._get_required_arg('char', kwargs)
+        super(VisibleComponent, self).__init__(**kwargs)
 
