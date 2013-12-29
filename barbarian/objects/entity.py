@@ -14,6 +14,8 @@ class Entity(object):
 
     """ Base Entity Class. """
 
+    # TODO: Entities will probably need some common attrs like a name, id...
+
     def __getattr__(self, attr_name):
         """ Log invalid attribute access, but don't raise exceptions. """
         # NOTE: This might be an *AWFUL* idea \o/
