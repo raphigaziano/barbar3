@@ -33,7 +33,7 @@ class Map(object):
         """
         Iterator implentation.
 
-        return a 3 tuple of (x_position, y_postion, cell object).
+        return 3 tuples of (x_position, y_postion, cell_object).
 
         """
         for i, c in enumerate(self.cells):
