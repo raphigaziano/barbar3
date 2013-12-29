@@ -5,9 +5,7 @@
 - basic gui (consoles)
   * log to that
 
-- basic game object => player
-
-- collisions
+- better game object => player
 
 - camera
 
