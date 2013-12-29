@@ -49,6 +49,9 @@ def dummy_draw_level(level):
         # libtcod.console_set_char_foreground(0, x, y, col)
         # libtcod.console_set_char(0, x, y, ch)
 
+    for obj in level.objects:
+        libtcod.console_set_char(0, obj.x, obj.y, obj.char)
+
 def dummy_draw_obj(obj):
     libtcod.console_set_char_foreground(0, obj.x, obj.y, libtcod.red)
     libtcod.console_set_char(0, obj.x, obj.y, obj.char)
