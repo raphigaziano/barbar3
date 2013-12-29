@@ -148,14 +148,16 @@ class DungeonState(GameState):
     """ Dummy Gameplay State """
 
     def __init__(self):
+        from entity import Player
         from mapgen import make_map
         from utils import rng
 
         self.m = make_map()
 
-        self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
-        while self.m.get_cell(self.px, self.py).blocks:
-            self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
+        px, py = rng.randrange(0, 80), rng.randrange(0, 40)
+        while self.m.get_cell(px, py).blocks:
+            px, py = rng.randrange(0, 80), rng.randrange(0, 40)
+        self.player = Player(px, py, '@')
 
         super(DungeonState, self).__init__()
         renderer.clear()
@@ -166,21 +168,22 @@ class DungeonState(GameState):
 
         gui.manager.process_input(key)
 
-        # if key.vk is not tcod.KEY_NONE:
-        #     self.dbgcons.add_msg('[DEBUG] key %c was pressed' % key.c)
-
         if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
-            self.py -= 1
-            logger.debug('moovinUP')
+            self.player.move(0, -1, self.m)
         elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
-            self.py += 1
-            logger.info('goinDOWN')
+            self.player.move(0, 1, self.m)
         elif key.vk in (tcod.KEY_LEFT, tcod.KEY_KP4):
-            self.px -= 1
-            logger.warning('goleft')
+            self.player.move(-1, 0, self.m)
         elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
-            self.px += 1
-            logger.error('booright')
+            self.player.move(1, 0, self.m)
+        elif key.vk in (tcod.KEY_KP9, ):
+            self.player.move(1, -1, self.m)
+        elif key.vk in (tcod.KEY_KP3, ):
+            self.player.move(1, 1, self.m)
+        elif key.vk in (tcod.KEY_KP1, ):
+            self.player.move(-1, 1, self.m)
+        elif key.vk in (tcod.KEY_KP7, ):
+            self.player.move(-1, -1, self.m)
         elif key.c == ord('m'):
             from barbarian.utils import rng
             gui.manager.msg(
@@ -198,6 +201,6 @@ class DungeonState(GameState):
     def render(self):
         renderer.clear()      # TODO: Clear only whats needed...
         renderer.dummy_draw_map(self.m)
-        renderer.dummy_draw_player(self.px, self.py)
+        renderer.dummy_draw_obj(self.player)
         gui.manager.render()
 

@@ -49,9 +49,9 @@ def dummy_draw_map(map):
         # libtcod.console_set_char_foreground(0, x, y, col)
         # libtcod.console_set_char(0, x, y, ch)
 
-def dummy_draw_player(x, y):
-    libtcod.console_set_char_foreground(0, x, y, libtcod.red)
-    libtcod.console_set_char(0, x, y, '@')
+def dummy_draw_obj(obj):
+    libtcod.console_set_char_foreground(0, obj.x, obj.y, libtcod.red)
+    libtcod.console_set_char(0, obj.x, obj.y, obj.char)
 
 tcod_consoles = {}
 def dummy_draw_console(con, x, y, blit_on=0):

@@ -38,6 +38,7 @@ class GUIManager(object):
         if self.debug_console.visible:
             self.debug_console.process_input(key)
             # Reset key to zero so it isn't picked up by the game itself
+            key.c = 0
             key.vk = 0
 
     def show_widget(self, widget_name):
