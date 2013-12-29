@@ -5,7 +5,7 @@
 - basic gui (consoles)
   * log to that
 
-- better game object => player
+TESTS!!!
 
 - camera
 
