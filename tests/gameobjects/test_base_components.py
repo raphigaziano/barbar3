@@ -61,6 +61,7 @@ class TestMobileComponent(unittest.TestCase):
     def setUp(self):
         self.mobile = components.MobileComponent(x=0, y=0)
         self.mock_level = Mock()
+        self.mock_level.is_blocked.return_value = False
         self.mock_level.get_objects_at.return_value = [Mock(), Mock(), Mock()]
 
     def assertPos(self, x, y):
@@ -70,8 +71,6 @@ class TestMobileComponent(unittest.TestCase):
 
     def test_simple_move(self):
         """ Basic move method """
-        self.mock_level.is_blocked.return_value = False
-
         self.mobile.move(1, 1, self.mock_level)
         self.assertPos(1, 1)
         self.mobile.move(-1, -1, self.mock_level)
@@ -84,6 +83,8 @@ class TestMobileComponent(unittest.TestCase):
 
     def test_blocked_move(self):
         """ Cancel move if path is blocked """
+        self.mock_level.is_blocked.return_value = True
+
         self.mobile.move(1, 1, self.mock_level)
         self.assertPos(0, 0)
         self.mobile.move(0, 1, self.mock_level)
@@ -101,10 +102,34 @@ class TestMobileComponent(unittest.TestCase):
         self.mobile.move(-1, 1, self.mock_level)
         self.assertPos(0, 0)
 
-    # TODO:
-    # - move_towards methods
+    def test_move_towards(self):
+        """ One step move towards a given position """
+        self.mobile.move_towards(10, 10, self.mock_level)
+        self.assertPos(1, 1)
+        self.mobile.move_towards(10, 1, self.mock_level)
+        self.assertPos(2, 1)
+        self.mobile.move_towards(0, 10, self.mock_level)
+        self.assertPos(1, 2)
+        self.mobile.move_towards(0, 0, self.mock_level)
+        self.assertPos(0, 1)
+        # ...
 
-    def test_on_bump_handler(self):
+    def test_move_towards_obj(self):
+        """ One step move towards a given positioned entity """
+        target = components.PositionComponent(x=5, y=5)
+        self.mobile.move_towards_obj(target, self.mock_level)
+        self.assertPos(1, 1)
+        self.mobile.move_towards_obj(target, self.mock_level)
+        self.assertPos(2, 2)
+        target.x = 0
+        self.mobile.move_towards_obj(target, self.mock_level)
+        self.assertPos(1, 3)
+        target.y = 0
+        self.mobile.move_towards_obj(target, self.mock_level)
+        self.assertPos(0, 2)
+        # ...
+
+    def test_on_bump_triggered(self):
         """ `on_bump` methods should be called when entity steps on their owner's cell """
         self.mobile.move(1, 1, self.mock_level)
         for m in self.mock_level.get_objects_at(1, 1):
