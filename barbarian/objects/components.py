@@ -5,6 +5,7 @@ barbarian.objects.components.py
 
 """
 # TODO: Better naming and split comps into several files.
+import math
 import logging
 
 logger = logging.getLogger(__name__)
@@ -47,6 +48,12 @@ class PositionComponent(BaseComponent):
         # TODO: move this attr in a separate SolidComponent
         self.blocks = self._get_default_arg('blocks', kwargs, True)
         super(PositionComponent, self).__init__(**kwargs)
+
+    def distance_from(self, x, y):
+        return math.sqrt((x - self.x) ** 2 +(y - self.y) ** 2)
+
+    def distance_from_obj(self, obj):
+        return self.distance_from(obj.x, obj.y)
 
 class MobileComponent(PositionComponent):
 
