@@ -29,8 +29,7 @@ class MobileComponent(PositionComponent):
 
         # Call any bumped objects bump handler
         for obj in level.get_objects_at(new_x, new_y):
-            if hasattr(obj, 'on_bump'):
-                obj.on_bump(self)
+            obj.on_bump(self)
 
         # return new position ?
 

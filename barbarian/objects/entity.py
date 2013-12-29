@@ -4,11 +4,20 @@ barbarian.objects.entity.py
 ============================
 
 """
+import logging
+
 from barbarian.objects import components
 
+logger = logging.getLogger(__name__)
+
 class Entity(object):
+
     """ Base Entity Class. """
-    pass
+
+    def __getattr__(self, attr_name):
+        """ Log invalid attribute access, but don't raise exceptions. """
+        # NOTE: This might be an *AWFUL* idea \o/
+        logger.warning('%s has no %s attribute' % (self, attr_name))
 
 class Actor(
     Entity,
