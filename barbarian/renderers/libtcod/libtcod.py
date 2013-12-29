@@ -36,14 +36,14 @@ def dummy_main_menu():
     libtcod.console_flush()
 
 
-def dummy_draw_map(map):
-    for x, y, cell in map:
+def dummy_draw_level(level):
+    for x, y, cell in level.map:
         if cell.blocks_sight:
-            col = libtcod.light_blue
-            ch  = '.'
-        else:
             col = libtcod.dark_blue
             ch  = '#'
+        else:
+            col = libtcod.light_blue
+            ch  = '.'
         # print x, y, col
         libtcod.console_set_char_background(0, x, y, col)
         # libtcod.console_set_char_foreground(0, x, y, col)

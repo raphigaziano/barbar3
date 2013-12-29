@@ -200,7 +200,7 @@ class DungeonState(GameState):
 
     def render(self):
         renderer.clear()      # TODO: Clear only whats needed...
-        renderer.dummy_draw_map(self.dungeon.current_level.map)
+        renderer.dummy_draw_level(self.dungeon.current_level)
         renderer.dummy_draw_obj(self.player)
         gui.manager.render()
 
