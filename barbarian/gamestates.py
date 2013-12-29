@@ -160,13 +160,6 @@ class DungeonState(GameState):
         super(DungeonState, self).__init__()
         renderer.clear()
 
-        # DEBUG - Fill dbg cons with random crap
-        from barbarian.utils import rng
-        while len(gui.manager.debug_console.msgs) < 80:
-            getattr(
-                logger, rng.choice(('debug', 'info', 'warn', 'error'))
-            )(rng.choice(('foo', 'bar', 'baz', 'moop')))
-
     def process_input(self):
 
         key = input.collect()
