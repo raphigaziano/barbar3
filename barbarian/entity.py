@@ -20,7 +20,6 @@ class Entity(object):
         self.y = y
         self.char = char
 
-
 class Player(Entity):
 
     """ Dummy Player object """
