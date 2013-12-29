@@ -16,6 +16,8 @@ class MissingRequiredProperty(Exception):
 
 class BaseComponent(object):
 
+    """ Base, common component helpers. """
+
     @classmethod
     def _get_required_arg(cls, arg_name, args_dict):
         """
@@ -42,6 +44,8 @@ class BaseComponent(object):
 
 class PositionComponent(BaseComponent):
 
+    """ Positionnal Attributes & Helpers. """
+
     def __init__(self, **kwargs):
         self.x = self._get_required_arg('x', kwargs)
         self.y = self._get_required_arg('y', kwargs)
@@ -50,14 +54,30 @@ class PositionComponent(BaseComponent):
         super(PositionComponent, self).__init__(**kwargs)
 
     def distance_from(self, x, y):
+        """
+        Return the distance between the entity and a point located at (x, y).
+
+        """
         return math.sqrt((x - self.x) ** 2 +(y - self.y) ** 2)
 
     def distance_from_obj(self, obj):
+        """
+        Return the distance between the entity and another positioned entity.
+
+        """
         return self.distance_from(obj.x, obj.y)
 
 class MobileComponent(PositionComponent):
 
+    """ Movement Handler """
+
     def move(self, dx, dy, level):
+        """
+        Move the entity by a (dx, dy) vector.
+
+        Also call the appropriate callback for any other entity we bump into.
+
+        """
         # Try and move to x+dx, y+dy
         new_x, new_y = self.x + dx, self.y + dy
         if level.is_blocked(new_x, new_y):
@@ -73,10 +93,20 @@ class MobileComponent(PositionComponent):
 
 class BumpComponent(PositionComponent):
 
+    """
+    Bump Behaviour.
+
+    Entities implementing this components will react according to their
+    `on_bump` method whenever another objects steps on the cell they occupy.
+
+    """
+
     def on_bump(self, bumper):
         logger.debug('BUMP!')
 
 class VisibleComponent(BaseComponent):
+
+    """ Minimal entity visual representation. """
 
     def __init__(self, **kwargs):
         self.char = self._get_required_arg('char', kwargs)
