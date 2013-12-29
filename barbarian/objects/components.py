@@ -25,7 +25,7 @@ class BaseComponent(object):
         try:
             return args_dict.pop(arg_name)
         except KeyError as e:
-            msg = 'ONOES'  # TODO: actual err msg
+            msg = '%s: Missing required property %s' % (cls.__name__, arg_name)
             logger.error(msg)
             raise MissingRequiredProperty(msg)
 
@@ -44,6 +44,7 @@ class PositionComponent(BaseComponent):
     def __init__(self, **kwargs):
         self.x = self._get_required_arg('x', kwargs)
         self.y = self._get_required_arg('y', kwargs)
+        # TODO: move this attr in a separate SolidComponent
         self.blocks = self._get_default_arg('blocks', kwargs, True)
         super(PositionComponent, self).__init__(**kwargs)
 
@@ -73,4 +74,3 @@ class VisibleComponent(BaseComponent):
     def __init__(self, **kwargs):
         self.char = self._get_required_arg('char', kwargs)
         super(VisibleComponent, self).__init__(**kwargs)
-
