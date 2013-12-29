@@ -149,7 +149,7 @@ class DungeonState(GameState):
 
     def __init__(self):
         from dungeon import Dungeon
-        from entity import Player, Entity
+        from objects.entity import Actor
         from utils import rng
 
         self.dungeon = Dungeon()
@@ -159,13 +159,13 @@ class DungeonState(GameState):
             x, y = rng.randrange(0, 80), rng.randrange(0, 40)
             while self.dungeon.current_level.is_blocked(x, y):
                 x, y = rng.randrange(0, 80), rng.randrange(0, 40)
-            e = Entity(x, y, rng.choice(('#', '!', 'o')))
+            e = Actor(x, y, rng.choice(('#', '!', 'o')), blocks=False)
             self.dungeon.current_level.objects.append(e)
 
         px, py = rng.randrange(0, 80), rng.randrange(0, 40)
         while self.dungeon.current_level.is_blocked(px, py):
             px, py = rng.randrange(0, 80), rng.randrange(0, 40)
-        self.player = Player(px, py, '@')
+        self.player = Actor(px, py, '@')
 
         super(DungeonState, self).__init__()
         renderer.clear()

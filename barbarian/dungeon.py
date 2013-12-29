@@ -29,7 +29,8 @@ class Level(object):
         """ Return True of the (x, y) cell is blocked, False otherwise. """
         # Dummy object collision: any object blocks
         for obj in self.get_objects_at(x, y):
-            return True
+            if obj.blocks:
+                return True
         return self.map.get_cell(x, y).blocks
 
 class Dungeon(object):
