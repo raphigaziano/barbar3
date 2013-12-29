@@ -34,6 +34,8 @@ class Level(object):
 
 class Dungeon(object):
 
+    """ Level Container. """
+
     def __init__(self):
         self.levels = []
         self.current_level = Level()
