@@ -5,9 +5,6 @@
 - basic gui (consoles)
   * log to that
 
-- map
-  * dummy but better gen
-
 - basic game object => player
 
 - collisions

@@ -38,10 +38,10 @@ def dummy_main_menu():
 
 def dummy_draw_map(map):
     for x, y, cell in map:
-        if cell == 0:
+        if cell.blocks_sight:
             col = libtcod.light_blue
             ch  = '.'
-        elif cell == 1:
+        else:
             col = libtcod.dark_blue
             ch  = '#'
         # print x, y, col

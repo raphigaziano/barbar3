@@ -69,7 +69,6 @@ class StateManager(object):
 
         # Switch state if requested
         next_state = self.current_state.next_state
-
         if self.current_state.done:
             self.pop()
         if next_state is not None:
@@ -155,7 +154,7 @@ class DungeonState(GameState):
         self.m = make_map()
 
         self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
-        while self.m.get_cell(self.px, self.py):
+        while self.m.get_cell(self.px, self.py).blocks:
             self.px, self.py = rng.randrange(0, 80), rng.randrange(0, 40)
 
         super(DungeonState, self).__init__()
