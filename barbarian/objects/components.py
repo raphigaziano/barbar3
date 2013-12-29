@@ -15,7 +15,8 @@ class MissingRequiredProperty(Exception):
 
 class BaseComponent(object):
 
-    def _get_required_arg(self, arg_name, args_dict):
+    @classmethod
+    def _get_required_arg(cls, arg_name, args_dict):
         """
         Attempt to retrieve `arg_name` from a kwarg dict and raise a specific
         exception in case of failure.
@@ -24,10 +25,12 @@ class BaseComponent(object):
         try:
             return args_dict.pop(arg_name)
         except KeyError as e:
-            # TODO: log & nicer err msg
-            raise MissingRequiredProperty(e)
+            msg = 'ONOES'  # TODO: actual err msg
+            logger.error(msg)
+            raise MissingRequiredProperty(msg)
 
-    def _get_default_arg(self, arg_name, args_dict, default=None):
+    @classmethod
+    def _get_default_arg(cls, arg_name, args_dict, default=None):
         """
         Attempt to retrieve `arg_name` from a kwarg dict and return `default`
         if it could not be found.
