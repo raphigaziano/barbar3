@@ -29,6 +29,7 @@ class Player(Entity):
         new_x, new_y = self.x + dx, self.y + dy
         if level.is_blocked(new_x, new_y):
             logger.debug('Cannot move to cell %d-%d' % (new_x, new_y))
-            return
-        self.x, self.y = new_x, new_y
+        else:
+            self.x, self.y = new_x, new_y
+        # return new position ?
 
