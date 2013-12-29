@@ -4,7 +4,7 @@ barbarian.mapgen.py
 
 """
 from barbarian.map import Map
-from barbarian.utils import rng
+from barbarian.utils import rng, geometry
 
 def make_map():
 
@@ -23,22 +23,12 @@ def make_map():
                 blocks_sight = blocks
             self.blocks_sight = blocks_sight
 
-    class Rect:
+    class Room(geometry.Rect):
         def __init__(self, x, y, w, h):
             self.x1 = x
             self.y1 = y
             self.x2 = x + w
             self.y2 = y + h
-
-        def center(self):
-            center_x = (self.x1 + self.x2) / 2
-            center_y = (self.y1 + self.y2) / 2
-            return (center_x, center_y)
-
-        def intersect(self, other):
-            #returns true if this rectangle intersects with another one
-            return (self.x1 <= other.x2 and self.x2 >= other.x1 and
-                    self.y1 <= other.y2 and self.y2 >= other.y1)
 
     def create_room(room):
         global my_map
@@ -63,7 +53,10 @@ def make_map():
     num_rooms = 0
 
     global my_map
-    my_map = Map(MAP_WIDTH, MAP_HEIGHT, [Tile(True) for _ in range(80 * 40)])
+    my_map = Map(
+        MAP_WIDTH, MAP_HEIGHT,
+        [Tile(True) for _ in range(MAP_WIDTH * MAP_HEIGHT)]
+    )
 
     for r in range(MAX_ROOMS):
         #random width and height
@@ -73,8 +66,8 @@ def make_map():
         x = rng.randint(0, MAP_WIDTH - w - 1)
         y = rng.randint(0, MAP_HEIGHT - h - 1)
 
-        #"Rect" class makes rectangles easier to work with
-        new_room = Rect(x, y, w, h)
+        #"Room" class makes rectangles easier to work with
+        new_room = Room(x, y, w, h)
 
         #run through the other rooms and see if they intersect with this one
         failed = False
