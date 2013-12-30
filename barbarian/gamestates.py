@@ -145,6 +145,7 @@ class MainMenuState(GameState):
             self._replace_with(DungeonState())
 
     def render(self):
+        renderer.clear()
         renderer.dummy_main_menu()
 
 class DungeonState(GameState):
