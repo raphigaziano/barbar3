@@ -4,7 +4,9 @@ barbarian.mapgen.py
 
 """
 from barbarian.map import Map
+from barbarian.objects.mapobjects import MapTile
 from barbarian.utils import rng, geometry
+
 
 def make_map():
 
@@ -15,13 +17,6 @@ def make_map():
     ROOM_MAX_SIZE = 10
     ROOM_MIN_SIZE = 6
     MAX_ROOMS = 30
-
-    class Tile(object):
-        def __init__(self, blocks, blocks_sight=None):
-            self.blocks = blocks
-            if blocks_sight is None:
-                blocks_sight = blocks
-            self.blocks_sight = blocks_sight
 
     class Room(geometry.Rect):
         def __init__(self, x, y, w, h):
@@ -55,7 +50,7 @@ def make_map():
     global my_map
     my_map = Map(
         MAP_WIDTH, MAP_HEIGHT,
-        [Tile(True) for _ in range(MAP_WIDTH * MAP_HEIGHT)]
+        [MapTile(blocks=True) for _ in range(MAP_WIDTH * MAP_HEIGHT)]
     )
 
     for r in range(MAX_ROOMS):

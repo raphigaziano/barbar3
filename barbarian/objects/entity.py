@@ -36,6 +36,7 @@ class Entity(object):
 class Actor(
     Entity,
     components.MobileComponent,
+    components.SolidComponent,
     components.BumpComponent,
     components.VisibleComponent,
 ):

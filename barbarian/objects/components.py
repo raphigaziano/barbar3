@@ -49,8 +49,6 @@ class PositionComponent(BaseComponent):
     def __init__(self, **kwargs):
         self.x = self._get_required_arg('x', kwargs)
         self.y = self._get_required_arg('y', kwargs)
-        # TODO: move this attr in a separate SolidComponent
-        self.blocks = self._get_default_arg('blocks', kwargs, True)
         super(PositionComponent, self).__init__(**kwargs)
 
     def distance_from(self, x, y):
@@ -66,6 +64,17 @@ class PositionComponent(BaseComponent):
 
         """
         return self.distance_from(obj.x, obj.y)
+
+class SolidComponent(BaseComponent):
+
+    """ Some physocal properties. Does this entoty block movement or los ? """
+
+    def __init__(self, **kwargs):
+        self.blocks = self._get_default_arg('blocks', kwargs, True)
+        self.blocks_sight = self._get_default_arg(
+            'blocks_sight', kwargs, self.blocks
+        )
+        super(SolidComponent, self).__init__(**kwargs)
 
 class MobileComponent(PositionComponent):
 
