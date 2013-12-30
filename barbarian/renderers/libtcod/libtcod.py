@@ -1,3 +1,10 @@
+# -*- coding: utf8 -*-
+"""
+barbarian.renderers.libtcod.libtcod.py
+======================================
+
+litdcod rendering functions.
+"""
 from barbarian import libtcodpy as libtcod
 
 from barbarian.renderers.libtcod import colors
@@ -15,14 +22,13 @@ def init():
     libtcod.console_init_root(
         settings.SCREEN_W, settings.SCREEN_H, 'Barbarian Quest III', False
     )
-
     libtcod.sys_set_fps(settings.LIMIT_FPS)
 
 def dummy_main_menu():
     libtcod.console_set_default_foreground(0, libtcod.light_yellow)
     libtcod.console_print_ex(0,
             settings.SCREEN_W/2, settings.SCREEN_H/2-12,
-            libtcod.BKGND_NONE,libtcod.CENTER,
+            libtcod.BKGND_NONE, libtcod.CENTER,
             'BARBARIAN QUEST III')
     libtcod.console_print_ex(0,
             settings.SCREEN_W/2, settings.SCREEN_H/2-8,
@@ -32,9 +38,6 @@ def dummy_main_menu():
             settings.SCREEN_W/2, settings.SCREEN_H-2,
             libtcod.BKGND_NONE, libtcod.CENTER,
             'By Zobinet')
-
-    libtcod.console_flush()
-
 
 color_dark_wall = libtcod.Color(0, 0, 100)
 color_light_wall = libtcod.Color(130, 110, 50)
@@ -89,7 +92,7 @@ def dummy_draw_console(con, x, y, blit_on=0):
     # !TEMPO!
     if id(con) not in tcod_consoles:
         new_console = libtcod.console_new(con.w, con.h)
-        libtcod.console_set_default_foreground(new_console, libtcod.white)
+        # libtcod.console_set_default_foreground(new_console, libtcod.white)
         # libtcod.console_set_default_background(new_console, libtcod.blue)
         libtcod.console_clear(new_console)
         tcod_consoles[id(con)] = new_console

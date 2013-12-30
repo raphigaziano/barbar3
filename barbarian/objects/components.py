@@ -12,6 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class MissingRequiredProperty(Exception):
+    """
+    Validation Error.
+
+    Raised when a required component property is missing.
+    """
     pass
 
 class BaseComponent(object):
@@ -90,7 +95,7 @@ class MobileComponent(PositionComponent):
         # Try and move to x+dx, y+dy
         new_x, new_y = self.x + dx, self.y + dy
         if level.is_blocked(new_x, new_y):
-            logger.debug('Cannot move to cell %d-%d' % (new_x, new_y))
+            logger.debug('Cannot move to cell %d-%d', new_x, new_y)
         else:
             self.x, self.y = new_x, new_y
 

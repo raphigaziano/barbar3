@@ -19,27 +19,25 @@ def make_map():
     MAX_ROOMS = 30
 
     class Room(geometry.Rect):
-        def __init__(self, x, y, w, h):
-            self.x1 = x
-            self.y1 = y
-            self.x2 = x + w
-            self.y2 = y + h
+        pass
+
+    my_map = Map(
+        MAP_WIDTH, MAP_HEIGHT,
+        [MapTile(blocks=True) for _ in range(MAP_WIDTH * MAP_HEIGHT)]
+    )
 
     def create_room(room):
-        global my_map
         for x in range(room.x1+1, room.x2):
             for y in range(room.y1+1, room.y2):
                 my_map.get_cell(x, y).blocks = False
                 my_map.get_cell(x, y).blocks_sight = False
 
     def create_h_tunnel(x1, x2, y):
-        global my_map
         for x in range(min(x1, x2), max(x1, x2) + 1):
             my_map.get_cell(x, y).blocks = False
             my_map.get_cell(x, y).blocks_sight = False
 
     def create_v_tunnel(y1, y2, x):
-        global my_map
         for y in range(min(y1, y2), max(y1, y2) + 1):
             my_map.get_cell(x, y).blocks = False
             my_map.get_cell(x, y).blocks_sight = False
@@ -47,13 +45,7 @@ def make_map():
     rooms = []
     num_rooms = 0
 
-    global my_map
-    my_map = Map(
-        MAP_WIDTH, MAP_HEIGHT,
-        [MapTile(blocks=True) for _ in range(MAP_WIDTH * MAP_HEIGHT)]
-    )
-
-    for r in range(MAX_ROOMS):
+    for _ in range(MAX_ROOMS):
         #random width and height
         w = rng.randint(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1)
         h = rng.randint(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1)
@@ -80,12 +72,7 @@ def make_map():
             #center coordinates of new room, will be useful later
             (new_x, new_y) = new_room.center()
 
-            if num_rooms == 0:
-                pass
-            #     #this is the first room, where the player starts at
-            #     player.x = new_x
-            #     player.y = new_y
-            else:
+            if num_rooms > 1:
                 #all rooms after the first:
                 #connect it to the previous room with a tunnel
 

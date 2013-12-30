@@ -45,6 +45,9 @@ class Actor(
 
 class Player(Actor):
 
+    """ Player Object - Basically an actor with some custom behaviour. """
+
     def move(self, dx, dy, level):
         super(Player, self).move(dx, dy, level)
         level.compute_fov(self.x, self.y)
+        # TODO: update cam here

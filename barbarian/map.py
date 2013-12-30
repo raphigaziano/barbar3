@@ -9,6 +9,12 @@ Basic Map data structure.
 
 
 class OutOfBoundMapError(IndexError, Exception):
+    """
+    Moar explicit IndexError.
+
+    Raised when trying to access a non existing cell.
+
+    """
     pass
 
 class Map(object):

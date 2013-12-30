@@ -31,7 +31,7 @@ class GUIManager(object):
             raise AttributeError()  # TODO: std err message
 
     def render(self):
-        for name, w in self.widgets.items():
+        for _, w in self.widgets.items():
             w.render()
 
     def process_input(self, key):

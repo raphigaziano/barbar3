@@ -4,8 +4,6 @@ barbarian.gamestates.py
 
 Game state objects & their manager.
 
-TODO: UNITTESTME!
-
 """
 import logging
 
@@ -13,6 +11,7 @@ from barbarian import libtcodpy as tcod
 from barbarian import gui
 from barbarian import input
 from barbarian.renderers import renderer
+from barbarian.utils import rng
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +33,12 @@ class StateManager(object):
         if initial_state is not None:
             self._states.append(initial_state)
 
-        logger.debug("State Manager Initialized with states %s" % self._states)
+        logger.debug("State Manager Initialized with states %s", self._states)
 
     @property
     def current_state(self):
         """ Currently active state is the one sitting on top of the stack. """
-        # TODO: Bettr error handling. Raise a specific exception ?
+        # TODO: Bettr error handling. Raise a specific exception if empty?
         return self._states[-1]
 
     @property
@@ -50,15 +49,15 @@ class StateManager(object):
 
     def pop(self):
         s = self._states.pop()
-        logger.debug("State %s popped off the stack" % s)
-        logger.debug("Current State Stack: %s" % self._states)
+        logger.debug("State %s popped off the stack", s)
+        logger.debug("Current State Stack: %s", self._states)
 
     def push(self, s):
         if self._states:
             self.current_state.next_state = None
         self._states.append(s)
-        logger.debug("State %s pushed on the stack" % self.current_state)
-        logger.debug("Current State Stack: %s" % self._states)
+        logger.debug("State %s pushed on the stack", self.current_state)
+        logger.debug("Current State Stack: %s", self._states)
 
     def update(self):
         """ Main event loop. """
@@ -124,11 +123,15 @@ class GameState(object):
 
 class InitState(GameState):
 
+    """ Game Initialization. """
+
     def update(self):
         renderer.init()
         self._replace_with(MainMenuState())
 
 class ShutDownState(GameState):
+
+    """ Cleanup on Shut-down. """
 
     def update(self):
         self._pop()
@@ -149,9 +152,8 @@ class DungeonState(GameState):
     """ Dummy Gameplay State """
 
     def __init__(self):
-        from dungeon import Dungeon
-        from objects.entity import Actor, Player
-        from utils import rng
+        from barbarian.dungeon import Dungeon
+        from barbarian.objects.entity import Player
 
         self.dungeon = Dungeon()
 
@@ -170,7 +172,6 @@ class DungeonState(GameState):
         self.dungeon.current_level.compute_fov(self.player.x, self.player.y)
 
         super(DungeonState, self).__init__()
-        renderer.clear()
 
     def process_input(self):
 
@@ -195,7 +196,6 @@ class DungeonState(GameState):
         elif key.vk in (tcod.KEY_KP7, ):
             self.player.move(-1, -1, self.dungeon.current_level)
         elif key.c == ord('m'):
-            from barbarian.utils import rng
             gui.manager.msg(
                 rng.choice(('foo', 'bar', 'baz', 'moop')),
                 rng.choice(('red', 'white', 'green', 'gray'))

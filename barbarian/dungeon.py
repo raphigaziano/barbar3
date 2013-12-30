@@ -12,6 +12,13 @@ from barbarian.mapgen import make_map
 
 class Level(object):
 
+    """
+    Game Level (in a dungeon or not - Level here basiclly means a play area.
+
+    Contains the level map(s) and a list of all items and actors inhabiting it.
+
+    """
+
     def __init__(self):
         self.map = make_map()
         self.fov_map = libtcod.map_new(self.map.w, self.map.h)
@@ -39,12 +46,18 @@ class Level(object):
         return self.map.get_cell(x, y).blocks
 
     def compute_fov(self, from_x, from_y):
+        """
+        Recompute fov based on the (from_x, from_y) position.
+
+        (Typically, (from_y, from_y) will be the player's current position).
+
+        """
         libtcod.map_compute_fov(
             self.fov_map, from_x, from_y, 10, True, 0   # TODO: use constants
         )
         for x, y, cell in self.map:
             if libtcod.map_is_in_fov(self.fov_map, x, y):
-                self.map.get_cell(x, y).explored = True
+                cell.explored = True
 
 
 class Dungeon(object):

@@ -1,3 +1,13 @@
+# -*- coding: utf8 -*-
+"""
+barbarian.renderers
+===================
+
+Rendering root.
+
+Expose the active renderer object/module to the rest of the game.
+
+"""
 import sys
 
 from barbarian.io import settings

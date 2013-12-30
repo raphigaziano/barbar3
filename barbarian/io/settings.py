@@ -8,10 +8,11 @@ Simple settings collecter.
 TODO: Plan a way to have default settings (somewhere) + user overrides
 
 """
-import os, sys
+import os
 
 
 class InvalidSetting(ValueError, Exception):
+    """ Setting Error. Raise when a required setting is missing or invalid. """
     pass
 
 SETTINGS_PATH = os.path.join(
