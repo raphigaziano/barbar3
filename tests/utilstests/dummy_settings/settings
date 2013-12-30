@@ -1,0 +1,5 @@
+STR = "foo"
+INT = 666
+
+MAP_W = 80
+MAP_H = 60
