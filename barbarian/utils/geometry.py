@@ -12,7 +12,7 @@ Mostly useful for manipulating the map.
 class Rect(object):
 
     """
-    A Simple Rectangulare Shape, defined by its top-left corner coordinates,
+    A Simple Rectangular Shape, defined by its top-left corner coordinates,
     width & height.
 
     """
@@ -21,7 +21,7 @@ class Rect(object):
         self.x1 = x
         self.y1 = y
         self.x2 = self.x1 + w
-        self.y2 = self.y2 + h
+        self.y2 = self.y1 + h
         # ???
         self.w = w
         self.h = h

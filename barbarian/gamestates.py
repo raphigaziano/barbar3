@@ -138,6 +138,7 @@ class MainMenuState(GameState):
     def update(self):
         k = input.collect()
         if k.vk is not tcod.KEY_NONE:
+            # Rather push
             self._replace_with(DungeonState())
 
     def render(self):
