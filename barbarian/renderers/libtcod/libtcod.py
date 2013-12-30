@@ -36,15 +36,27 @@ def dummy_main_menu():
     libtcod.console_flush()
 
 
+color_dark_wall = libtcod.Color(0, 0, 100)
+color_light_wall = libtcod.Color(130, 110, 50)
+color_dark_ground = libtcod.Color(50, 50, 150)
+color_light_ground = libtcod.Color(200, 180, 50)
+
 def dummy_draw_level(level):
     for x, y, cell in level.map:
-        if cell.blocks_sight:
-            col = libtcod.dark_blue
-            ch  = '#'
+        if not cell.explored:
+            continue
+        in_fov = libtcod.map_is_in_fov(level.fov_map, x, y)
+        if in_fov:
+            if cell.blocks_sight:
+                col = color_light_wall
+            else:
+                col = color_light_ground
         else:
-            col = libtcod.light_blue
-            ch  = '.'
-        # print x, y, col
+            if cell.blocks_sight:
+                col = color_dark_wall
+            else:
+                col = color_dark_ground
+
         libtcod.console_set_char_background(0, x, y, col)
         # libtcod.console_set_char_foreground(0, x, y, col)
         # libtcod.console_set_char(0, x, y, ch)

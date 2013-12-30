@@ -149,23 +149,24 @@ class DungeonState(GameState):
 
     def __init__(self):
         from dungeon import Dungeon
-        from objects.entity import Actor
+        from objects.entity import Actor, Player
         from utils import rng
 
         self.dungeon = Dungeon()
 
         # Dummy game objects
-        for _ in range(10):
-            x, y = rng.randrange(0, 80), rng.randrange(0, 40)
-            while self.dungeon.current_level.is_blocked(x, y):
-                x, y = rng.randrange(0, 80), rng.randrange(0, 40)
-            e = Actor(x=x, y=y, char=rng.choice(('#', '!', 'o')), blocks=False)
-            self.dungeon.current_level.objects.append(e)
+        # for _ in range(10):
+        #     x, y = rng.randrange(0, 80), rng.randrange(0, 40)
+        #     while self.dungeon.current_level.is_blocked(x, y):
+        #         x, y = rng.randrange(0, 80), rng.randrange(0, 40)
+        #     e = Actor(x=x, y=y, char=rng.choice(('#', '!', 'o')), blocks=False)
+        #     self.dungeon.current_level.objects.append(e)
 
         px, py = rng.randrange(0, 80), rng.randrange(0, 40)
         while self.dungeon.current_level.is_blocked(px, py):
             px, py = rng.randrange(0, 80), rng.randrange(0, 40)
-        self.player = Actor(x=px, y=py, char='@')
+        self.player = Player(x=px, y=py, char='@')
+        self.dungeon.current_level.compute_fov(self.player.x, self.player.y)
 
         super(DungeonState, self).__init__()
         renderer.clear()
