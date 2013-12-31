@@ -29,8 +29,11 @@ class Entity(object):
     # Standard Components some specializing entities will automagically get.
     base_components = ()
 
-    def __init__(self):
+    def __init__(self, **kwargs):
 
+        # kwargs and super call: temporary fix (inheriting classes still need
+        # it)
+        super(Entity, self).__init__(**kwargs)
         self._components = []
         for c in self.base_components:
             self.add_component(c)
