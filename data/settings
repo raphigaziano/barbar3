@@ -7,4 +7,7 @@ SCREEN_H = 50
 MAP_W = 80
 MAP_H = 40
 
+CAM_W = 80
+CAM_H = 40
+
 # RENDERER = "foobar"

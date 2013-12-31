@@ -63,6 +63,9 @@ SCREEN_H = _get_setting('SCREEN_H', py_type=int, required=True)
 MAP_W = _get_setting('MAP_W', py_type=int, required=True)
 MAP_H = _get_setting('MAP_H', py_type=int, required=True)
 
+CAM_W = _get_setting('CAM_W', py_type=int, required=True)
+CAM_H = _get_setting('CAM_H', py_type=int, required=True)
+
 RENDERER = _get_setting('RENDERER', py_type=str, default='libtcod')
 
 ASSETS_ROOT = _get_setting(
