@@ -61,7 +61,7 @@ class PositionComponent(BaseComponent):
         Return the distance between the entity and a point located at (x, y).
 
         """
-        return int(math.sqrt((x - self.x) ** 2 +(y - self.y) ** 2))
+        return int(math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2))
 
     def distance_from_obj(self, obj):
         """

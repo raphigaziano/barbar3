@@ -26,11 +26,33 @@ class Entity(object):
 
     # TODO: Entities will probably need some common attrs like a name, id...
 
+    # Standard Components some specializing entities will automagically get.
+    base_components = ()
+
+    def __init__(self):
+
+        self._components = []
+        for c in self.base_components:
+            self.add_component(c)
+
+    def add_component(self, component, index=-1):
+        self._components.insert(index, component)
+
+    def push_component(self, component):
+        self._component.insert(0, component)
+
+    def pop_component(self):
+        return self._component.pop(0)   # Check Index
+
     def __getattr__(self, attr_name):
         """ Log invalid attribute access, but don't raise exceptions. """
         # NOTE: This might be an *AWFUL* idea \o/
-        logger.warning('%s has no %s attribute' % (self, attr_name))
+        logger.warning('%s has no %s attribute', self, attr_name)
         return NullProperty()
+        # for c in self._components:
+        #    if hasattr(c, attr_name):
+        #        return getattr(c, attr_name)
+        # warn & NullProp
 
 
 class Actor(
