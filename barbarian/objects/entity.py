@@ -49,6 +49,8 @@ class Entity(object):
         # NOTE: This might be an *AWFUL* idea \o/
         logger.warning('%s has no %s attribute', self, attr_name)
         return NullProperty()
+        # Perf idea: Cache a component-attribute mapping
+        # (Updated on component list modifications).
         # for c in self._components:
         #    if hasattr(c, attr_name):
         #        return getattr(c, attr_name)
