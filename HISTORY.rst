@@ -8,6 +8,7 @@ Dummy Release to have something on the master branch & celebrate the 666th
 line of code.
 
 Features:
+
 - Settings and assets reading/loading basics.
 - Game states management.
 - Basic map & level architecture, with dummy but workable map generation.
