@@ -13,6 +13,8 @@ V 0.0.7:
 
 - Cleaner rendering layer
 
+- Moar settings, data drive xp (keymappings, colors, basic npc stats)
+
 - Basic monsters:
 
   * Dummy AI (=> "Controller" component)
