@@ -23,6 +23,9 @@ class BaseComponent(object):
 
     """ Base, common component helpers. """
 
+    def __init__(self, **kwargs):
+        pass
+
     @classmethod
     def _get_required_arg(cls, arg_name, args_dict):
         """

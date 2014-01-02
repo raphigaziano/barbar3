@@ -5,10 +5,15 @@ barbarian.objects.mapobjects.py
 
 """
 from barbarian.objects.entity import Entity
-from barbarian.objects.components import SolidComponent#, PositionComponent
+from barbarian.objects.components import SolidComponent, PositionComponent
 
 
-class MapTile(Entity, SolidComponent):#, PositionComponenet):
+class MapTile(Entity):
+
+    base_components = (
+        SolidComponent,
+        # PositionComponent,
+    )
 
     """
     A Basic Map Tile.
