@@ -83,16 +83,44 @@ class Entity(object):
         """
         return self._components.pop(0)
 
+    def has_component(self, component):
+        """ TODO: DOC & TESTS """
+        # Swapping lookups might improve perfs if string lookup is more
+        # frequent.
+        if component in self._components:
+            return True
+        for c in self._components:
+            cname = c.__class__.__name__
+            if cname.rsplit('Component').lower == component.lower():
+                return True
+        return False
+
+    def has_property(self, property_name):
+        """ TODO: DOC & TESTS """
+        for c in self._components:
+            if hasattr(c, property_name):
+                return True
+        return False
+
+    def get(self, property_name, default=None):
+        """ TODO: DOC & TESTS """
+        # dict-like get method
+        for c in self._components:
+            if hasattr(c, property_name):
+                return getattr(c, property_name)
+        return default
+
+
     def __getattr__(self, attr_name):
         """ Log invalid attribute access, but don't raise exceptions. """
         # NOTE: This might be an *AWFUL* idea \o/
         # Perf idea: Cache a component-attribute mapping
         # (Updated on component list modifications).
-        for c in self._components:
-           if hasattr(c, attr_name):
-               return getattr(c, attr_name)
-        logger.warning('%s has no %s attribute', self, attr_name)
-        return NullProperty()
+        attr = self.get(attr_name)
+        if attr is None:
+            logger.warning('%s has no %s attribute', self, attr_name)
+            return NullProperty()   # Nah, just raise an error...
+        return attr
 
 class Actor(Entity):
 
@@ -110,7 +138,6 @@ class Player(Actor):
     """ Player Object - Basically an actor with some custom behaviour. """
 
     def move(self, dx, dy, level):
-        # super(Player, self).move(dx, dy, level)
-        self._components[0].move(dx, dy, level)    # OUCH!
+        self.__getattr__('move')(dx, dy, level)
         level.compute_fov(self.x, self.y)
         # TODO: update cam here
