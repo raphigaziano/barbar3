@@ -72,6 +72,10 @@ class TestBaseEntityAttributeAccess(unittest.TestCase):
         def __init__(self):
             self.bar = 'bar'
 
+    class FooBarComponent(object):
+        def __init__(self):
+            self.foo = 'bar'
+
     def setUp(self):
         self.e = entity.Entity()
         # self.foo_component, self.bar_component = Mock(), Mock()
@@ -93,5 +97,35 @@ class TestBaseEntityAttributeAccess(unittest.TestCase):
         self.assertIsInstance(self.e.moop, entity.NullProperty)
 
     def test_missing_method_access(self):
-        """ Accessing a non-existent entity method should return a NullProp """
+        """ Caling a non-existent entity method should return a NullProp """
         self.assertIsInstance(self.e.moop(), entity.NullProperty)
+
+    def test_component_override(self):
+        """ Pushing component to the front to override some attrs or methods """
+        self.e.push_component(self.FooBarComponent())
+        self.assertEqual('bar', self.e.foo)
+        self.e.pop_component()
+        self.assertEqual('foo', self.e.foo)
+
+class TestNullProperty(unittest.TestCase):
+
+    def setUp(self):
+        self.null_prop = entity.NullProperty()
+
+    def test_getattr(self):
+        """ Accessing a NullProperty attribute should return another NullProperty """
+        self.assertIsInstance(self.null_prop.foo, entity.NullProperty)
+        self.assertIsInstance(self.null_prop.bar, entity.NullProperty)
+
+    def test_call(self):
+        """ Calling a NullProperty instance should return another NullProperty """
+        self.assertIsInstance(self.null_prop(), entity.NullProperty)
+
+    def test_is(self):
+        """ is test with a NullProperty returns based on the class:
+            Two NullProperty instances are considered equal """
+        null_prop = entity.NullProperty()
+        self.assertTrue(null_prop == self.null_prop)
+        other_prop = object()
+        self.assertFalse(other_prop == self.null_prop)
+
