@@ -62,6 +62,7 @@ class TestBaseEntityComponentManagement(unittest.TestCase):
         self.assertListEqual([], self.e._components)
 
 
+<<<<<<< HEAD
 class TestBaseEntityAttributeAccess(unittest.TestCase):
 
     class FooComponent(object):
@@ -73,6 +74,19 @@ class TestBaseEntityAttributeAccess(unittest.TestCase):
             self.bar = 'bar'
 
     class FooBarComponent(object):
+=======
+class TestBaseEntityComponentsAccess(unittest.TestCase):
+
+    class FooComponent(entity.components.BaseComponent):
+        def __init__(self):
+            self.foo = 'foo'
+
+    class BarComponent(entity.components.BaseComponent):
+        def __init__(self):
+            self.bar = 'bar'
+
+    class FooBarComponent(entity.components.BaseComponent):
+>>>>>>> develop
         def __init__(self):
             self.foo = 'bar'
 
@@ -87,6 +101,34 @@ class TestBaseEntityAttributeAccess(unittest.TestCase):
         self.e.add_component(self.foo_component)
         self.e.add_component(self.bar_component)
 
+<<<<<<< HEAD
+=======
+    def test_has_component(self):
+        """ Component presence assertion """
+        self.assertTrue(self.e.has_component(self.FooComponent))
+        self.assertFalse(self.e.has_component(self.FooBarComponent))
+
+    def test_has_component_subclass(self):
+        """ Component presence assertion, checking for a base component class """
+        self.assertTrue(self.e.has_component(entity.components.BaseComponent))
+
+    def test_has_property(self):
+        """ Entity property check """
+        self.assertTrue(self.e.has_property('foo'))
+        self.assertTrue(self.e.has_property('bar'))
+        self.assertFalse(self.e.has_property('moop'))
+
+    def test_get_property(self):
+        """ Property retrieval via get method """
+        self.assertEqual('foo', self.e.get('foo'))
+        self.assertEqual('bar', self.e.get('bar'))
+        self.assertEqual(self.e.NULL_PROPERTY, self.e.get('moop'))
+
+    def test_get_property_with_default(self):
+        """ Property retrieval via get mehod with default value """
+        self.assertEqual('moop', self.e.get('moop', default='moop'))
+
+>>>>>>> develop
     def test_simple_attribute_access(self):
         """ Accessing contained components attrs from the entity """
         self.assertEqual('foo', self.e.foo)
@@ -94,11 +136,19 @@ class TestBaseEntityAttributeAccess(unittest.TestCase):
 
     def test_missing_attribute_access(self):
         """ Accessing a non-existent entity attribute should return a NullProp """
+<<<<<<< HEAD
         self.assertIsInstance(self.e.moop, entity.NullProperty)
 
     def test_missing_method_access(self):
         """ Caling a non-existent entity method should return a NullProp """
         self.assertIsInstance(self.e.moop(), entity.NullProperty)
+=======
+        self.assertTrue(self.e.moop is self.e.NULL_PROPERTY)
+
+    # def test_missing_method_access(self):
+    #     """ Caling a non-existent entity method should return a NullProp """
+    #     self.assertIsInstance(self.e.moop(), entity.NullProperty)
+>>>>>>> develop
 
     def test_component_override(self):
         """ Pushing component to the front to override some attrs or methods """
@@ -107,6 +157,7 @@ class TestBaseEntityAttributeAccess(unittest.TestCase):
         self.e.pop_component()
         self.assertEqual('foo', self.e.foo)
 
+<<<<<<< HEAD
 class TestNullProperty(unittest.TestCase):
 
     def setUp(self):
@@ -129,3 +180,88 @@ class TestNullProperty(unittest.TestCase):
         other_prop = object()
         self.assertFalse(other_prop == self.null_prop)
 
+=======
+class TestEntityContainer(unittest.TestCase):
+
+    class FooComponent(entity.components.BaseComponent):
+        def __init__(self):
+            self.foo = 'foo'
+
+    class BarComponent(entity.components.BaseComponent):
+        def __init__(self):
+            self.bar = 'bar'
+
+    class FooBarComponent(entity.components.BaseComponent):
+        def __init__(self):
+            self.foo = 'bar'
+
+    def setUp(self):
+        self.container = entity.EntityContainer()
+
+        self.foo_entity = entity.Entity()
+        self.foo_entity.add_component(self.FooComponent())
+        self.bar_entity = entity.Entity()
+        self.bar_entity.add_component(self.BarComponent())
+        self.foobar_entity = entity.Entity()
+        self.foobar_entity.add_component(self.FooBarComponent())
+
+        self.container.append(self.foo_entity)
+        self.container.append(self.bar_entity)
+
+    def test_filter_by_component(self):
+        """ TODO: DOCME """
+        foo_comps = [c for c in
+            self.container.filter_by_component(self.FooComponent)
+        ]
+        bar_comps = [c for c in
+            self.container.filter_by_component(self.BarComponent)
+        ]
+        foobar_comps = [c for c in
+            self.container.filter_by_component(self.FooBarComponent)
+        ]
+
+        self.assertEqual(1, len(foo_comps))
+        self.assertEqual(1, len(bar_comps))
+        self.assertEqual(0, len(foobar_comps))
+
+        for e in foo_comps:
+            self.assertTrue(e.has_component(self.FooComponent))
+        for e in bar_comps:
+            self.assertTrue(e.has_component(self.BarComponent))
+
+    def test_filter_by_property(self):
+        """ TODO: DOCME """
+        foo_props = [c for c in
+            self.container.filter_by_property('foo')
+        ]
+        bar_props = [c for c in
+            self.container.filter_by_property('bar')
+        ]
+        foobar_props= [c for c in
+            self.container.filter_by_property('foobar')
+        ]
+
+        self.assertEqual(1, len(foo_props))
+        self.assertEqual(1, len(bar_props))
+        self.assertEqual(0, len(foobar_props))
+
+        for e in foo_props:
+            self.assertTrue(e.has_property('foo'))
+        for e in bar_props:
+            self.assertTrue(e.has_property('bar'))
+
+    def test_filter_by_property_with_explicit_val(self):
+        """ TODO: DOCME """
+        ok_props = [c for c in
+            self.container.filter_by_property('foo', 'foo')
+        ]
+        nok_props = [c for c in
+            self.container.filter_by_property('foo', 'bar')
+        ]
+
+        self.assertEqual(1, len(ok_props))
+        self.assertEqual(0, len(nok_props))
+
+        for e in ok_props:
+            self.assertEqual('foo', e.foo)
+>>>>>>> develop

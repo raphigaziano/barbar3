@@ -142,7 +142,7 @@ class BumpComponent(PositionComponent):
     def on_bump(self, bumper):
         logger.debug('BUMP!')
 
-class VisibleComponent(BaseComponent):
+class VisibleComponent(PositionComponent):
 
     """ Minimal entity visual representation. """
 

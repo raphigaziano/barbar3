@@ -9,6 +9,7 @@ from barbarian import libtcodpy as libtcod
 
 from barbarian.renderers.libtcod import colors
 from barbarian.io import settings, assets
+from barbarian.objects.components import VisibleComponent
 
 def init():
     # Dummy console
@@ -48,7 +49,7 @@ def dummy_draw_level(level):
     for x, y, cell in level.map:
         if not cell.explored:
             continue
-        in_fov = libtcod.map_is_in_fov(level.fov_map, x, y)
+        in_fov = level.is_in_fov(x, y)
         if in_fov:
             if cell.blocks_sight:
                 col = color_light_wall
@@ -64,8 +65,9 @@ def dummy_draw_level(level):
         # libtcod.console_set_char_foreground(0, x, y, col)
         # libtcod.console_set_char(0, x, y, ch)
 
-    for obj in level.objects:
-        libtcod.console_set_char(0, obj.x, obj.y, obj.char)
+    for obj in level.objects.filter_by_component(VisibleComponent):
+        if level.is_obj_in_fov(obj):
+            dummy_draw_obj(obj)
 
 def dummy_draw_obj(obj):
     libtcod.console_set_char_foreground(0, obj.x, obj.y, libtcod.red)
