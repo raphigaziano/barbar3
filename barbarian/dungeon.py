@@ -23,11 +23,12 @@ class Level(object):
     def __init__(self):
         self.map = make_map()
         self.actors = EntityContainer()
+        self.items = EntityContainer()
         self.populate()
 
     @property
     def objects(self):
-        return self.actors
+        return EntityContainer(self.actors + self.items)
 
     def get_map_cell(self, x, y):
         """ Shortcut to access map cells directly. """
@@ -57,6 +58,13 @@ class Level(object):
                 x = rng.randrange(0, self.map.w)
                 y = rng.randrange(0, self.map.h)
             self.actors.append(Actor(x=x, y=y, char='r'))
+        for _ in range(5):
+            x = rng.randrange(0, self.map.w)
+            y = rng.randrange(0, self.map.h)
+            while self.map.get_cell(x, y).blocks:
+                x = rng.randrange(0, self.map.w)
+                y = rng.randrange(0, self.map.h)
+            self.actors.append(Actor(x=x, y=y, char='#', blocks=False))
 
     def update(self):
         """ STUB """
