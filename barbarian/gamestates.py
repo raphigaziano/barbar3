@@ -170,7 +170,7 @@ class DungeonState(GameState):
         while self.dungeon.current_level.is_blocked(px, py):
             px, py = rng.randrange(0, 80), rng.randrange(0, 40)
         self.player = Player(x=px, y=py, char='@')
-        self.dungeon.current_level.compute_fov(self.player.x, self.player.y)
+        self.dungeon.current_level.map.compute_fov(self.player.x, self.player.y)
 
         super(DungeonState, self).__init__()
 

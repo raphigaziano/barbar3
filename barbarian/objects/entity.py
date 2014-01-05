@@ -149,5 +149,5 @@ class Player(Actor):
 
     def move(self, dx, dy, level):
         self.get('move')(dx, dy, level)
-        level.compute_fov(self.x, self.y)
+        level.map.compute_fov(self.x, self.y)
         # TODO: update cam here

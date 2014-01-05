@@ -49,7 +49,7 @@ def dummy_draw_level(level):
     for x, y, cell in level.map:
         if not cell.explored:
             continue
-        in_fov = level.is_in_fov(x, y)
+        in_fov = level.map.is_in_fov(x, y)
         if in_fov:
             if cell.blocks_sight:
                 col = color_light_wall
@@ -66,7 +66,7 @@ def dummy_draw_level(level):
         # libtcod.console_set_char(0, x, y, ch)
 
     for obj in level.objects.filter_by_component(VisibleComponent):
-        if level.is_obj_in_fov(obj):
+        if level.map.is_obj_in_fov(obj):
             dummy_draw_obj(obj)
 
 def dummy_draw_obj(obj):

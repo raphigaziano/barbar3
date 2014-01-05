@@ -6,6 +6,7 @@ barbarian.map.py
 Basic Map data structure.
 
 """
+from barbarian import libtcodpy as libtcod
 
 
 class OutOfBoundMapError(IndexError, Exception):
@@ -25,6 +26,8 @@ class Map(object):
         self.w = width
         self.h = height
         self.cells = cells or []
+
+        self.fov_map = libtcod.map_new(self.w, self.h)
 
     def get_cell(self, x, y):
         """ Get the cell at cartesian coordinates (x, y). """
@@ -52,6 +55,51 @@ class Map(object):
         # Dummy stub.
         cells = [0, 0, 0]
         return self.__class__(w, h, cells)
+
+    def init_fov_map(self):
+        """
+        Initialize the fov map.
+
+        Make sure to call it *AFTER* cells have been populated.
+
+        """
+        for x, y, cell in iter(self):
+            libtcod.map_set_properties(
+                self.fov_map, x, y, not cell.blocks_sight, not cell.blocks
+            )
+
+    def compute_fov(self, from_x, from_y):
+        """
+        Recompute fov based on the (from_x, from_y) position.
+
+        (Typically, (from_x, from_y) will be the player's current position).
+
+        """
+        libtcod.map_compute_fov(
+            self.fov_map, from_x, from_y, 10, True, 0   # TODO: use constants
+        )
+        for x, y, cell in iter(self):
+            if self.is_in_fov(x, y):
+                cell.explored = True
+
+    def is_in_fov(self, x, y):
+        """
+        Return whether map pos (x, y) is in fov.
+
+        Shortcut for calling libtcod.map_is_in_fov(map, x, y)
+
+        """
+        return libtcod.map_is_in_fov(self.fov_map, x, y)
+
+    def is_obj_in_fov(self, obj):
+        """
+        Return whether map obj is in fov.
+
+        Shortcut for calling libtcod.map_is_in_fov(map, obj.x, obj.y)
+
+        """
+        return self.is_in_fov(obj.x, obj.y)
+
 
     ### Internal Utils ###
     ######################

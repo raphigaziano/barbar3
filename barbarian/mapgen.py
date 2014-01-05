@@ -93,6 +93,7 @@ def make_map():
             rooms.append(new_room)
             num_rooms += 1
 
+    my_map.init_fov_map()
     return my_map
 
 
