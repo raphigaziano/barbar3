@@ -58,7 +58,7 @@ def init(logger_name):
         logging.Formatter('[%(levelname)s] %(message)s')
     )
 
-    logger.addHandler(console_handler)
+    # logger.addHandler(console_handler)
     logger.addHandler(barbargui_handler)
 
     logger.debug("Logger setup - Done")
