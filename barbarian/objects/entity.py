@@ -37,13 +37,14 @@ class Entity(object):
 
     # An Alias to the NullProperty Class for easier checks
     NULL_PROPERTY = NullProperty()
-    # Standard Components some specializing entities will automagically get.
-    base_components = ()
+    # Specialized entitiy classes can specify a number of required components
+    # in this list.
+    required_components = ()
 
     def __init__(self, **kwargs):
 
         self._components = []
-        for C in self.base_components:
+        for C in self.required_components:
             self.add_component(C(**kwargs))
 
     def add_component(self, component, index=None):
@@ -132,12 +133,15 @@ class Entity(object):
 class Actor(Entity):
     """ Dummy Actor object """
 
-    base_components = (
+    required_components = (
         components.MobileComponent,
         components.SolidComponent,
         components.BumpComponent,
         components.VisibleComponent,
     )
+
+    def update(self, level):
+        pass
 
 class Player(Actor):
 

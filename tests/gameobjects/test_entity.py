@@ -61,20 +61,6 @@ class TestBaseEntityComponentManagement(unittest.TestCase):
 
         self.assertListEqual([], self.e._components)
 
-
-<<<<<<< HEAD
-class TestBaseEntityAttributeAccess(unittest.TestCase):
-
-    class FooComponent(object):
-        def __init__(self):
-            self.foo = 'foo'
-
-    class BarComponent(object):
-        def __init__(self):
-            self.bar = 'bar'
-
-    class FooBarComponent(object):
-=======
 class TestBaseEntityComponentsAccess(unittest.TestCase):
 
     class FooComponent(entity.components.BaseComponent):
@@ -86,7 +72,6 @@ class TestBaseEntityComponentsAccess(unittest.TestCase):
             self.bar = 'bar'
 
     class FooBarComponent(entity.components.BaseComponent):
->>>>>>> develop
         def __init__(self):
             self.foo = 'bar'
 
@@ -101,8 +86,6 @@ class TestBaseEntityComponentsAccess(unittest.TestCase):
         self.e.add_component(self.foo_component)
         self.e.add_component(self.bar_component)
 
-<<<<<<< HEAD
-=======
     def test_has_component(self):
         """ Component presence assertion """
         self.assertTrue(self.e.has_component(self.FooComponent))
@@ -128,7 +111,6 @@ class TestBaseEntityComponentsAccess(unittest.TestCase):
         """ Property retrieval via get mehod with default value """
         self.assertEqual('moop', self.e.get('moop', default='moop'))
 
->>>>>>> develop
     def test_simple_attribute_access(self):
         """ Accessing contained components attrs from the entity """
         self.assertEqual('foo', self.e.foo)
@@ -136,19 +118,15 @@ class TestBaseEntityComponentsAccess(unittest.TestCase):
 
     def test_missing_attribute_access(self):
         """ Accessing a non-existent entity attribute should return a NullProp """
-<<<<<<< HEAD
         self.assertIsInstance(self.e.moop, entity.NullProperty)
 
     def test_missing_method_access(self):
         """ Caling a non-existent entity method should return a NullProp """
-        self.assertIsInstance(self.e.moop(), entity.NullProperty)
-=======
         self.assertTrue(self.e.moop is self.e.NULL_PROPERTY)
 
     # def test_missing_method_access(self):
     #     """ Caling a non-existent entity method should return a NullProp """
     #     self.assertIsInstance(self.e.moop(), entity.NullProperty)
->>>>>>> develop
 
     def test_component_override(self):
         """ Pushing component to the front to override some attrs or methods """
@@ -157,30 +135,6 @@ class TestBaseEntityComponentsAccess(unittest.TestCase):
         self.e.pop_component()
         self.assertEqual('foo', self.e.foo)
 
-<<<<<<< HEAD
-class TestNullProperty(unittest.TestCase):
-
-    def setUp(self):
-        self.null_prop = entity.NullProperty()
-
-    def test_getattr(self):
-        """ Accessing a NullProperty attribute should return another NullProperty """
-        self.assertIsInstance(self.null_prop.foo, entity.NullProperty)
-        self.assertIsInstance(self.null_prop.bar, entity.NullProperty)
-
-    def test_call(self):
-        """ Calling a NullProperty instance should return another NullProperty """
-        self.assertIsInstance(self.null_prop(), entity.NullProperty)
-
-    def test_is(self):
-        """ is test with a NullProperty returns based on the class:
-            Two NullProperty instances are considered equal """
-        null_prop = entity.NullProperty()
-        self.assertTrue(null_prop == self.null_prop)
-        other_prop = object()
-        self.assertFalse(other_prop == self.null_prop)
-
-=======
 class TestEntityContainer(unittest.TestCase):
 
     class FooComponent(entity.components.BaseComponent):
@@ -264,4 +218,3 @@ class TestEntityContainer(unittest.TestCase):
 
         for e in ok_props:
             self.assertEqual('foo', e.foo)
->>>>>>> develop

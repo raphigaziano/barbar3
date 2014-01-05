@@ -27,8 +27,12 @@ class Level(object):
             libtcod.map_set_properties(
                 self.fov_map, x, y, not cell.blocks_sight, not cell.blocks
             )
-        self.objects = EntityContainer()
+        self.actors = EntityContainer()
         self.populate()
+
+    @property
+    def objects(self):
+        return self.actors
 
     def get_map_cell(self, x, y):
         """ Shortcut to access map cells directly. """
@@ -58,7 +62,7 @@ class Level(object):
             self.fov_map, from_x, from_y, 10, True, 0   # TODO: use constants
         )
         for x, y, cell in self.map:
-            if libtcod.map_is_in_fov(self.fov_map, x, y):
+            if self.is_in_fov(x, y):
                 cell.explored = True
 
     def is_in_fov(self, x, y):
@@ -89,11 +93,12 @@ class Level(object):
             while self.map.get_cell(x, y).blocks:
                 x = rng.randrange(0, self.map.w)
                 y = rng.randrange(0, self.map.h)
-            self.objects.append(Actor(x=x, y=y, char='r'))
+            self.actors.append(Actor(x=x, y=y, char='r'))
 
     def update(self):
         """ STUB """
-        pass
+        for a in self.actors:
+            a.update(self)
 
 class Dungeon(object):
 

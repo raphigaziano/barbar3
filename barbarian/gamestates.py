@@ -208,6 +208,7 @@ class DungeonState(GameState):
 
     def update(self):
         self.process_input()
+        self.dungeon.current_level.update()
 
     def render(self):
         renderer.clear()      # TODO: Clear only whats needed...
