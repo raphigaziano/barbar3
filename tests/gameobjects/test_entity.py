@@ -163,7 +163,7 @@ class TestEntityContainer(unittest.TestCase):
         self.container.append(self.bar_entity)
 
     def test_filter_by_component(self):
-        """ TODO: DOCME """
+        """ Get all entities containing a given component """
         foo_comps = [c for c in
             self.container.filter_by_component(self.FooComponent)
         ]
@@ -184,7 +184,7 @@ class TestEntityContainer(unittest.TestCase):
             self.assertTrue(e.has_component(self.BarComponent))
 
     def test_filter_by_property(self):
-        """ TODO: DOCME """
+        """ Get all entities possessing the given property """
         foo_props = [c for c in
             self.container.filter_by_property('foo')
         ]
@@ -205,7 +205,7 @@ class TestEntityContainer(unittest.TestCase):
             self.assertTrue(e.has_property('bar'))
 
     def test_filter_by_property_with_explicit_val(self):
-        """ TODO: DOCME """
+        """ Get all entities with a given property set at the given value """
         ok_props = [c for c in
             self.container.filter_by_property('foo', 'foo')
         ]
