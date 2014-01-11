@@ -65,7 +65,7 @@ def dummy_draw_level(level):
         # libtcod.console_set_char_foreground(0, x, y, col)
         # libtcod.console_set_char(0, x, y, ch)
 
-    for obj in level.objects.filter_by_component(VisibleComponent):
+    for obj in level.objects.filter_by_components(VisibleComponent):
         if level.map.is_obj_in_fov(obj):
             dummy_draw_obj(obj)
 
