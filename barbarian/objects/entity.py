@@ -15,9 +15,12 @@ class NullProperty(object):
 
 class EntityContainer(list):
 
-    def filter_by_component(self, component_class):
+    def filter_by_component(self, *component_classes):
         for e in iter(self):
-            if e.has_component(component_class):
+            for c in component_classes:
+                if not e.has_component(c):
+                    break
+            else:
                 yield e
 
     def filter_by_property(self, property_name, property_value=None):
