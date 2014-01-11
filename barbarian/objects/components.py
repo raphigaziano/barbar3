@@ -142,10 +142,12 @@ class BumpComponent(PositionComponent):
     def on_bump(self, bumper):
         logger.debug('BUMP!')
 
-class VisibleComponent(PositionComponent):
+class VisibleComponent(BaseComponent):
 
     """ Minimal entity visual representation. """
 
     def __init__(self, **kwargs):
         self.char = self._get_required_arg('char', kwargs)
+        color = self._get_default_arg('color', kwargs, 'white')
+        # self.color = get_renderer_specific_color_object(color)
         super(VisibleComponent, self).__init__(**kwargs)

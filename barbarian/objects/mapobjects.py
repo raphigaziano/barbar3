@@ -10,7 +10,7 @@ from barbarian.objects.components import SolidComponent, PositionComponent
 
 class MapTile(Entity):
 
-    base_components = (
+    required_components = (
         SolidComponent,
         # PositionComponent,
     )
