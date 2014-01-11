@@ -165,13 +165,13 @@ class TestEntityContainer(unittest.TestCase):
     def test_filter_by_component(self):
         """ Get all entities containing a given component """
         foo_comps = [c for c in
-            self.container.filter_by_component(self.FooComponent)
+            self.container.filter_by_components(self.FooComponent)
         ]
         bar_comps = [c for c in
-            self.container.filter_by_component(self.BarComponent)
+            self.container.filter_by_components(self.BarComponent)
         ]
         foobar_comps = [c for c in
-            self.container.filter_by_component(self.FooBarComponent)
+            self.container.filter_by_components(self.FooBarComponent)
         ]
 
         self.assertEqual(1, len(foo_comps))
@@ -181,6 +181,23 @@ class TestEntityContainer(unittest.TestCase):
         for e in foo_comps:
             self.assertTrue(e.has_component(self.FooComponent))
         for e in bar_comps:
+            self.assertTrue(e.has_component(self.BarComponent))
+
+    def test_filter_by_components(self):
+        """ Filter entities by components, passing several component types """
+        foo_and_bar_entity = entity.Entity()
+        foo_and_bar_entity.add_component(self.FooComponent())
+        foo_and_bar_entity.add_component(self.BarComponent())
+        self.container.append(foo_and_bar_entity)
+
+        foo_and_bar_comps = [c for c in
+            self.container.filter_by_components(
+                self.FooComponent, self.BarComponent
+            )
+        ]
+        self.assertEqual(1, len(foo_and_bar_comps))
+        for e in foo_and_bar_comps:
+            self.assertTrue(e.has_component(self.FooComponent))
             self.assertTrue(e.has_component(self.BarComponent))
 
     def test_filter_by_property(self):
@@ -218,3 +235,4 @@ class TestEntityContainer(unittest.TestCase):
 
         for e in ok_props:
             self.assertEqual('foo', e.foo)
+

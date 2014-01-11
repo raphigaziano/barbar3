@@ -15,7 +15,7 @@ class NullProperty(object):
 
 class EntityContainer(list):
 
-    def filter_by_component(self, *component_classes):
+    def filter_by_components(self, *component_classes):
         """ Return all entitites containing all passed components types. """
         for e in iter(self):
             for c in component_classes:
