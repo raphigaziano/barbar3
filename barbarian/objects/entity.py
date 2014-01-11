@@ -16,6 +16,7 @@ class NullProperty(object):
 class EntityContainer(list):
 
     def filter_by_component(self, *component_classes):
+        """ Return all entitites containing all passed components types. """
         for e in iter(self):
             for c in component_classes:
                 if not e.has_component(c):
@@ -24,6 +25,13 @@ class EntityContainer(list):
                 yield e
 
     def filter_by_property(self, property_name, property_value=None):
+        """
+        Return all entities possessing the given property.
+
+        If property_value is passed, then entities will be further filtered
+        by wheter their queried property is set to the passed value.
+
+        """
         for e in iter(self):
             if e.has_property(property_name):
                 if (property_value is not None and
