@@ -28,6 +28,7 @@ class Level(object):
 
     @property
     def objects(self):
+        # TODO: Test me!
         return EntityContainer(self.actors + self.items)
 
     def get_map_cell(self, x, y):
