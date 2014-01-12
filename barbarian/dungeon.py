@@ -8,6 +8,7 @@ Dugeon & Dungeon levels.
 """
 from barbarian import libtcodpy as libtcod
 from barbarian.mapgen import make_map
+from barbarian.objects import components
 from barbarian.objects.entity import EntityContainer
 
 
@@ -36,10 +37,19 @@ class Level(object):
         return self.map.get_cell(x, y)
 
     def get_objects_at(self, x, y):
-        """ Yield all objects located at (x,y). """
-        for o in self.objects:
+        """
+        Return all objects located at (x,y).
+
+        Objects are container in a  EntityContainer list for further filtering
+        by prop or component.
+        """
+        res = EntityContainer()
+        for o in self.objects.filter_by_components(
+            components.PositionComponent
+        ):
             if o.x == x and o.y == y:
-                yield o
+                res.append(o)
+        return res
 
     def is_blocked(self, x, y):
         """ Return True of the (x, y) cell is blocked, False otherwise. """
