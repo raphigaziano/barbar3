@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 """
-barbarian.renderers.libtcod.libtcod.py
+barbarian.renderers.libtcod.painter.py
 ======================================
 
 litdcod rendering functions.
