@@ -24,8 +24,7 @@ class BaseComponent(object):
     """ Base, common component helpers. """
 
     def __init__(self, **kwargs):
-        # TODO: keep a reference to containing entity
-        pass
+        self.e = self._get_required_arg('entity', kwargs)
 
     @classmethod
     def _get_required_arg(cls, arg_name, args_dict):

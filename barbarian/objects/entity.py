@@ -62,6 +62,7 @@ class Entity(object):
         for c_name, c_val in kwargs.items():
             CompCls = getattr(components, c_name)
             if CompCls is not None and not self.has_component(c_name):
+                c_val['entity'] = self
                 self.add_component(CompCls(**c_val))
             # else:
             #     setattr(self, c_name, c_val)
