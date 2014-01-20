@@ -50,13 +50,21 @@ class Entity(object):
     NULL_PROPERTY = NullProperty()
     # Specialized entitiy classes can specify a number of required components
     # in this list.
-    required_components = ()
 
-    def __init__(self, **kwargs):
+    def __init__(self, entity_name=None, **kwargs):
+
+        if entity_name is not None:
+            self.entity_name = entity_name
+        else:
+            self.entity_name = self.__class__.__name__
 
         self._components = []
-        for C in self.required_components:
-            self.add_component(C(**kwargs))
+        for c_name, c_val in kwargs.items():
+            CompCls = getattr(components, c_name)
+            if CompCls is not None and not self.has_component(c_name):
+                self.add_component(CompCls(**c_val))
+            # else:
+            #     setattr(self, c_name, c_val)
 
     def add_component(self, component, index=None):
         """
@@ -100,11 +108,17 @@ class Entity(object):
         """
         Check if entity contains the queried component, or a subclass thereof.
 
-        component should be a component class, not an instance.
+        component should be a component class (not an instance), or its class
+        name as a string.
         """
         for c in self._components:
-            if issubclass(c.__class__, component):
-                return True
+            cls = c.__class__
+            try:
+                if issubclass(cls, component):
+                    return True
+            except TypeError:
+                if cls.__name__ == component:
+                    return True
         return False
 
     def has_property(self, property_name):
@@ -129,6 +143,19 @@ class Entity(object):
                 return getattr(c, property_name)
         return default
 
+    def set_property(self, prop_name, prop_val):
+        """ Try and set attr on a component. """
+        # TODO:
+        # Ensuring we only update the first component having this prop by
+        # returning after we found and updated it.
+        # Is this the right behaviour ? Parameterize this ?
+        # Also, Should we raise an error if prop_name can't be found ?
+        # /!\ DOC & TEST ME when this is is settled /!\
+        for c in self._components:
+            if hasattr(c, prop_name):
+                setattr(c, prop_name, prop_val)
+                return
+
     def __getattr__(self, attr_name):
         """ Log invalid attribute access, but don't raise exceptions. """
         # NOTE: This might be an *AWFUL* idea \o/
@@ -140,6 +167,13 @@ class Entity(object):
             # raise an error ?
         return attr
 
+    def update(self, level):
+        # update all Updatable components
+        pass
+
+    def on_bump(self, DUMARG=None):
+        # call all components on_bump
+        return self.__getattr__('on_bump')  # TEMPO HACK
 
 class Actor(Entity):
     """ Dummy Actor object """
@@ -150,9 +184,6 @@ class Actor(Entity):
         components.BumpComponent,
         components.VisibleComponent,
     )
-
-    def update(self, level):
-        pass
 
 class Player(Actor):
 

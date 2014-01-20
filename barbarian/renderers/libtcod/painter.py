@@ -7,7 +7,7 @@ litdcod rendering functions.
 """
 from barbarian import libtcodpy as libtcod
 
-from barbarian.renderers.libtcod import colors
+from barbarian.renderers.libtcod.gfxdata import RenderData
 from barbarian.io import settings, assets
 from barbarian.objects.components import VisibleComponent
 
@@ -70,8 +70,14 @@ def dummy_draw_level(level):
             dummy_draw_obj(obj)
 
 def dummy_draw_obj(obj):
-    libtcod.console_set_char_foreground(0, obj.x, obj.y, libtcod.red)
-    libtcod.console_set_char(0, obj.x, obj.y, obj.char)
+    from barbarian.io.data import read_data_file
+    gfxdata = read_data_file(
+        'graphics/libtcod/entities_props.json'
+    )[obj.entity_name]
+    render_data = RenderData(color=gfxdata['color'])
+    libtcod.console_set_char_foreground(0, obj.x, obj.y, render_data.color)
+    # /!\ Libtcod needs byte strings /!\
+    libtcod.console_set_char(0, obj.x, obj.y, str(obj.char))
 
 tcod_consoles = {}
 def dummy_draw_console(con, x, y, blit_on=0):
@@ -113,8 +119,9 @@ def dummy_draw_console(con, x, y, blit_on=0):
     # for i, msg in enumerate(con.msgs[-(8+offset):-(offset)]):
     offset = 1 # TEMPO
     for i, msg in enumerate(con.last_msgs[-(con.h-2):]):
-        libtcod.console_set_default_foreground(tcod_cons,
-                                                getattr(colors, msg.col))
+        # HACKKKKKKKKKKKKKKKK
+        rdata = RenderData(color=msg.col)
+        libtcod.console_set_default_foreground(tcod_cons, rdata.color)
         libtcod.console_print_rect(
             tcod_cons, 1, offset, con.w-2, con.h-2, msg.txt
         )

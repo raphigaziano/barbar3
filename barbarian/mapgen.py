@@ -8,6 +8,7 @@ from barbarian.objects.mapobjects import MapTile
 from barbarian.utils import rng, geometry
 
 from barbarian.io.settings import MAP_W, MAP_H
+from barbarian.objects.factories import build_entity
 
 
 def make_map():
@@ -23,7 +24,9 @@ def make_map():
 
     my_map = Map(
         MAP_W, MAP_H,
-        [MapTile(blocks=True) for _ in range(MAP_W * MAP_H)]
+        # [MapTile(**{'SolidComponent': {'blocks': True}}) for _ in range(MAP_W * MAP_H)]
+        [build_entity('base_tile', data_file='mapobjs.json')
+         for _ in range(MAP_W * MAP_H)]
     )
 
     def create_room(room):

@@ -1,0 +1,11 @@
+{
+    'Player': {
+        'color': 'white'
+    },
+    'rat': {
+        'color': '#ff0000'
+    },
+    'parchment': {
+        'color': '#00ff00'
+    }
+}

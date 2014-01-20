@@ -95,11 +95,33 @@ class TestBaseEntityComponentsAccess(unittest.TestCase):
         """ Component presence assertion, checking for a base component class """
         self.assertTrue(self.e.has_component(entity.components.BaseComponent))
 
+    def test_filter_by_components_string_lookup(self):
+        """ Component presence assertion, string lookup """
+        self.assertTrue(self.e.has_component('FooComponent'))
+        self.assertTrue(self.e.has_component('BarComponent'))
+
     def test_has_property(self):
         """ Entity property check """
         self.assertTrue(self.e.has_property('foo'))
         self.assertTrue(self.e.has_property('bar'))
         self.assertFalse(self.e.has_property('moop'))
+
+    def test_set_property(self):
+        """ Set a property on a component """
+        self.e.set_property('foo', 'bar')
+        self.assertFalse('foo' in self.e.__dict__)
+        self.assertEqual('bar', self.foo_component.foo)
+
+        self.e.set_property('bar', 'foo')
+        self.assertFalse('bar' in self.e.__dict__)
+        self.assertEqual('foo', self.bar_component.bar)
+
+    def test_set_property_current_component(self):
+        """ Set property on the active (top of the stack) component only """
+        self.e.add_component(self.FooComponent())
+        self.e.set_property('foo', 'bar')
+        self.assertEqual('bar', self.foo_component.foo)
+        self.assertNotEqual('bar', self.e._components[-1].foo)
 
     def test_get_property(self):
         """ Property retrieval via get method """

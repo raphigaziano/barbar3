@@ -3,9 +3,11 @@
 """Unit tests for the various helpers functions (settings & assets management)"""
 import os
 import unittest
+from io import StringIO
 
 from barbarian.io import settings
 from barbarian.io import assets
+from barbarian.io import data
 
 
 class TestSettings(unittest.TestCase):
@@ -100,4 +102,9 @@ class TestAssets(unittest.TestCase):
         self.assertEqual(path, self.get_path(*args))
         self.assertTrue(os.path.exists(self.get_path(*args)))
 
+class TestDataReaders(unittest.TestCase):
 
+    def test_double_quotes_convertion(self):
+        """Convert single quotes in json fiels to double quotes to keep parser from blowing up """
+        f = StringIO(u"{'foo': 'bar'}")
+        self.assertEqual({'foo': 'bar'}, data.read_data(f))

@@ -22,6 +22,6 @@ class MapTile(Entity):
     & tracks map infos (explored status, noise or scent levels...).
 
     """
-    def __init__(self, **kwargs):
-        super(MapTile, self).__init__(**kwargs)
+    def __init__(self,  *args, **kwargs):
+        super(MapTile, self).__init__(*args, **kwargs)
         self.explored = False

@@ -24,6 +24,7 @@ class BaseComponent(object):
     """ Base, common component helpers. """
 
     def __init__(self, **kwargs):
+        # TODO: keep a reference to containing entity
         pass
 
     @classmethod
@@ -55,8 +56,8 @@ class PositionComponent(BaseComponent):
     """ Positionnal Attributes & Helpers. """
 
     def __init__(self, **kwargs):
-        self.x = self._get_required_arg('x', kwargs)
-        self.y = self._get_required_arg('y', kwargs)
+        self.x = self._get_default_arg('x', kwargs, -1)
+        self.y = self._get_default_arg('y', kwargs, -1)
         super(PositionComponent, self).__init__(**kwargs)
 
     def distance_from(self, x, y):
@@ -84,6 +85,7 @@ class SolidComponent(BaseComponent):
         )
         super(SolidComponent, self).__init__(**kwargs)
 
+# TODO: No inheritance
 class MobileComponent(PositionComponent):
 
     """ Movement Handler """
@@ -129,6 +131,7 @@ class MobileComponent(PositionComponent):
         """ Move one step towards `obj`. """
         self.move_towards(obj.x, obj.y, level)
 
+# TODO: no inheritance
 class BumpComponent(PositionComponent):
 
     """
@@ -148,6 +151,4 @@ class VisibleComponent(BaseComponent):
 
     def __init__(self, **kwargs):
         self.char = self._get_required_arg('char', kwargs)
-        color = self._get_default_arg('color', kwargs, 'white')
-        # self.color = get_renderer_specific_color_object(color)
         super(VisibleComponent, self).__init__(**kwargs)

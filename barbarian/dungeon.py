@@ -62,20 +62,21 @@ class Level(object):
         """ Stub method """
         from barbarian.utils import rng
         from barbarian.objects.entity import Actor
+        from barbarian.objects.factories import build_entity
         for _ in range(10):
             x = rng.randrange(0, self.map.w)
             y = rng.randrange(0, self.map.h)
             while self.map.get_cell(x, y).blocks:
                 x = rng.randrange(0, self.map.w)
                 y = rng.randrange(0, self.map.h)
-            self.actors.append(Actor(x=x, y=y, char='r'))
+            self.actors.append(build_entity('rat', x, y))
         for _ in range(5):
             x = rng.randrange(0, self.map.w)
             y = rng.randrange(0, self.map.h)
             while self.map.get_cell(x, y).blocks:
                 x = rng.randrange(0, self.map.w)
                 y = rng.randrange(0, self.map.h)
-            self.actors.append(Actor(x=x, y=y, char='#', blocks=False))
+            self.actors.append(build_entity('parchment', x, y))
 
     def update(self):
         """ STUB """

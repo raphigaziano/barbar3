@@ -1,0 +1,23 @@
+{
+    '__common__': {
+        'SolidComponent': {
+            'blocks': true
+        },
+        'MobileComponent': {}
+    },
+    'rat': {
+        '__entity_type__': 'barbarian.objects.entity.Actor',
+        'VisibleComponent': {
+            'char': 'r'
+        }
+    },
+    'parchment': {
+        '__entity_type__': 'barbarian.objects.entity.Actor',
+        'VisibleComponent': {
+            'char': '#'
+        },
+        'SolidComponent': {
+            'blocks': false
+        }
+    }
+}
