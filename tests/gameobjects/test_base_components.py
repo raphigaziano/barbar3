@@ -13,7 +13,7 @@ class TestBaseComponent(unittest.TestCase):
 class TestPositionComponent(unittest.TestCase):
 
     def setUp(self):
-        self.pos = components.MobileComponent(x=0, y=0)
+        self.pos = components.MobileComponent(entity=None, x=0, y=0)
 
     def test_distance(self):
         """ Base distance helper """
@@ -31,27 +31,27 @@ class TestPositionComponent(unittest.TestCase):
         """ Distance from object """
         self.assertEqual(
             0, self.pos.distance_from_obj(
-                components.PositionComponent(x=0, y=0)
+                components.PositionComponent(entity=None, x=0, y=0)
             )
         )
         self.assertEqual(
             1, self.pos.distance_from_obj(
-                components.PositionComponent(x=1, y=0)
+                components.PositionComponent(entity=None, x=1, y=0)
             )
         )
         self.assertEqual(
             1, self.pos.distance_from_obj(
-                components.PositionComponent(x=0, y=1)
+                components.PositionComponent(entity=None, x=0, y=1)
             )
         )
         self.assertEqual(
             1, self.pos.distance_from_obj(
-                components.PositionComponent(x=1, y=1)
+                components.PositionComponent(entity=None, x=1, y=1)
             )
         )
         self.assertEqual(
             2, self.pos.distance_from_obj(
-                components.PositionComponent(x=2, y=1)
+                components.PositionComponent(entity=None, x=2, y=1)
             )
         )
         # ...
@@ -59,7 +59,7 @@ class TestPositionComponent(unittest.TestCase):
 class TestMobileComponent(unittest.TestCase):
 
     def setUp(self):
-        self.mobile = components.MobileComponent(x=0, y=0)
+        self.mobile = components.MobileComponent(entity=None, x=0, y=0)
         self.mock_level = Mock()
         self.mock_level.is_blocked.return_value = False
         self.mock_level.get_objects_at.return_value = [Mock(), Mock(), Mock()]
@@ -116,7 +116,7 @@ class TestMobileComponent(unittest.TestCase):
 
     def test_move_towards_obj(self):
         """ One step move towards a given positioned entity """
-        target = components.PositionComponent(x=5, y=5)
+        target = components.PositionComponent(entity=None, x=5, y=5)
         self.mobile.move_towards_obj(target, self.mock_level)
         self.assertPos(1, 1)
         self.mobile.move_towards_obj(target, self.mock_level)

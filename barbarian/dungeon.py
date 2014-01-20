@@ -79,8 +79,9 @@ class Level(object):
             self.actors.append(build_entity('parchment', x, y))
 
     def update(self):
-        """ STUB """
-        for a in self.actors:
+        """ Update all actors on this level. """
+        # TODO: test, assert all actors update method is called
+        for a in self.actors.filter_by_property('update'):
             a.update(self)
 
 class Dungeon(object):

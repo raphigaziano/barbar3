@@ -168,9 +168,12 @@ class Entity(object):
             # raise an error ?
         return attr
 
-    def update(self, level):
-        # update all Updatable components
-        pass
+    def update(self, **kwargs):
+        """ Update all Updatable components. """
+        # TODO: test, assert all components update method is called
+        for c in self._components:
+            if hasattr(c, 'update'):
+                c.update(**kwargs)
 
     def on_bump(self, DUMARG=None):
         # call all components on_bump
