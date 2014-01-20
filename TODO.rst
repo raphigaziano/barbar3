@@ -29,5 +29,3 @@ short term
   Player gets a special one handling user input.
   Monsters AI goes there, too.
 - Input layer...
-
-- Components should have access to heir entity.
