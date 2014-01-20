@@ -52,3 +52,21 @@ def build_entity(entity_name, x=-1, y=-1, data_file='entities.json'):
     if e.has_property('y'):
         e.set_property('y', y)
     return e
+
+
+def build_player(level):
+    """ Dummy player builder. """
+    from barbarian.utils import rng
+    px, py = rng.randrange(0, 80), rng.randrange(0, 40)
+    while level.is_blocked(px, py):
+        px, py = rng.randrange(0, 80), rng.randrange(0, 40)
+    player = entity.Player(
+        entity_name='player',
+        VisibleComponent=dict(char='@'),
+        MobileComponent=dict(),
+    )
+    player.set_property('x', px)
+    player.set_property('y', py)
+    level.map.compute_fov(px, py)
+
+    return player

@@ -154,18 +154,10 @@ class DungeonState(GameState):
 
     def __init__(self):
         from barbarian.dungeon import Dungeon
-        from barbarian.objects.entity import Player
-        from barbarian.objects import components
+        from barbarian.objects.factories import build_player
 
         self.dungeon = Dungeon()
-
-        px, py = rng.randrange(0, 80), rng.randrange(0, 40)
-        while self.dungeon.current_level.is_blocked(px, py):
-            px, py = rng.randrange(0, 80), rng.randrange(0, 40)
-        self.player = Player(VisibleComponent=dict(char='@'))
-        self.player.add_component(components.MobileComponent(entity=self.player))
-        self.player.set_property('x', px); self.player.set_property('y', py)
-        self.dungeon.current_level.map.compute_fov(self.player.x, self.player.y)
+        self.player = build_player(self.dungeon.current_level)
 
         super(DungeonState, self).__init__()
 

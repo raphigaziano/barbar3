@@ -1,5 +1,5 @@
 {
-    'Player': {
+    'player': {
         'color': 'white'
     },
     'rat': {
