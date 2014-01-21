@@ -3,6 +3,7 @@
         'SolidComponent': {
             'blocks': true
         },
+        'PositionComponent': {},
         'MobileComponent': {}
     },
     'rat': {

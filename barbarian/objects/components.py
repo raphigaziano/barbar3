@@ -84,8 +84,7 @@ class SolidComponent(BaseComponent):
         )
         super(SolidComponent, self).__init__(**kwargs)
 
-# TODO: No inheritance
-class MobileComponent(PositionComponent):
+class MobileComponent(BaseComponent):
 
     """ Movement Handler """
 
@@ -97,11 +96,12 @@ class MobileComponent(PositionComponent):
 
         """
         # Try and move to x+dx, y+dy
-        new_x, new_y = self.x + dx, self.y + dy
+        new_x, new_y = self.e.x + dx, self.e.y + dy
         if level.is_blocked(new_x, new_y):
             logger.debug('Cannot move to cell %d-%d', new_x, new_y)
         else:
-            self.x, self.y = new_x, new_y
+            self.e.set_property('x', new_x)
+            self.e.set_property('y', new_y)
 
         # Call any bumped objects bump handler
         for obj in level.get_objects_at(new_x, new_y):
@@ -111,7 +111,7 @@ class MobileComponent(PositionComponent):
 
     def move_towards(self, target_x, target_y, level):
         """ Move one step towards the (target_x, target_y) cell. """
-        dx, dy = target_x - self.x, target_y - self.y
+        dx, dy = target_x - self.e.x, target_y - self.e.y
         ddx = ddy = 0
 
         if dx > 0:
@@ -130,8 +130,7 @@ class MobileComponent(PositionComponent):
         """ Move one step towards `obj`. """
         self.move_towards(obj.x, obj.y, level)
 
-# TODO: no inheritance
-class BumpComponent(PositionComponent):
+class BumpComponent(BaseComponent):
 
     """
     Bump Behaviour.

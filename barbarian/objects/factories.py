@@ -63,10 +63,9 @@ def build_player(level):
     player = entity.Player(
         entity_name='player',
         VisibleComponent=dict(char='@'),
+        PositionComponent=dict(x=px, y=py),
         MobileComponent=dict(),
     )
-    player.set_property('x', px)
-    player.set_property('y', py)
-    level.map.compute_fov(px, py)
+    level.map.compute_fov(player.x, player.y)
 
     return player

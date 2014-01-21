@@ -5,6 +5,7 @@ import unittest
 
 from mock import Mock
 
+from barbarian.objects.entity import Entity
 from barbarian.objects import components
 
 class TestBaseComponent(unittest.TestCase):
@@ -13,7 +14,8 @@ class TestBaseComponent(unittest.TestCase):
 class TestPositionComponent(unittest.TestCase):
 
     def setUp(self):
-        self.pos = components.MobileComponent(entity=None, x=0, y=0)
+        e = Entity()
+        self.pos = components.PositionComponent(entity=e, x=0, y=0)
 
     def test_distance(self):
         """ Base distance helper """
@@ -59,15 +61,19 @@ class TestPositionComponent(unittest.TestCase):
 class TestMobileComponent(unittest.TestCase):
 
     def setUp(self):
-        self.mobile = components.MobileComponent(entity=None, x=0, y=0)
+        e = Entity()
+        self.pos = components.PositionComponent(entity=e, x=0, y=0)
+        e.add_component(self.pos)
+        self.mobile = components.MobileComponent(entity=e)
+        e.add_component(self.mobile)
         self.mock_level = Mock()
         self.mock_level.is_blocked.return_value = False
         self.mock_level.get_objects_at.return_value = [Mock(), Mock(), Mock()]
 
     def assertPos(self, x, y):
         """ Helper - Assert self.mobile is at the (x, y) position. """
-        self.assertEqual(x, self.mobile.x)
-        self.assertEqual(y, self.mobile.y)
+        self.assertEqual(x, self.pos.x)
+        self.assertEqual(y, self.pos.y)
 
     def test_simple_move(self):
         """ Basic move method """
