@@ -130,6 +130,16 @@ class MobileComponent(BaseComponent):
         """ Move one step towards `obj`. """
         self.move_towards(obj.x, obj.y, level)
 
+class PlayerMobileComponent(MobileComponent):
+
+    """ Specialized moving components for the player. """
+
+    def move(self, dx, dy, level):
+        super(PlayerMobileComponent, self).move(dx, dy, level)
+        level.map.compute_fov(self.e.x, self.e.y)
+        # TODO: update cam here
+
+
 class BumpComponent(BaseComponent):
 
     """

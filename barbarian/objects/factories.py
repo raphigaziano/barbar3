@@ -60,11 +60,11 @@ def build_player(level):
     px, py = rng.randrange(0, 80), rng.randrange(0, 40)
     while level.is_blocked(px, py):
         px, py = rng.randrange(0, 80), rng.randrange(0, 40)
-    player = entity.Player(
+    player = entity.Entity(
         entity_name='player',
         VisibleComponent=dict(char='@'),
         PositionComponent=dict(x=px, y=py),
-        MobileComponent=dict(),
+        PlayerMobileComponent=dict(),
     )
     level.map.compute_fov(player.x, player.y)
 

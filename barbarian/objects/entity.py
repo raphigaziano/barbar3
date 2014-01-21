@@ -188,12 +188,3 @@ class Actor(Entity):
         components.BumpComponent,
         components.VisibleComponent,
     )
-
-class Player(Actor):
-
-    """ Player Object - Basically an actor with some custom behaviour. """
-
-    def move(self, dx, dy, level):
-        self.get('move')(dx, dy, level)
-        level.map.compute_fov(self.x, self.y)
-        # TODO: update cam here
