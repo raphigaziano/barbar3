@@ -9,7 +9,7 @@ import unittest
 from barbarian.io import data
 from barbarian.objects import factories
 
-from barbarian.objects.entity import Entity, Actor
+from barbarian.objects.entity import Entity
 
 
 class TestEntityDataReader(unittest.TestCase):
@@ -76,6 +76,5 @@ class TestEntityBuilder(unittest.TestCase):
         """ Building a simple entity from config file """
         e = factories.build_entity('rat', 12, 24)
         self.assertIsInstance(e, Entity)
-        self.assertIsInstance(e, Actor)
         self.assertEqual(True, e.blocks)
         self.assertEqual('r', e.char)

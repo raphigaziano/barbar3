@@ -4,7 +4,6 @@ barbarian.mapgen.py
 
 """
 from barbarian.map import Map
-from barbarian.objects.mapobjects import MapTile
 from barbarian.utils import rng, geometry
 
 from barbarian.io.settings import MAP_W, MAP_H

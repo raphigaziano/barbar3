@@ -41,12 +41,15 @@ def build_entity(entity_name, x=-1, y=-1, data_file='entities.json'):
     data = read_data_file(data_file)
     e_data = _get_entity_data(data, entity_name)
 
+    """
     Cls = import_from_path(e_data.pop('__entity_type__'))
     if Cls is None:
         logger.error('Entity type %s is not defined' % Cls.__name__)
         return  # TODO: better err handling
+    """
 
-    e = Cls(entity_name, **e_data)
+    e_data.pop('__entity_type__')
+    e = entity.Entity(entity_name, **e_data)
     if e.has_property('x'):
         e.set_property('x', x)
     if e.has_property('y'):

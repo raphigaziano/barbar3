@@ -178,13 +178,3 @@ class Entity(object):
     def on_bump(self, DUMARG=None):
         # call all components on_bump
         return self.__getattr__('on_bump')  # TEMPO HACK
-
-class Actor(Entity):
-    """ Dummy Actor object """
-
-    required_components = (
-        components.MobileComponent,
-        components.SolidComponent,
-        components.BumpComponent,
-        components.VisibleComponent,
-    )

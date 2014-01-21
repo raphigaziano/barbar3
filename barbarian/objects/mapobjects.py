@@ -4,24 +4,3 @@ barbarian.objects.mapobjects.py
 ===============================
 
 """
-from barbarian.objects.entity import Entity
-from barbarian.objects.components import SolidComponent, PositionComponent
-
-
-class MapTile(Entity):
-
-    required_components = (
-        SolidComponent,
-        # PositionComponent,
-    )
-
-    """
-    A Basic Map Tile.
-
-    Define whether this part of the map blocks movement or sight,
-    & tracks map infos (explored status, noise or scent levels...).
-
-    """
-    def __init__(self,  *args, **kwargs):
-        super(MapTile, self).__init__(*args, **kwargs)
-        self.explored = False

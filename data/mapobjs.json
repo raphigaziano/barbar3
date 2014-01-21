@@ -1,6 +1,7 @@
 {
     '__common__': {
         '__entity_type__': 'barbarian.objects.mapobjects.MapTile',
+        'ExploredComponent': {},
         'SolidComponent': {
             'blocks': true,
             'blocks_sight': true

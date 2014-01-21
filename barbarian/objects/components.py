@@ -160,3 +160,9 @@ class VisibleComponent(BaseComponent):
     def __init__(self, **kwargs):
         self.char = self._get_required_arg('char', kwargs)
         super(VisibleComponent, self).__init__(**kwargs)
+
+class ExploredComponent(BaseComponent):
+    """ Dummy for map tiles """
+    def __init__(self, **kwargs):
+        self.explored = False
+        super(ExploredComponent, self).__init__(**kwargs)

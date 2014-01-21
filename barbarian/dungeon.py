@@ -61,7 +61,6 @@ class Level(object):
     def populate(self):
         """ Stub method """
         from barbarian.utils import rng
-        from barbarian.objects.entity import Actor
         from barbarian.objects.factories import build_entity
         for _ in range(10):
             x = rng.randrange(0, self.map.w)
