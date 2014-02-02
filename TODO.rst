@@ -27,8 +27,6 @@ short term
 - basic data reading & entity builder:
   - validators ? ala settings vals ? in components ?
 
-- Test: assert update methods are rightly called
-
 - CanAct(?) component, containg the update method.
   Player gets a special one handling user input.
   Monsters AI goes there, too.
