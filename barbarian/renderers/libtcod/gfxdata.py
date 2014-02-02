@@ -38,6 +38,7 @@ class RenderData(object):
         except KeyError:
             return self._get_color_object(col_name)
 
+    # TODO: Move those tu utils
     # Stack Overflow: http://stackoverflow.com/a/214657
     @staticmethod
     def _hex_to_rgb(value):
