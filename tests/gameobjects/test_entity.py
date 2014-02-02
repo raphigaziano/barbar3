@@ -61,6 +61,21 @@ class TestBaseEntityComponentManagement(unittest.TestCase):
 
         self.assertListEqual([], self.e._components)
 
+    def test_update_component(self):
+        """ Updating Entity also updates all updatable components. """
+        no_update_comp = Mock(spec=object)
+
+        self.e.push_component(self.mock_comp_1)
+        self.e.push_component(no_update_comp)
+        self.e.push_component(self.mock_comp_3)
+
+        self.e.update()
+
+        self.mock_comp_1.update.assert_called_once_with()
+        self.mock_comp_3.update.assert_called_once_with()
+
+        self.assertFalse(no_update_comp.called)
+
 class TestBaseEntityComponentsAccess(unittest.TestCase):
 
     class FooComponent(entity.components.BaseComponent):

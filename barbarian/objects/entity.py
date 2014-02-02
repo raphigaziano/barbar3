@@ -170,7 +170,6 @@ class Entity(object):
 
     def update(self, **kwargs):
         """ Update all Updatable components. """
-        # TODO: test, assert all components update method is called
         for c in self._components:
             if hasattr(c, 'update'):
                 c.update(**kwargs)

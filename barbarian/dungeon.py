@@ -77,11 +77,10 @@ class Level(object):
                 y = rng.randrange(0, self.map.h)
             self.actors.append(build_entity('parchment', x, y))
 
-    def update(self):
+    def update(self, **kwargs):
         """ Update all actors on this level. """
-        # TODO: test, assert all actors update method is called
         for a in self.actors.filter_by_property('update'):
-            a.update(self)
+            a.update(self, **kwargs)
 
 class Dungeon(object):
 
