@@ -26,18 +26,6 @@ def _get_entity_data(data_dict, entity_name):
 
 def build_entity(entity_name, x=-1, y=-1, data_file='entities.json'):
     """ Dummy builder """
-
-    # TODO: move to utils
-    def import_from_path(path):
-        """
-            Import a class dynamically, given it's dotted path.
-        """
-        module_name, class_name = path.rsplit('.', 1)
-        try:
-            return getattr(__import__(module_name, fromlist=[class_name]), class_name)
-        except AttributeError:
-            raise ImportError('Unable to import %s' % path)
-
     data = read_data_file(data_file)
     e_data = _get_entity_data(data, entity_name)
 
@@ -48,7 +36,6 @@ def build_entity(entity_name, x=-1, y=-1, data_file='entities.json'):
         return  # TODO: better err handling
     """
 
-    e_data.pop('__entity_type__')
     e = entity.Entity(entity_name, **e_data)
     if e.has_property('x'):
         e.set_property('x', x)

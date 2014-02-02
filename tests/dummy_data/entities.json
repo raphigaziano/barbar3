@@ -5,13 +5,11 @@
         }
     },
     'rat': {
-        '__entity_type__': 'barbarian.objects.entity.Actor',
         'VisibleComponent': {
             'char': 'r'
         }
     },
     'parchment': {
-        '__entity_type__': 'barbarian.objects.entity.Actor',
         'VisibleComponent': {
             'char': '#'
         },
