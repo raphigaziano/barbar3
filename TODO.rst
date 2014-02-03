@@ -12,6 +12,7 @@ TESTS!!!:
   * data reading (ughh...)
   * entity building
   * start to test the level obj
+  * input layer...
   * ...
 
 - camera
@@ -21,13 +22,12 @@ short term
 
 - Color "proxy":
   - REWORK - THIS IS FUGLY RIGHT NOW
-  - Have a pseudo parser to read hexcodes or rgb
-    -> done is static meths on randerers.libtcod.gfxdata.RendeData. Move
-       it to utils.
 - basic data reading & entity builder:
   - validators ? ala settings vals ? in components ?
 
 - CanAct(?) component, containg the update method.
   Player gets a special one handling user input.
   Monsters AI goes there, too.
+
 - Input layer...
+- components keep a ref to their containing entity
