@@ -22,6 +22,9 @@ short term
 
 - Color "proxy":
   - REWORK - THIS IS FUGLY RIGHT NOW
+  - Have a pseudo parser to read hexcodes or rgb
+    -> done is static meths on randerers.libtcod.gfxdata.RendeData. Move
+       it to utils.
 - basic data reading & entity builder:
   - validators ? ala settings vals ? in components ?
 
