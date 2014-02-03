@@ -1,0 +1,12 @@
+{
+    'std_state': {
+        'move_n': ['<up>', '<kp8>'],
+        'move_s': ['<down>', '<kp2>'],
+        'move_w': ['<left>', '<kp4>'],
+        'move_e': ['<right>', '<kp6>'],
+        'move_nw': ['<kp7>'],
+        'move_ne': ['<kp9>'],
+        'move_sw': ['<kp1>'],
+        'move_se': ['<kp3>']
+    }
+}

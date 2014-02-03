@@ -9,7 +9,7 @@ import logging
 
 from barbarian import libtcodpy as tcod
 from barbarian import gui
-from barbarian import input
+from barbarian.input import common as input
 from barbarian.renderers import renderer
 from barbarian.utils import rng
 
@@ -139,8 +139,8 @@ class ShutDownState(GameState):
 class MainMenuState(GameState):
 
     def update(self):
-        k = input.collect()
-        if k.vk is not tcod.KEY_NONE:
+        k = input.collect_keypresses()
+        if k is not None:
             # Rather push
             self._replace_with(DungeonState())
 
@@ -163,34 +163,36 @@ class DungeonState(GameState):
 
     def process_input(self):
 
-        key = input.collect()
+        key  = input.collect_keypresses()
+        gui.manager.process_input(key)  # TODO: assign retval to key
 
-        gui.manager.process_input(key)
+        action = input.check_keypress(key, 'std_state')
 
-        if key.vk in (tcod.KEY_UP, tcod.KEY_KP8):
+        if action == 'move_n':
             self.player.move(0, -1, self.dungeon.current_level)
-        elif key.vk in (tcod.KEY_DOWN, tcod.KEY_KP2):
+        elif action == 'move_s':
             self.player.move(0, 1, self.dungeon.current_level)
-        elif key.vk in (tcod.KEY_LEFT, tcod.KEY_KP4):
+        elif action == 'move_w':
             self.player.move(-1, 0, self.dungeon.current_level)
-        elif key.vk in (tcod.KEY_RIGHT, tcod.KEY_KP6):
+        elif action == 'move_e':
             self.player.move(1, 0, self.dungeon.current_level)
-        elif key.vk in (tcod.KEY_KP9, ):
+        elif action == 'move_ne':
             self.player.move(1, -1, self.dungeon.current_level)
-        elif key.vk in (tcod.KEY_KP3, ):
+        elif action == 'move_se':
             self.player.move(1, 1, self.dungeon.current_level)
-        elif key.vk in (tcod.KEY_KP1, ):
+        elif action == 'move_sw':
             self.player.move(-1, 1, self.dungeon.current_level)
-        elif key.vk in (tcod.KEY_KP7, ):
+        elif action == 'move_nw':
             self.player.move(-1, -1, self.dungeon.current_level)
-        elif key.c == ord('m'):
+
+        if key == 'm':
             gui.manager.msg(
                 rng.choice(('foo', 'bar', 'baz', 'moop')),
                 rng.choice(('red', 'white', 'green', 'gray'))
             )
-        elif key.c == ord('d'):
+        elif key == 'd':
             gui.manager.show_widget('debug_console')
-        elif key.vk == tcod.KEY_ESCAPE:
+        elif key == '<esc>':
             self._replace_with(ShutDownState())
 
     def update(self):
