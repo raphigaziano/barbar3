@@ -185,12 +185,12 @@ class DungeonState(GameState):
         elif action == 'move_nw':
             self.player.move(-1, -1, self.dungeon.current_level)
 
-        if key == 'm':
+        if key == '<ctrl>-m':
             gui.manager.msg(
                 rng.choice(('foo', 'bar', 'baz', 'moop')),
                 rng.choice(('red', 'white', 'green', 'gray'))
             )
-        elif key == 'd':
+        elif key == '<ctrl>-d':
             gui.manager.show_widget('debug_console')
         elif key == '<esc>':
             self._replace_with(ShutDownState())
