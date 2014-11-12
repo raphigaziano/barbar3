@@ -71,10 +71,10 @@ class Map(object):
 
     def slice(self, x, y, w, h):
         """ Return a submap object, which rect is defined by x, y, w & h. """
-        cells = []
-        for _y in range(y, y+h):
-            for _x in range(x, x+w):
-                cells.append(self.cells[self._cartesian_to_idx(_x, _y)])
+        cells = [
+            self.cells[self._cartesian_to_idx(_x, _y)]
+            for _y in range(y, y+h) for _x in range(x, x+w)
+        ]
         return self.__class__(w, h, cells)
 
     def slice_from_rect(self, rect):
