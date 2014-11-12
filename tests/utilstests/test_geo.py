@@ -9,13 +9,13 @@ class TestRect(unittest.TestCase):
     def test_center(self):
         """ Getting the center position of a given rect """
         r = Rect(0, 0, 10, 10)
-        self.assertEqual((5, 5), r.center)
+        self.assertEqual((5, 5), r.center())
         r = Rect(0, 0, 5, 10)
-        self.assertEqual((2, 5), r.center)
+        self.assertEqual((2, 5), r.center())
         r = Rect(0, 0, 10, 5)
-        self.assertEqual((5, 2), r.center)
+        self.assertEqual((5, 2), r.center())
         r = Rect(0, 0, 1, 1)
-        self.assertEqual((0, 0), r.center)
+        self.assertEqual((0, 0), r.center())
 
     def test_intersects(self):
         """ Rect intersections """

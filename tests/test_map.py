@@ -10,34 +10,13 @@ class TestMap(unittest.TestCase):
     def test_get_cell(self):
         """ Accessing map cells """
         m = map.Map(10, 10, [1] * 100)
-        [self.assertEqual(1, m.get_cell(x, y))
-         for y in range(10) for x in range(10)]
+        [self.assertEqual(
+            1, m.get_cell(x, y)
+        ) for y in range(10) for x in range(10)]
         m = map.Map(10, 10, [0] * 100)
-        [self.assertEqual(0, m.get_cell(x, y))
-         for y in range(10) for x in range(10)]
-
-    def test_indexing(self):
-        """ Direct indexing shortcut """
-        m = map.Map(10, 10, [1] * 100)
-        [self.assertEqual(1, m[x, y]) for y in range(10) for x in range(10)]
-        # Passing an explicit tuple should also work
-        [self.assertEqual(1, m[(x, y)]) for y in range(10) for x in range(10)]
-
-        m = map.Map(10, 10, [0] * 100)
-        [self.assertEqual(0, m[x, y]) for y in range(10) for x in range(10)]
-        # Passing an explicit tuple should also work
-        [self.assertEqual(0, m[(x, y)]) for y in range(10) for x in range(10)]
-
-    def test_indexing_errors(self):
-        """ Indexing overload accepts only specific args """
-        # 2 args required
-        m = map.Map(5, 5, [1] * 50)
-        self.assertRaises(IndexError, m.__getitem__, (0,))
-        self.assertRaises(IndexError, m.__getitem__, (0, 0, 0))
-
-        # No slicing
-        self.assertRaises(TypeError, m.__getitem__, slice(1, 1))
-        self.assertRaises(TypeError, m.__getitem__, slice(1, 1, 1))
+        [self.assertEqual(
+            0, m.get_cell(x, y)
+        ) for y in range(10) for x in range(10)]
 
     def test_invalid_map_location(self):
         """ Trying to access an out of bounds cell should raise an exception """
@@ -102,32 +81,8 @@ class TestMap(unittest.TestCase):
         ) for x, y, _ in m]
 
     def test_slice(self):
-        """ Getting a new map from a portion of an existing one """
-        cells = [
-            'a', 'b', 'c', 'd', 'e',
-            'f', 'g', 'h', 'i', 'j',
-            'k', 'l', 'm', 'n', 'o',
-            'p', 'q', 'r', 's', 't',
-            'u', 'v', 'w', 'x', 'y'
-        ]
-        m = map.Map(5, 5, cells)
-
-        new_m = m.slice(1, 2, 2, 2)
-        self.assertListEqual(['l', 'm', 'q', 'r'], new_m.cells)
-        # FIXME: test More edge cases
-
-    def test_slice_from_rect(self):
-        """ Getting a map slice from a given Rect object """
-        from barbarian.utils.geometry import Rect
-        cells = [
-            'a', 'b', 'c', 'd', 'e',
-            'f', 'g', 'h', 'i', 'j',
-            'k', 'l', 'm', 'n', 'o',
-            'p', 'q', 'r', 's', 't',
-            'u', 'v', 'w', 'x', 'y'
-        ]
-        m = map.Map(5, 5, cells)
-        r = Rect(1, 2, 2, 2)
-
-        new_m = m.slice_from_rect(r)
-        self.assertListEqual(['l', 'm', 'q', 'r'], new_m.cells)
+        """ GAGAGA """
+        # Dummy failing test
+        m = map.Map(10, 10, [1] * 100)
+        self.assertListEqual([0, 0, 0], m.slice(10, 10, 10, 10).cells)
+        self.fail('FIXME')
