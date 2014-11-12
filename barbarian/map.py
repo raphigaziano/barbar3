@@ -17,6 +17,7 @@ class OutOfBoundMapError(IndexError, Exception):
     """
     pass
 
+
 class Map(object):
 
     """ Basic Map object """
@@ -35,6 +36,24 @@ class Map(object):
                 "Can't access cell %d-%d: Out of bounds" % (x, y)
             )
 
+    def __getitem__(self, pos):
+        """ Shortcut for Map.get_cell. """
+
+        # TODO: moar doc
+        if isinstance(pos, slice):
+            msg = ('Slicing is not allowed on %s. Use the explicit '
+                   '%s.slice method instead' % (self.__class__, self.__class__))
+            raise TypeError(msg)
+
+        try:
+            x, y = pos
+        except (TypeError, ValueError):
+            msg = ('Custom indexing for %s objects. '
+                   'Use obj[x,y] (both values are mandatory).' % self.__class__)
+            raise IndexError(msg)
+
+        return self.get_cell(x, y)
+
     def __iter__(self):
         """
         Iterator implentation.
@@ -49,9 +68,14 @@ class Map(object):
 
     def slice(self, x, y, w, h):
         """ Return a submap object, which rect is defined by x, y, w & h. """
-        # Dummy stub.
-        cells = [0, 0, 0]
+        cells = []
+        for _x, _y, c in self:
+            if _x >= x and _x < (x + w) and _y >= y and _y < (y + h):
+                cells.append(c)
         return self.__class__(w, h, cells)
+
+    def slice_from_rect(self, rect):
+        return self.slice(rect.x, rect.y, rect.w, rect.h)
 
     ### Internal Utils ###
     ######################
