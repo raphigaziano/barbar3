@@ -29,8 +29,8 @@ def make_map():
     )
 
     def create_room(room):
-        for x in range(room.x1+1, room.x2):
-            for y in range(room.y1+1, room.y2):
+        for x in range(room.x+1, room.x2):
+            for y in range(room.y+1, room.y2):
                 my_map.get_cell(x, y).blocks = False
                 my_map.get_cell(x, y).blocks_sight = False
 
@@ -72,14 +72,14 @@ def make_map():
             create_room(new_room)
 
             #center coordinates of new room, will be useful later
-            (new_x, new_y) = new_room.center()
+            (new_x, new_y) = new_room.center
 
             if num_rooms > 1:
                 #all rooms after the first:
                 #connect it to the previous room with a tunnel
 
                 #center coordinates of previous room
-                (prev_x, prev_y) = rooms[num_rooms-1].center()
+                (prev_x, prev_y) = rooms[num_rooms-1].center
 
                 #draw a coin (random number that is either 0 or 1)
                 if rng.coin_flip():
