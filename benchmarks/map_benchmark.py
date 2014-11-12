@@ -1,5 +1,8 @@
+import os
+import sys
 from timeit import timeit
 
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 setup_code = """
 from barbarian.map import Map
