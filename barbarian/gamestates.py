@@ -221,6 +221,13 @@ class DungeonState(GameState):
             gui.manager.show_widget('debug_console')
         elif key == '<esc>':
             self._replace_with(ShutDownState())
+        elif key == '<shift>-R':
+            for x, y, cell in self.dungeon.current_level.map:
+                cell.explored = True
+        elif key == '<shift>-N':
+            from barbarian.dungeon import Level
+            self.dungeon.current_level = Level()
+            self.dungeon.current_level.map.compute_fov(self.player.x, self.player.y)
 
     def update(self):
         self.process_input()
