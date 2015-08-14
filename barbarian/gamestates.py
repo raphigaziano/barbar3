@@ -48,14 +48,19 @@ class StateManager(object):
         return not len(self._states) >= 1
 
     def pop(self):
+        self.current_state.on_leaving()
         s = self._states.pop()
         logger.debug("State %s popped off the stack", s)
         logger.debug("Current State Stack: %s", self._states)
+        if self._states:
+            self.current_state.on_revealed()
 
     def push(self, s):
         if self._states:
             self.current_state.next_state = None
+            self.current_state.on_obscured()
         self._states.append(s)
+        self.current_state.on_entered()
         logger.debug("State %s pushed on the stack", self.current_state)
         logger.debug("Current State Stack: %s", self._states)
 
@@ -114,6 +119,28 @@ class GameState(object):
 
     # event methods: on_init, on_leave, ...
     # => http://blog.nuclex-games.com/tutorials/cxx/game-state-management/
+
+    def on_entered(self):
+        """ Stub Method, called when a state is activated. No-op. """
+        pass
+
+    def on_leaving(self):
+        """ Stub method, called before leaving a state. No-op. """
+        pass
+
+    def on_obscured(self):
+        """
+        Stub method, called vby the current state when another one is
+        stacked on top of it. No-op.
+        """
+        pass
+
+    def on_revealed(self):
+        """
+        Stub method, called when a state active again after popping the one that
+        obscured it. No-op.
+        """
+        pass
 
     # ...
 
