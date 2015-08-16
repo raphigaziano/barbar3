@@ -25,6 +25,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+import os
 import sys
 import ctypes
 import struct
@@ -39,10 +40,30 @@ try:  #import NumPy if available
 except ImportError:
     numpy_available = False
 
-### PATH HACK ###
-import os
+### PATH & 32/64 BITS HACK ###
+import platform
+
+def machine():
+    """Return type of machine."""
+    if os.name == 'nt' and sys.version_info[:2] < (2,7):
+        return os.environ.get("PROCESSOR_ARCHITEW6432",
+               os.environ.get('PROCESSOR_ARCHITECTURE', ''))
+    else:
+        return platform.machine()
+
+def os_bits(machine=machine()):
+    """Return bitness of operating system, or None if unknown."""
+    machine2bits = {'AMD64': 64, 'x86_64': 64, 'i386': 32, 'x86': 32, 'i686': 32}
+    return machine2bits.get(machine, None)
+
 LIBDIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'lib')
-LIBTCOD_DIR = os.path.join(LIBDIR, 'libtcod')
+
+if os_bits() == 32:
+    LIBTCOD_DIR = os.path.join(LIBDIR, 'libtcod32')
+elif os_bits() == 64:
+    LIBTCOD_DIR = os.path.join(LIBDIR, 'libtcod64')
+
+### /HACK ###
 
 LINUX=False
 MAC=False
