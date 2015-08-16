@@ -78,6 +78,60 @@ class Grid(object):
         """ Helper to slice directly from a Rect object. """
         return self.slice(rect.x, rect.y, rect.w, rect.h)
 
+    def get_neighbors(self, x, y, cardinal_only=False):
+        # TODO: TESTS!!!!
+        # Directional stuff could be generalized elsewhere
+        # (along with position helpers ?)
+        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        if not cardinal_only:
+            dirs += [(1, -1), (1, 1), (-1, 1), (-1, -1)]
+        for dx, dy in dirs:
+            try:
+                yield self[x+dx, y+dy]
+            except OutOfBoundGridError:
+                # This will cause a "incomplete" list to be returned, which may
+                # or may not be whet the calling code expects.
+                pass
+
+    def _floodfill(self, x, y, predicate, action=None):
+        # TODO: TESTS!!
+        # TODO: recursive (this version) or stack based (private version below) ?
+        cell = self[x, y]
+        if predicate(cell):
+            if action is not None:
+                action(cell)
+            yield cell
+            self.floodfill(x + 1, y, predicate, action) # right
+            self.floodfill(x - 1, y, predicate, action) # left
+            self.floodfill(x, y + 1, predicate, action) # down
+            self.floodfill(x, y - 1, predicate, action) # up
+
+    def floodfill(self, x, y, predicate, action=None):
+        stack = set()
+        visited = set()
+        stack.add( (x, y) )
+        while len(stack) > 0:
+            x, y = stack.pop()
+            # TODO: inbound helper (on rect ? grid ?)
+            if (x < 0 or x > self.w -1 or y < 0 or y > self.h - 1):
+                continue
+            if (x, y) in visited:
+                continue
+
+            visited.add((x, y))
+            cell = self[x, y]
+            if not predicate(cell):
+                continue
+            if action is not None:
+                action(cell)
+
+            stack.add( (x + 1, y) )  # right
+            stack.add( (x - 1, y) )  # left
+            stack.add( (x, y + 1) )  # down
+            stack.add( (x, y - 1) )  # up
+
+            yield cell
+
     ### Alternate constructors ###
     ##############################
 
