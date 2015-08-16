@@ -21,8 +21,8 @@ class Level(object):
 
     """
 
-    def __init__(self):
-        self.map = make_map()
+    def __init__(self, map_builder=make_map):
+        self.map = map_builder()
         self.actors = EntityContainer()
         self.items = EntityContainer()
         self.populate()
