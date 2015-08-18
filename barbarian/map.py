@@ -8,6 +8,8 @@ Basic Map data structure.
 """
 from barbarian import libtcodpy as libtcod
 
+from barbarian.utils import geometry
+
 
 class OutOfBoundGridError(IndexError, Exception):
     """
@@ -80,11 +82,9 @@ class Grid(object):
 
     def get_neighbors(self, x, y, cardinal_only=False):
         # TODO: TESTS!!!!
-        # Directional stuff could be generalized elsewhere
-        # (along with position helpers ?)
-        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-        if not cardinal_only:
-            dirs += [(1, -1), (1, 1), (-1, 1), (-1, -1)]
+        dirs = (
+            geometry.CARDINAL_DIRECTIONS if cardinal_only
+            else geometry.ALL_DIRECTIONS)
         for dx, dy in dirs:
             try:
                 yield self[x+dx, y+dy]

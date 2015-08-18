@@ -340,12 +340,6 @@ def make_map_roguebasin_exemple_1():
 def make_map_drunken_walk():
     """ Basic drunken walk """
     MAX_TRIES = 5000
-    DIRECTIIONS = (
-        (0, 1),     # North
-        (1, 0),     # East
-        (0, -1),    # South
-        (-1, 0),    # West
-    )
 
     my_map = Map(
         MAP_W, MAP_H,
@@ -353,16 +347,15 @@ def make_map_drunken_walk():
          for _ in range(MAP_W * MAP_H)]
     )
 
-    start_x, start_y = random.randint(20, MAP_W-20), random.randint(20, MAP_H-20)
+    start_x, start_y = random.randint(40, MAP_W-40), random.randint(20, MAP_H-20)
     x, y = start_x, start_y
     tries = 0
     while tries < MAX_TRIES:
         tries +=1
         my_map[x, y].blocks = False
         my_map[x, y].blocks_sight = False
-        dx, dy = random.choice(DIRECTIIONS)
-        if (x + dx >= MAP_W or y + dy >= MAP_H or
-            x <= 0 or y <= 0):
+        dx, dy = random.choice(geometry.CARDINAL_DIRECTIONS)
+        if (x >= MAP_W-1 or y >= MAP_H-1 or x <= 1 or y <= 1):
             continue
         x += dx
         y += dy
