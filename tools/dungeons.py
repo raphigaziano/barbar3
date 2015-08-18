@@ -31,6 +31,7 @@ class InitState(gamestates.GameState):
         renderer.init()
         self._replace_with(MainMenuState())
 
+
 class MainMenuState(gamestates.GameState):
 
     def __init__(self):
@@ -42,7 +43,13 @@ class MainMenuState(gamestates.GameState):
         self.option_list = sorted(self.map_builders.keys())
         from pprint import pprint; pprint(self.map_builders)
 
+        # Lol, worst place ever to be checking sys.argv
+        if len(sys.argv) > 1:
+            cb = self.map_builders[sys.argv[1]]
+            self._replace_with(DungeonState(cb))
+
     def update(self):
+
         k = input.collect_keypresses()
 
         if k is None: return
