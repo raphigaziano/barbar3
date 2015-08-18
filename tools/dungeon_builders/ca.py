@@ -83,7 +83,7 @@ def make_map_cellular_automata_full_room():
 
     FLOOR_CHANCE = 55
     SMOOTHING_PASSES = random.randint(2, 8)
-    print('Smoothing passes: ', SMOOTHING_PASSES)
+    print 'Smoothing passes: ', SMOOTHING_PASSES
 
     my_map = Map(
         MAP_W, MAP_H,

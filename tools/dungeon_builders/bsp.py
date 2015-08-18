@@ -124,9 +124,9 @@ def make_map_basic_bsp():
     )
 
     DISCARD_BY_RATIO = True
-    W_RATIO          = 0.35
-    H_RATIO          = 0.35
-    N_SPLITS = 4
+    W_RATIO          = 0.45
+    H_RATIO          = 0.45
+    N_SPLITS = 6
 
     main_container = Container(0, 0, MAP_W, MAP_H)
     container_tree = split_container(main_container, N_SPLITS, DISCARD_BY_RATIO, W_RATIO, H_RATIO)
