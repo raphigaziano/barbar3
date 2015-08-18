@@ -67,8 +67,8 @@ def make_map_basic_bsp():
 
         def fill_grid(self, map_):
             room_offset = 1
-            for x in range(self.x+room_offset, self.x+self.w-room_offset):
-                for y in range(self.y+room_offset, self.y+self.h-room_offset):
+            for x in range(self.x+room_offset, self.x+self.w):
+                for y in range(self.y+room_offset, self.y+self.h):
                     my_map[x, y].blocks = False
                     my_map[x, y].blocks_sight = False
 
