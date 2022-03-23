@@ -3,9 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from tests.unit.base import DummyRawsMixin
 
-from barbarian.utils.rng import Rng
-from barbarian.spawn import spawn_entity, spawn_door, spawn_zone, spawn_level
-from barbarian.settings import MAX_SPAWNS
+from barbarian.spawn import spawn_entity
 
 
 class BaseSpawnTest(unittest.TestCase):
