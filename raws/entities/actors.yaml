@@ -1,0 +1,23 @@
+_base_actor:
+    actor: {}
+    physics: {}
+player:
+    _parent: _base_actor
+    typed:   { type: 'player' }
+    actor:   { is_player: True }
+    fov:     { range: 10 }      
+    health:  { hp: 25 }
+    stats:   { strength: 5 }
+    visible: { glyph: '@' }
+kobold:
+    _parent: _base_actor
+    typed:   { type: 'kobold' }
+    health:  { hp: 2 }
+    stats:   { strength: 2 }
+    visible: { glyph: k }
+orc:
+    _parent: _base_actor
+    typed:   { type: 'orc' }
+    health:  { hp: 3 }
+    stats:   { strength: 3 }
+    visible: { glyph: o }
