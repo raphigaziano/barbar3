@@ -6,22 +6,6 @@ Mostly useful for manipulating the map.
 
 """
 
-# Directional constants. This might not be the best place for them, but it
-# makes sense for now.
-
-DIR_N  = (0, -1)
-DIR_E  = (1, 0)
-DIR_S  = (0, 1)
-DIR_W  = (-1, 0)
-DIR_NE = (1, -1)
-DIR_SE = (1, 1)
-DIR_SW = (-1, 1)
-DIR_NW = (-1, -1)
-
-CARDINAL_DIRECTIONS = (DIR_N, DIR_E, DIR_S, DIR_W)
-DIAGONAL_DIRECTIONS = (DIR_NE, DIR_SE, DIR_SW, DIR_NW)
-ALL_DIRECTIONS = CARDINAL_DIRECTIONS + DIAGONAL_DIRECTIONS
-
 
 class Rect:
     """

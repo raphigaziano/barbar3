@@ -27,11 +27,11 @@ class Grid:
 
     __slot__ = ('cells',)
 
-    _CARDINAL_DIRS = (
+    CARDINAL_DIRS = (
         (0, -1), (1, 0), (0, 1), (-1, 0))       # N, E, S, W
-    _DIAGONAL_DIRS = (
+    DIAGONAL_DIRS = (
         (1, -1), (1, 1), (-1, 1), (-1, -1))     # NE, SE, SW, NW
-    _ALL_DIRS =  _CARDINAL_DIRS + _DIAGONAL_DIRS
+    ALL_DIRS =  CARDINAL_DIRS + DIAGONAL_DIRS
 
     def __init__(self, width, height, cells=None):
         self.w = width
@@ -103,7 +103,7 @@ class Grid:
 
         """
         dirs = (
-            self._CARDINAL_DIRS if cardinal_only else self._ALL_DIRS)
+            self.CARDINAL_DIRS if cardinal_only else self.ALL_DIRS)
 
         for dx, dy in dirs:
             nx, ny = x + dx, y + dy
