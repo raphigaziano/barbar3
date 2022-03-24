@@ -20,43 +20,6 @@ class GameState:
         raise AttributeError(
             f"{clsname} object has no attribute '{attr_name}'")
 
-    def map_batch(self, game):
-        # Attempt to optimise. No significant gain
-        # over list comps :/
-        level = game.current_level
-        map_ = level.map
-        arr_length = map_.w * map_.h
-
-        batched = {
-            'map': {
-                'width': map_.w,
-                'height': map_.h,
-                'cells': [None] * arr_length,
-                'bitmask_grid': [None] * arr_length if map_.bitmask_grid else None,
-            },
-            'map_snapshots': [[None] * arr_length] * len(level.map_snapshots),
-            'visible_cells': [None] * arr_length,
-            'explored_cells': [None] * arr_length,
-        }
-
-        for i, c in enumerate(map_.cells):
-            x, y = map_._idx_to_cartesian(i)
-            # if full_update:
-            batched['map']['cells'][i] = c.value
-            if map_.bitmask_grid:
-                batched['map']['bitmask_grid'][i] = map_.bitmask_grid.cells[i]
-            for j, snap in enumerate(level.map_snapshots):
-                snap_cells = batched['map']['map_snapshots'][j]
-                snap_cells[i] = snap.cells[i].value
-            # /endif
-            batched['visible_cells'][i] = (x, y) in game.player.fov.visible_cells
-            batched['explored_cells'][i] = (x, y) in level.explored
-            # if debug:
-            #     pass
-            #     # pathmap
-
-        return batched
-
     def update(self, game):
         """
         Build the state dictionnary which will be sent to the client.
@@ -87,9 +50,6 @@ class GameState:
                 e.serialize() for e in
                 Event.get_current_events(game.ticks, flush=True)],
         }
-
-        # batched = self.map_batch(game)
-        # self._state.update(batched)
 
         # DEBUGGING
         m = game.current_level.map

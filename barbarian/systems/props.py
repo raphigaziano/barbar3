@@ -4,7 +4,6 @@ Prop logic
 """
 import logging
 
-from barbarian.components.use import Usable
 from barbarian.actions import Action, ActionType
 
 logger = logging.getLogger(__name__)

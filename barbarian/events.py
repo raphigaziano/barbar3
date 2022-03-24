@@ -1,3 +1,7 @@
+"""
+Game events handling.
+
+"""
 from enum import auto
 from dataclasses import dataclass, field
 

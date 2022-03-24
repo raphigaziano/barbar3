@@ -33,8 +33,7 @@ class Fov(Component):
     range: int
 
     def __post_init__(self):
-        self.visible_cells = set()
-        self.explored = set()
+        self.reset()
 
     def reset(self):
         self.visible_cells = set()

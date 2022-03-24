@@ -190,9 +190,9 @@ class EntityGrid(Grid):
         Grid.__init__(self, width, height, cells)
 
     def __iter__(self):
-        for x, y, entity in super().__iter__():
-            if entity is not None:
-                yield x, y, entity
+        for x, y, obj in super().__iter__():
+            if obj is not None:
+                yield x, y, obj
 
     def __len__(self):
         return len(self.all)
@@ -201,8 +201,8 @@ class EntityGrid(Grid):
     def all(self):
         return [e for _, __, e in self]
 
-    def add(self, x, y, e):
-        self.set_cell(x, y, e)
+    def add(self, x, y, obj):
+        self.set_cell(x, y, obj)
 
     def remove(self, x, y, _):
         self.set_cell(x, y, None)
@@ -246,8 +246,8 @@ class GridContainer(EntityGrid):
     def all(self):
         return list(itertools.chain.from_iterable(self.cells))
 
-    def add(self, x, y, o):
-        self.get_cell(x, y).add(o)
+    def add(self, x, y, obj):
+        self.get_cell(x, y).add(obj)
 
-    def remove(self, x, y, o):
-        self.get_cell(x, y).remove(o)
+    def remove(self, x, y, obj):
+        self.get_cell(x, y).remove(obj)

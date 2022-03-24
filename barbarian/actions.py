@@ -1,3 +1,7 @@
+"""
+Action handlers
+
+"""
 import logging
 from enum import auto
 from dataclasses import dataclass, field
@@ -92,6 +96,7 @@ class Action:
         self._emit_event(EventType.ACTION_REJECTED, **kwargs)
 
     def _emit_event(self, event_type, msg="", **kwargs):
+        """ Emit an event indicating success or failure. """
         # Store msg for testing.
         self.msg = msg
 
@@ -120,16 +125,19 @@ class Action:
             logger.warning(e)
             raise ActionDataError(e.args[0]) from e
 
-    # Shortcuts for common actions
+    # Shortcuts for common action types
 
     @classmethod
     def attack(cls, a, t, d=None):
+        """ Short hand constructor for an ATTACK actin. """
         return cls(ActionType.ATTACK, a, t, d)
 
     @classmethod
     def move(cls, a, d):
+        """ Short hand constructor for a MOVE actin. """
         return cls(ActionType.MOVE, a, None, d)
 
     @classmethod
     def inflict_dmg(cls, a, t, d):
+        """ Short hand constructor for an INFLICT_DMG actin. """
         return cls(ActionType.INFLICT_DMG, a, t, d)

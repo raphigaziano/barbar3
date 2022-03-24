@@ -32,8 +32,19 @@ class Entity:
 
     @property
     def name(self):
-        if self.named: return self.named.name
-        if self.typed: return self.typed.type
+        """
+        Return a name for display in messages or other. Will use
+        the named components if it is set, and fall back to the
+        entity's type if not.
+
+        REFACT: rename this to display_name to avoid potential
+        confusion ?
+
+        """
+        if self.named:
+            return self.named.name
+        if self.typed:
+            return self.typed.type
         return None
 
     def __repr__(self):
@@ -48,7 +59,7 @@ class Entity:
 
     @property
     def components(self):
-        for cname in Component.__COMPONENT_MAP__.keys():
+        for cname in Component.__COMPONENT_MAP__:
             c = getattr(self, cname, None)
             if c:
                 yield cname, c
@@ -105,6 +116,7 @@ class Entity:
             del self.__dict__[cname]
 
     def replace_component(self, new_component):
+        """ Rm old, add new. """
         attr_name = new_component.attr_name
         self.remove_component(attr_name)
         setattr(self, attr_name, new_component)

@@ -99,13 +99,23 @@ class Map(Grid):
             self.floodfill(x, y - 1, predicate, action) # up
 
     def floodfill(self, x, y, predicate, action=None):
+        """
+        Yield all reacheable (accordingt to `predicate`) cells, starting
+        from (x, y).
+
+        Option `action` should be a callable wich will be run for each
+        yielded cell.
+
+        REFACT: pass more arguments (like the cell itself, maybe the map ?)
+        to both the predicate and action callables.
+
+        """
         stack = set()
         visited = set()
         stack.add( (x, y) )
         while len(stack) > 0:
             x, y = stack.pop()
-            # TODO: inbound helper (on rect ? grid ?)
-            if (x < 0 or x > self.w -1 or y < 0 or y > self.h - 1):
+            if self.in_bounds(x, y):
                 continue
             if (x, y) in visited:
                 continue

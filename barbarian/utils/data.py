@@ -17,8 +17,8 @@ def merge_dicts(dst, src):
 
 def make_hash(o):
     """
-    Makes a hash from a dictionary, list, tuple or set to any level, that 
-    contains only other hashable types (including any lists, tuples, sets, 
+    Makes a hash from a dictionary, list, tuple or set to any level, that
+    contains only other hashable types (including any lists, tuples, sets,
     and dictionaries).
 
     nicked from:

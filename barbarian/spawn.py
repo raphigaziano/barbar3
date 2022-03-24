@@ -24,6 +24,7 @@ def spawn_entity(x, y, entity_data):
 
 
 def spawn_player(x, y):
+    """ Shortcut. Spawn player at (x, y). """
     actor_data = get_entity_data('player', 'actors')
     return spawn_entity(x, y, actor_data)
 
@@ -76,9 +77,9 @@ def spawn_door(level, x, y):
     if (
         level.map.in_bounds(x, y) and
         level.map[x, y] == TileType.FLOOR and
+        not level.props[x,y] and
         # Some rooms share walls, which causes several doors to
         # be spawned an the same cells and causes shenanigans
-        not level.props[x,y] and
         len(list(level.map.get_neighbors(
             x, y, cardinal_only=True,
             predicate=lambda _, __, c: c == TileType.FLOOR

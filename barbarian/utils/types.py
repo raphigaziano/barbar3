@@ -19,7 +19,7 @@ class FrozenDict(dict):
 
     def __init__(self, *args, **kwargs):
         self._hash = None
-        super(FrozenDict, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __hash__(self):
         if self._hash is None:

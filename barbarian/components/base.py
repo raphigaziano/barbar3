@@ -1,8 +1,10 @@
+"""
+Base component logic. Mainly metaclass shenanigans.
+
+"""
 import logging
 from collections.abc import Iterable
-from functools import reduce
-from operator import xor
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 
 from barbarian.utils.data import make_hash
 
@@ -46,13 +48,6 @@ class _ComponentMeta(type):
             cls_instances = getattr(cls, cls.mangle('__flyweight_instances'))
 
             hash_kwargs = kwargs.copy()
-            # Note: this will break if instance contains dict (or
-            # other unhashable types) attributes. Flyweight should
-            # mostly concern simple components, so this may be okay.
-            # Also, nicked from:
-            # https://stackoverflow.com/questions/5884066/hashing-a-dictionary/65625434#65625434
-            # instance_hash = reduce(xor, map(hash, hash_kwargs.items()), 0)
-
             instance_hash = make_hash(hash_kwargs)
 
             if instance_hash not in cls_instances:
@@ -112,14 +107,14 @@ class Component(metaclass=_ComponentMeta):
     __serialize__ = False
     __flyweight__ = False
 
-    _initialized = False    # Will be set by _ComponentMeta.__call__ 
+    _initialized = False    # Will be set by _ComponentMeta.__call__
 
     @classmethod
     def mangle(cls, attr_name):
         """ Manually mangle dunder name to avoid scoping shenanigans. """
         # This may be overkill (just using a single undescore pseudo
         # private attribute is technically enough), but at least for flyweight
-        # components, having potential child classes share their instances 
+        # components, having potential child classes share their instances
         # with their parents smells like nasty bugs galore...
         if not attr_name.startswith('__'):
             raise ValueError('No need to mangle a name not starting with __')

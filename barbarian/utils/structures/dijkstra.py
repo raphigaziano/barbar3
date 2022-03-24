@@ -3,7 +3,6 @@ Dijkstra implementation.
 
 """
 import sys
-import gc
 import heapq
 import logging
 

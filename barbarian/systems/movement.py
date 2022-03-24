@@ -54,7 +54,7 @@ def move_actor(action, level):
             return systems.props.trigger(actor, prop)
     else:
         # Technically, the move action has failed, so we should explicitely
-        # reject it before returning a new one, in order to emit the fail 
+        # reject it before returning a new one, in order to emit the fail
         # event which might be needed for commands like autoexplore.
         if target := level.actors[destx, desty]:
             action.reject()

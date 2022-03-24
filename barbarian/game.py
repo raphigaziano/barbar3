@@ -1,3 +1,7 @@
+"""
+Main entry point / High level game logic.
+
+"""
 import logging
 import logging.config
 
@@ -10,14 +14,20 @@ from barbarian.actions import Action, ActionType, ActionError
 from barbarian.events import Event, EventType
 from barbarian.utils.rng import Rng
 
-from barbarian.settings import *
+from barbarian.settings import MAP_W, MAP_H, MAP_DEBUG, LOGCONFIG
 
 
 logger = logging.getLogger(__name__)
 
 
 class EndTurn(Exception):
-    pass
+    """
+    Raise this to abort a turn.
+
+    Loop will keep running, but unprocessed actors for the current
+    turn will be skipped.
+
+    """
 
 
 class Game:
@@ -66,7 +76,8 @@ class Game:
         components.init_components()
         systems.init_systems()
 
-    def init_logging(self):
+    @staticmethod
+    def init_logging():
         """ Configure logger """
         logging.config.dictConfig(LOGCONFIG)
         logger.debug("Logger setup - Done")
@@ -275,9 +286,8 @@ class Game:
                 if dead_actor == self.player:
                     self.is_running = False
                     raise EndTurn
-                else:
-                    e.processed = True
-                    self.current_level.actors.remove_e(dead_actor)
+                e.processed = True
+                self.current_level.actors.remove_e(dead_actor)
 
     ### NETWORK ###
     ###############

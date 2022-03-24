@@ -40,7 +40,6 @@ class TestSpawnZone(BaseFunctionalTestCase):
             self.assertEqual('trap', level.props.all[0].typed.type)
 
             self.assertEqual(2, len(level.items))
-            # Order should follow roll results
             self.assertIn('potion', (i.typed.type for _, __, i in level.items))
             self.assertIn('scroll', (i.typed.type for _, __, i in level.items))
 

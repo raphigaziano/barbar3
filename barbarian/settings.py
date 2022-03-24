@@ -39,4 +39,3 @@ LOGCONFIG = {
 RAWS_ROOT = 'raws'
 
 MAX_SPAWNS = 4  # per zone
-

@@ -30,7 +30,7 @@ def load_raws():
     - entity spawn table.
 
     """
-    for table_key in _entity_tables.keys():
+    for table_key in _entity_tables:
         fname = f'entities/{table_key}.yaml'
         load_raw_table(table_key, fname)
 
