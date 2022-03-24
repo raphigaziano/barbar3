@@ -7,7 +7,7 @@ import tcod.event
 
 
 class RunMode(BaseGameMode):
-    """ 
+    """
     Main game mode.
 
     This will handle actual gameplay and most direct interaction
@@ -73,47 +73,13 @@ class RunMode(BaseGameMode):
 
         return [e for e in entity_list if predicate(e)]
 
-    # TODO: have a dedicated "auto" mode for this ?
-    def _repeat_cmd(self, action_name, data=None):
-        """ 
-        Re-run an action until interrupted, either by an game or
-        ui event.
-
-        """
-        data = data or {}
-        while True:
-            self.client.send_request(Request.action(action_name, data))
-            self.client.render()
-            request = self.ui_events.handle(self.client.context)
-            if request:
-                return self.client.process_request(request)
-            for ge in self.client.gamestate.last_events:
-                match ge:
-                    case {
-                        'type': 'action_rejected',
-                        'data': {
-                            # FIXME: this should be one or the other,
-                            # depending on the action.
-                            # Can case check a passed in dict ???
-                            'type': ('move' | 'xplore'),
-                            'actor': {'name': 'player'},
-                        },
-                    }:
-                        break
-                    case {'type': 'actor_spotted'}:
-                        self.log_msg('Something dangerous is in view')
-                        break
-            else:
-                continue
-            break
-
     def cmd_move_r(self, data):
         """ Move repeatedly until an ennemy is spotted """
-        self._repeat_cmd('move', data)
+        self.push(AutoRunMode, action_name='move', action_data=data)
 
     def cmd_autoxplore(self, _):
         """ Same as above, but with an autoexploring move """
-        self._repeat_cmd('xplore')
+        self.push(AutoRunMode, action_name='xplore')
 
     def process_response(self, r):
         if r.status == 'OK':
@@ -183,5 +149,37 @@ class RunMode(BaseGameMode):
                 self.mapgen_index += 1
         # Normal rendering
         else:
-            renderer.render_all(
-                gamestate, self.gamelog, self.bloodstains)
+            renderer.render_all(gamestate, self.gamelog, self.bloodstains)
+
+
+class AutoRunMode(RunMode):
+    """
+    Re-run an action until interrupted, either by a game or ui event.
+
+    """
+    def __init__(self, client, action_name="", action_data=None):
+        super().__init__(client)
+        self.action_name = action_name
+        self.action_data = action_data or {}
+
+    def update(self, context):
+        self.client.send_request(
+            Request.action(self.action_name, self.action_data))
+        request = super().update(context)
+        if request:
+            self.pop()
+            return self.client.process_request(request)
+
+    def process_game_events(self, game_events):
+        for ge in game_events:
+            match ge:
+                case {
+                    'type': 'action_rejected',
+                    'data': {
+                        'actor': {'name': 'player'},
+                    },
+                } if ge['data']['type'] == self.action_name:
+                    self.pop()
+                case {'type': 'actor_spotted'}:
+                    self.log_msg('Something dangerous is in view')
+                    self.pop()

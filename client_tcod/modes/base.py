@@ -49,11 +49,11 @@ class ModeManager():
         # if self._modes:
         #     self.current_mode.on_revealed()
 
-    def push(self, mode_cls):
+    def push(self, mode_cls, **mode_kwargs):
         if self._modes:
             self.current_mode.next_mode = None
             # self.current_mode.on_obscured()
-        new_mode = mode_cls(self.client)
+        new_mode = mode_cls(self.client, **mode_kwargs)
         self._modes.append(new_mode)
         # self.current_mode.on_entered()
         logger.debug("Mode %s pushed on the stack", self.current_mode)
@@ -66,10 +66,11 @@ class ModeManager():
         # We nedd to grab the next mode now to handle replacement
         # (current_mode will break once it's been popped).
         next_mode = self.current_mode.next_mode
+        next_mode_kwargs = self.current_mode.next_mode_kwargs
         if self.current_mode.done:
             self.pop()
         if next_mode is not None:
-            self.push(next_mode)
+            self.push(next_mode, **next_mode_kwargs)
 
         # Let the current mode do its thing
         return self.current_mode.update(client.context)
@@ -84,19 +85,21 @@ class BaseGameMode:
         self.client = client
         self.done = False
         self.next_mode = None
+        self.next_mode_kwargs = None
 
     def pop(self):
         """ Signal the Mode manager to pop self. """
         self.done = True
 
-    def push(self, next_mode):
+    def push(self, next_mode, **mode_kwargs):
         """ Signal the Mode manager to push s onto self. """
         self.next_mode = next_mode
+        self.next_mode_kwargs = mode_kwargs
 
-    def replace_with(self, next_mode):
+    def replace_with(self, next_mode, **mode_kwargs):
         """ Shortcut: pop self & push s, effectively replacing self with s. """
         self.pop()
-        self.push(next_mode)
+        self.push(next_mode, **mode_kwargs)
 
     def cmd_setvar(self, data):
         k, v = data['key'], data['val']
