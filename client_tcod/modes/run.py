@@ -25,20 +25,6 @@ class RunMode(BaseGameMode):
         self.mapgen_index = 0
         self.mapgen_timer = 0.0
 
-    def cmd_change_level(self, data):
-        """
-        Regen the current level, or restart the game if it's not
-        running.
-
-        """
-        self.client.send_request(Request.action('change_level'))
-        status = self.client.response.status
-        if (
-            status == 'error' and
-            self.client.response.err_code == 'NOT_RUNNING'
-        ):
-            self.client.send_request(Request.start())
-
     def cmd_open_door(self, _):
         surrounding_doors = [
             d for d in self.get_surrounding_entities(

@@ -69,7 +69,7 @@ class RunEventHandler(BaseEventHandler):
         ### Debug commands ###
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_n):
-            return Request.client('change_level')
+            return Request.action('change_level')
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_r):
             return Request.client(
