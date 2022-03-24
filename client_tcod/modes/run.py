@@ -1,4 +1,4 @@
-from ..modes.base import BaseGameMode
+from ..modes.base import BaseGameMode, GameOverMode
 from ..nw import Request
 from ..ui_events import RunEventHandler
 from .. import constants
@@ -15,9 +15,10 @@ class RunMode(BaseGameMode):
 
     """
 
+    ui_events = RunEventHandler()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.ui_events = RunEventHandler()
 
         self.gamelog = []
         self.bloodstains = []
@@ -139,14 +140,21 @@ class RunMode(BaseGameMode):
             match ge:
                 case {
                     'type': 'action_accepted',
-                    'data': {'type': 'change_level'}
+                    'data': {'type': 'change_level'},
                 }:
                     self.bloodstains = []
                     self.mapgen_index = 0
 
-                case {'type': 'actor_died'}:
-                    self.bloodstains.append(
-                        ge['data']['actor']['pos'])
+                case {
+                    'type': 'actor_died',
+                    'data': {'actor': {'actor': {'is_player': False}}},
+                }:
+                    self.bloodstains.append(ge['data']['actor']['pos'])
+                case {
+                    'type': 'actor_died',
+                    'data': {'actor': {'actor': {'is_player': True}}},
+                }:
+                    self.replace_with(GameOverMode)
 
             self.log_event(ge)
 

@@ -4,6 +4,7 @@ Temporary client to interact with the barbarian game.
 """
 from .constants import *
 from .nw import Request
+from .modes.base import ModeManager, InitMode
 from .modes.run import RunMode
 from .render import TcodRenderer
 from .clock import Clock
@@ -26,7 +27,7 @@ class BarbarClient:
 
     def __init__(self):
         self.game = None
-        self.current_mode = RunMode(self)
+        self.game_modes = None
 
         self.context = None
         self.renderer = None
@@ -37,18 +38,23 @@ class BarbarClient:
         self.con = None
         self.response = None
 
-    def init(self, connection, seed):
+    @property
+    def current_mode(self):
+        return self.game_modes.current_mode
+
+    def init(self, connection):
         """ Init all client systems and start the game. """
         self.con = connection
         self.renderer = TcodRenderer()
         self.context = self.renderer.init_tcod()
         self.renderer.init_consoles()
 
+    def start(self, seed):
+        """ Init mode manager and start the ui loop. """
+        self.game_modes = ModeManager(self)
+        self.game_modes.push(InitMode)
         self.send_request(Request.start({'seed': seed}))
 
-    def start(self, connection, seed):
-        """ Init the client (see above) and start the ui loop. """
-        self.init(connection, seed)
         self.run()
 
     def render(self):
@@ -101,6 +107,9 @@ class BarbarClient:
 
         self.current_mode.process_response(self.response)
 
+    def cmd_start(self, _):
+        self.start(None)
+
     def cmd_shutdown(self, _):
         """ Shutdown systems and exit. """
         self.con.close()
@@ -112,7 +121,7 @@ class BarbarClient:
         """ Main client loop. """
         while True:
             self.render()
-            request = self.current_mode.ui_events.handle(self.context)
+            request = self.game_modes.update(self)
             if request:
                 self.process_request(request)
             self.clock.sync()

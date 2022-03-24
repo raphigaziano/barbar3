@@ -131,3 +131,14 @@ class RunEventHandler(BaseEventHandler):
 
     # def ev_mousemotion(self, ev):
     #     print(ev)
+
+
+class GameOverEventHandler(BaseEventHandler):
+
+    def ev_keydown(self, e):
+
+        if r := super().ev_keydown(e):
+            return r
+
+        if e.sym == tcod.event.K_n:
+            return Request.client('start')

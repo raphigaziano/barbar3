@@ -364,3 +364,17 @@ class TcodRenderer:
         self.render_ui(gamestate, gamelog)
 
         self.context.present(self.root_console)
+
+    def render_gameover_screen(self, gamestate):
+        self.render_hud(gamestate)
+
+        msg = 'You are dead!'
+        msg_x, msg_y = (C.SCREEN_W // 2) - (len(msg) // 2), 20
+        self.hud_console.print(msg_x, msg_y, msg, tcod.red)
+
+        msg = 'Press n to start a new run, or escape to quit.'
+        msg_x, msg_y = (C.SCREEN_W // 2) - (len(msg) // 2), 25
+        self.hud_console.print(msg_x, msg_y, msg, tcod.red)
+
+        self.hud_console.blit(self.root_console, bg_alpha=0.0)
+        self.context.present(self.root_console)

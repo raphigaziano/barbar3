@@ -32,4 +32,5 @@ if __name__ == '__main__':
         connection = DummyTCPClient(game=BarbarGame())
 
     client = BarbarClient()
-    sys.exit(client.start(connection, args.seed))
+    client.init(connection)
+    sys.exit(client.start(args.seed))
