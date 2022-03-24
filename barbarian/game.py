@@ -348,14 +348,16 @@ class Game:
 
     def process_set_request(self, d):
         """ Process a get request (ie set an internal valueà. """
+        # Val is set in the module namespace (via globals()).
+        # This should do for now, but we'll surely need a more robust
+        # settings system in the long run...
         k = d['key']
         if d.get('toggle'):
-            setattr(self, k, not getattr(self, k))
+            new_val = not globals()[k]
         else:
-            v = d['val']    # TODO: handle missing key error
-            setattr(self, k, v)
+            new_val = d['val']    # TODO: handle missing key error
 
-        new_val = getattr(self, k)
+        globals()[k] = new_val
         logger.debug('Set var %s to %s', k, new_val)
 
         return self.response('OK', key=k, val=new_val)

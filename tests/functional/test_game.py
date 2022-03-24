@@ -77,6 +77,24 @@ class TestGame(BaseGameTest):
         self.assertIn('dungeon', Rng._rngs)
         self.assertIn('spawn', Rng._rngs)
 
+    @patch('barbarian.systems.movement.change_level')
+    def test_setting_change_is_repercuted(self, patched_change_level):
+        # Temporary regression test (we'll surely need to change
+        # the way settings are handled at some point).
+        game = Game()
+
+        game.process_set_request({'key': 'MAP_DEBUG', 'val': True})
+        action = Action(ActionType.CHANGE_LEVEL)
+        game.process_action(action)
+        patched_change_level.assert_called_with(
+            action, game.world, game.player, debug=True)
+
+        game.process_set_request({'key': 'MAP_DEBUG', 'val': False})
+        action = Action(ActionType.CHANGE_LEVEL)
+        game.process_action(action)
+        patched_change_level.assert_called_with(
+            action, game.world, game.player, debug=False)
+
 
 class TestGameLoop(BaseGameTest):
 
