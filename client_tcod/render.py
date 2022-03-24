@@ -376,5 +376,5 @@ class TcodRenderer:
         msg_x, msg_y = (C.SCREEN_W // 2) - (len(msg) // 2), 25
         self.hud_console.print(msg_x, msg_y, msg, tcod.red)
 
-        self.hud_console.blit(self.root_console, bg_alpha=0.0)
+        self.hud_console.blit(self.root_console, bg_alpha=0.03)
         self.context.present(self.root_console)
