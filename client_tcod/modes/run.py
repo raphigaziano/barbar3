@@ -17,11 +17,12 @@ class RunMode(BaseGameMode):
 
     ui_events = RunEventHandler()
 
+    __gamelog = []
+    __bloodstains = []
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.gamelog = []
-        self.bloodstains = []
         self.mapgen_index = 0
         self.mapgen_timer = 0.0
 
@@ -94,14 +95,14 @@ class RunMode(BaseGameMode):
                     'type': 'action_accepted',
                     'data': {'type': 'change_level'},
                 }:
-                    self.bloodstains = []
+                    self.__bloodstains = []
                     self.mapgen_index = 0
 
                 case {
                     'type': 'actor_died',
                     'data': {'actor': {'actor': {'is_player': False}}},
                 }:
-                    self.bloodstains.append(ge['data']['actor']['pos'])
+                    self.__bloodstains.append(ge['data']['actor']['pos'])
                 case {
                     'type': 'actor_died',
                     'data': {'actor': {'actor': {'is_player': True}}},
@@ -111,7 +112,7 @@ class RunMode(BaseGameMode):
             self.log_event(ge)
 
     def log_msg(self, m):
-        self.gamelog.append((self.client.gamestate.tick, m))
+        self.__gamelog.append((self.client.gamestate.tick, m))
 
     # FIXME: Hacky, and relies too much on knowing the internal
     # event structure (ie, we need an event type enum or mapping
@@ -149,7 +150,7 @@ class RunMode(BaseGameMode):
                 self.mapgen_index += 1
         # Normal rendering
         else:
-            renderer.render_all(gamestate, self.gamelog, self.bloodstains)
+            renderer.render_all(gamestate, self.__gamelog, self.__bloodstains)
 
 
 class AutoRunMode(RunMode):
