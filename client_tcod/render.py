@@ -70,18 +70,11 @@ class TcodRenderer:
         self.context = None
 
     def init_tcod(self):
-        # tilesheet_name = 'dejavu10x10_gs_tc.png'
-        # tilesheet_cell_w, tilesheet_cell_h = 32, 8
-        # tilesheet_name = 'Markvii.png'
-        # tilesheet_cell_w, tilesheet_cell_h = 16, 16
-        # tilesheet_name =' Cheepicus_14x14.png'
-        # tilesheet_cell_w, tilesheet_cell_h = 16, 16
-        tilesheet_name = 'terminal10x10_gs_tc.png'
-        tilesheet_cell_w, tilesheet_cell_h = 32, 8
-        tilesheet_path = os.path.join(C.ASSETS_PATH, 'fonts', tilesheet_name)
+        tilesheet_path = os.path.join(
+            C.ASSETS_PATH, 'fonts', C.TILESHEET_NAME)
         ts = tcod.tileset.load_tilesheet(
-            tilesheet_path, tilesheet_cell_w, tilesheet_cell_h,
-            tcod.tileset.CHARMAP_TCOD)
+            tilesheet_path, 
+            C.TILESHEET_CELL_W, C.TILESHEET_CELL_H, C.TILESHEET_CHARMAP)
 
         self.context = tcod.context.new(
             columns=C.SCREEN_W, rows=C.SCREEN_H,

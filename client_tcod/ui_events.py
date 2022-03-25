@@ -4,6 +4,7 @@ Tcod event processing.
 """
 from .nw import Request
 from . import constants
+from .constants import MOVE_KEYS
 
 import tcod.event
 
@@ -62,38 +63,6 @@ class BaseEventHandler(tcod.event.EventDispatch[None]):
 class RunEventHandler(BaseEventHandler):
     """ Main hander, used for for actual game commands """
 
-    MOVE_KEYS = {  # key_symbol: (x, y)
-        # Arrow keys.
-        tcod.event.K_LEFT: (-1, 0),
-        tcod.event.K_RIGHT: (1, 0),
-        tcod.event.K_UP: (0, -1),
-        tcod.event.K_DOWN: (0, 1),
-        tcod.event.K_HOME: (-1, -1),
-        tcod.event.K_END: (-1, 1),
-        tcod.event.K_PAGEUP: (1, -1),
-        tcod.event.K_PAGEDOWN: (1, 1),
-        tcod.event.K_PERIOD: (0, 0),
-        # Numpad keys.
-        tcod.event.K_KP_1: (-1, 1),
-        tcod.event.K_KP_2: (0, 1),
-        tcod.event.K_KP_3: (1, 1),
-        tcod.event.K_KP_4: (-1, 0),
-        tcod.event.K_KP_6: (1, 0),
-        tcod.event.K_KP_7: (-1, -1),
-        tcod.event.K_KP_8: (0, -1),
-        tcod.event.K_KP_9: (1, -1),
-        tcod.event.K_CLEAR: (0, 0),  # Numpad `clear` key.
-        # Vi Keys.
-        tcod.event.K_h: (-1, 0),
-        tcod.event.K_j: (0, 1),
-        tcod.event.K_k: (0, -1),
-        tcod.event.K_l: (1, 0),
-        tcod.event.K_y: (-1, -1),
-        tcod.event.K_u: (1, -1),
-        tcod.event.K_b: (-1, 1),
-        tcod.event.K_n: (1, 1),
-    }
-
     def ev_keydown(self, e):
 
         if r := super().ev_keydown(e):
@@ -102,11 +71,11 @@ class RunEventHandler(BaseEventHandler):
         if r := super().debug_events(e):
             return r
 
-        if e.sym in self.MOVE_KEYS:
+        if e.sym in MOVE_KEYS:
             if e.mod & tcod.event.KMOD_LSHIFT:
-                return Request.client('move_r', {'dir': self.MOVE_KEYS[e.sym]})
+                return Request.client('move_r', {'dir': MOVE_KEYS[e.sym]})
             else:
-                return Request.action('move', {'dir': self.MOVE_KEYS[e.sym]})
+                return Request.action('move', {'dir': MOVE_KEYS[e.sym]})
 
         if e.sym in (tcod.event.K_COMMA, tcod.event.K_KP_5):
             return Request.action('idle')
@@ -167,8 +136,7 @@ class PromptDirectionEventHandler(BaseEventHandler):
         if e.sym == tcod.event.K_ESCAPE:
             return Request.client('pop_mode')
 
-        # FIXME: move those to constants
-        if e.sym in RunEventHandler.MOVE_KEYS:
-            dir_ = RunEventHandler.MOVE_KEYS[e.sym]
+        if e.sym in MOVE_KEYS:
+            dir_ = MOVE_KEYS[e.sym]
             if dir_ != (0, 0):
                 return dir_
