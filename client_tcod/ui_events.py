@@ -158,3 +158,17 @@ class GameOverEventHandler(BaseEventHandler):
 
         if e.sym == tcod.event.K_n:
             return Request.client('start')
+
+
+class PromptDirectionEventHandler(BaseEventHandler):
+
+    def ev_keydown(self, e):
+
+        if e.sym == tcod.event.K_ESCAPE:
+            return Request.client('pop_mode')
+
+        # FIXME: move those to constants
+        if e.sym in RunEventHandler.MOVE_KEYS:
+            dir_ = RunEventHandler.MOVE_KEYS[e.sym]
+            if dir_ != (0, 0):
+                return dir_

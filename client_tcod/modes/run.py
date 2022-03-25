@@ -1,5 +1,5 @@
 from ..modes.base import BaseGameMode, GameOverMode
-from ..modes.ui import DbgMapMode
+from ..modes.ui import DbgMapMode, PromptDirectionMode
 from ..nw import Request
 from ..ui_events import RunEventHandler
 
@@ -38,20 +38,25 @@ class RunMode(BaseGameMode):
 
     def _open_or_close_door(self, surrounding_doors):
 
+        def use_prop(px, py):
+            self.client.send_request(
+                Request.action('use_prop', {'propx': px, 'propy': py}))
+
+        def use_prop_from_dir(dx, dy):
+            px, py = self.client.gamestate.player['pos']
+            use_prop(px + dx, py + dy)
+
         if not surrounding_doors:
             print('TODO: log err msg')
         elif len(surrounding_doors) == 1:
             target_door = surrounding_doors[0]
             tdx, tdy = target_door['pos']
-            self.client.send_request(
-                Request.action('use_prop', {'propx': tdx, 'propy': tdy}))
+            use_prop(tdx, tdy)
         else:
-            # Same as above with a warning for now
-            print('FIXME: prompt user for direction!')
-            target_door = surrounding_doors[0]
-            tdx, tdy = target_door['pos']
-            self.client.send_request(
-                Request.action('use_prop', {'propx': tdx, 'propy': tdy}))
+            # Prompt user for direction
+            self.push(
+                PromptDirectionMode,
+                on_leaving=lambda s, dx, dy: use_prop_from_dir(dx, dy))
 
     def get_surrounding_entities(self, entity_list, entity_type=""):
         px, py = self.client.gamestate.player['pos']

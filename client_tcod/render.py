@@ -365,6 +365,23 @@ class TcodRenderer:
 
         self.context.present(self.root_console)
 
+    def render_prompt(self, prompt):
+
+        self.hud_console.clear(bg=(255, 0, 255))
+
+        prompt_x, prompt_y = (C.SCREEN_W // 2) - (len(prompt) // 2), 20
+        prompt_height = self.hud_console.get_height_rect(
+            prompt_x, prompt_y, 30, 30, prompt)
+
+        self.hud_console.draw_frame(
+            prompt_x-2, prompt_y-2, len(prompt) + 4, 5, fg=tcod.white, bg=tcod.black)
+        self.hud_console.print_box(
+            prompt_x, prompt_y, len(prompt), prompt_height,
+            prompt, tcod.yellow, tcod.black)
+
+        self.hud_console.blit(self.root_console, key_color=(255, 0, 255))
+        self.context.present(self.root_console)
+
     def render_gameover_screen(self, gamestate):
         self.render_hud(gamestate)
 

@@ -1,5 +1,5 @@
 from ..modes.base import BaseGameMode, GameOverMode
-from ..ui_events import DbgMapEventHandler
+from ..ui_events import DbgMapEventHandler, PromptDirectionEventHandler
 from .. import constants
 
 
@@ -36,3 +36,23 @@ class DbgMapMode(BaseGameMode):
                 self.mapgen_index += 1
         else:
             self.pop()
+
+
+class PromptDirectionMode(BaseGameMode):
+
+    ui_events = PromptDirectionEventHandler()
+
+    prompt = 'Chose a direction (esc to cancel): '
+
+    def update(self, context):
+
+        res = super().update(context)
+        if isinstance(res, tuple):
+            dx, dy = res
+            self.on_leaving(dx, dy)
+            self.pop()
+        else:
+            return res
+
+    def render(self, gamestate, renderer):
+        renderer.render_prompt(self.prompt)

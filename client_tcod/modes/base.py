@@ -42,20 +42,18 @@ class ModeManager():
         return self._modes[-1]
 
     def pop(self):
-        # self.current_mode.on_leaving()
         s = self._modes.pop()
         logger.debug("Mode %s popped off the stack", s)
         logger.debug("Current Mode Stack: %s", self._modes)
-        # if self._modes:
-        #     self.current_mode.on_revealed()
+        # - if self._modes:
+        # -     self.current_mode.on_revealed()
 
     def push(self, mode_cls, **mode_kwargs):
         if self._modes:
             self.current_mode.next_mode = None
-            # self.current_mode.on_obscured()
+            # - self.current_mode.on_obscured()
         new_mode = mode_cls(self.client, **mode_kwargs)
         self._modes.append(new_mode)
-        # self.current_mode.on_entered()
         logger.debug("Mode %s pushed on the stack", self.current_mode)
         logger.debug("Current Mode Stack: %s", self._modes)
 
@@ -81,11 +79,27 @@ class BaseGameMode:
 
     ui_events = BaseEventHandler()
 
-    def __init__(self, client):
+    def __init__(
+        self, client,
+        on_entered=None, on_leaving=None,
+        on_revealed=None, on_obscured=None,
+        *args, **kwargs
+    ):
         self.client = client
         self.done = False
         self.next_mode = None
         self.next_mode_kwargs = None
+
+        self._bind(on_entered, 'on_entered')
+        self._bind(on_leaving, 'on_leaving')
+        # self._bind(on_revealed, 'on_revealed')
+        # self._bind(on_obscured, 'on_obscured')
+
+    def _bind(self, f, as_name):
+        """ https://gist.github.com/hangtwenty/a928b801ca5c7705e94e """
+        if f is None:
+            f = lambda s, *args, **kwargs: None
+        setattr(self, as_name, f.__get__(self, self.__class__))
 
     def pop(self):
         """ Signal the Mode manager to pop self. """
