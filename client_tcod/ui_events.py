@@ -19,6 +19,40 @@ class BaseEventHandler(tcod.event.EventDispatch[None]):
         if e.sym == tcod.event.K_ESCAPE:
             return Request.client('shutdown')
 
+    def debug_events(self, e):
+
+        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_n):
+            return Request.action('change_level')
+
+        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_r):
+            from .modes.ui import DbgMapMode    # Avoid circular import
+            return Request.client('push_mode', {'new_mode': DbgMapMode})
+
+        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_d):
+            constants.MAP_DEBUG = not constants.MAP_DEBUG
+            return Request.set('MAP_DEBUG', val=constants.MAP_DEBUG)
+            # return Request.set('MAP_DEBUG', toggle=True)
+
+        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_x):
+            v = not constants.SHOW_UNEXPLORED_CELLS
+            return Request.client(
+                'setvar_g', {'key': 'SHOW_UNEXPLORED_CELLS', 'val': v})
+
+        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_p):
+            v = not constants.SHOW_PATH_INFO
+            return Request.client(
+                'setvar_g', {'key': 'SHOW_PATH_INFO', 'val': v})
+
+        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_v):
+            v = not constants.SHOW_SPAWN_ZONES
+            return Request.client(
+                'setvar_g', {'key': 'SHOW_SPAWN_ZONES', 'val': v})
+
+        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_f):
+            v = not constants.IGNORE_FOV
+            return Request.client(
+                'setvar_g', {'key': 'IGNORE_FOV', 'val': v})
+
     def handle(self, ctxt):
         """ Process UI events. """
         for e in tcod.event.get():
@@ -66,41 +100,8 @@ class RunEventHandler(BaseEventHandler):
         if r := super().ev_keydown(e):
             return r
 
-        ### Debug commands ###
-
-        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_n):
-            return Request.action('change_level')
-
-        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_r):
-            return Request.client(
-                'setvar', {'key': 'mapgen_index', 'val': 0})
-
-        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_d):
-            constants.MAP_DEBUG = not constants.MAP_DEBUG
-            return Request.set('MAP_DEBUG', val=constants.MAP_DEBUG)
-            # return Request.set('MAP_DEBUG', toggle=True)
-
-        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_x):
-            v = not constants.SHOW_UNEXPLORED_CELLS
-            return Request.client(
-                'setvar_g', {'key': 'SHOW_UNEXPLORED_CELLS', 'val': v})
-
-        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_p):
-            v = not constants.SHOW_PATH_INFO
-            return Request.client(
-                'setvar_g', {'key': 'SHOW_PATH_INFO', 'val': v})
-
-        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_v):
-            v = not constants.SHOW_SPAWN_ZONES
-            return Request.client(
-                'setvar_g', {'key': 'SHOW_SPAWN_ZONES', 'val': v})
-
-        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_f):
-            v = not constants.IGNORE_FOV
-            return Request.client(
-                'setvar_g', {'key': 'IGNORE_FOV', 'val': v})
-
-        ### "Game" cmds ###
+        if r := super().debug_events(e):
+            return r
 
         if e.sym in self.MOVE_KEYS:
             if e.mod & tcod.event.KMOD_LSHIFT:
@@ -131,6 +132,22 @@ class RunEventHandler(BaseEventHandler):
 
     # def ev_mousemotion(self, ev):
     #     print(ev)
+
+
+class DbgMapEventHandler(BaseEventHandler):
+
+    def ev_keydown(self, e):
+
+        if r := super().ev_keydown(e):
+            return r
+
+        # Call it *before* super().debug_cmds,to shadow its Alt-r event
+        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_r):
+            return Request.client(
+                'setvar', {'key': 'mapgen_index', 'val': 0})
+
+        if r := super().debug_events(e):
+            return r
 
 
 class GameOverEventHandler(BaseEventHandler):

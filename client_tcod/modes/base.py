@@ -101,6 +101,22 @@ class BaseGameMode:
         self.pop()
         self.push(next_mode, **mode_kwargs)
 
+    # mode command handlers: allow event handler to trigger a mode
+    # change.
+
+    def cmd_push_mode(self, data):
+        new_mode = data['new_mode']
+        new_mode_kwargs = data.get('kwargs', {})
+        self.push(new_mode, **new_mode_kwargs)
+
+    def cmd_pop_mode(self, data):
+        self.pop()
+
+    def cmd_replace_mode_with(self, data):
+        new_mode = data['new_mode']
+        new_mode_kwargs = data.get('kwargs', {})
+        self.replace_with(new_mode, **new_mode_kwargs)
+
     def cmd_setvar(self, data):
         k, v = data['key'], data['val']
         setattr(self, k, v)

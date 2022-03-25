@@ -1,7 +1,7 @@
 from ..modes.base import BaseGameMode, GameOverMode
+from ..modes.ui import DbgMapMode
 from ..nw import Request
 from ..ui_events import RunEventHandler
-from .. import constants
 
 import tcod.event
 
@@ -19,12 +19,6 @@ class RunMode(BaseGameMode):
 
     __gamelog = []
     __bloodstains = []
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.mapgen_index = 0
-        self.mapgen_timer = 0.0
 
     def cmd_open_door(self, _):
         surrounding_doors = [
@@ -84,7 +78,8 @@ class RunMode(BaseGameMode):
 
     def process_response(self, r):
         if r.status == 'OK':
-            self.process_game_events(self.client.gamestate.last_events)
+            if r.gs:
+                self.process_game_events(r.gs.last_events)
         if r.status == 'error':
             self.log_error(r)
 
@@ -96,7 +91,7 @@ class RunMode(BaseGameMode):
                     'data': {'type': 'change_level'},
                 }:
                     self.__bloodstains = []
-                    self.mapgen_index = 0
+                    self.push(DbgMapMode)
 
                 case {
                     'type': 'actor_died',
@@ -139,18 +134,7 @@ class RunMode(BaseGameMode):
             print(r)
 
     def render(self, gamestate, renderer):
-        # Map debug mode:
-        snapshots = gamestate.map_snapshots
-        if constants.MAP_DEBUG and self.mapgen_index < len(snapshots):
-            mapgen_step = snapshots[self.mapgen_index]
-            renderer.render_map_debug(mapgen_step)
-            self.mapgen_timer += 1   # FIXME incr by actual passed time
-            if self.mapgen_timer >= constants.MAP_DEBUG_DELAY:
-                self.mapgen_timer = 0.0
-                self.mapgen_index += 1
-        # Normal rendering
-        else:
-            renderer.render_all(gamestate, self.__gamelog, self.__bloodstains)
+        renderer.render_all(gamestate, self.__gamelog, self.__bloodstains)
 
 
 class AutoRunMode(RunMode):
