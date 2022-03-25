@@ -52,7 +52,7 @@ class BarbarClient:
     def start(self, seed):
         """ Init mode manager and start the ui loop. """
         self.game_modes = ModeManager(self)
-        self.game_modes.push(InitMode)
+        self.game_modes.push(InitMode())
         self.send_request(Request.start({'seed': seed}))
 
         self.run()
@@ -121,7 +121,7 @@ class BarbarClient:
         """ Main client loop. """
         while True:
             self.render()
-            request = self.game_modes.update(self)
+            request = self.game_modes.update()
             if request:
                 self.process_request(request)
             self.clock.sync()

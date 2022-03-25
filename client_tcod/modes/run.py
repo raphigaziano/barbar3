@@ -63,7 +63,7 @@ class RunMode(BaseGameMode):
             use_prop(tdx, tdy)
         else:
             # Prompt user for direction
-            self.push(PromptDirectionMode, on_leaving=use_prop_cb)
+            self.push(PromptDirectionMode(on_leaving=use_prop_cb))
 
         return True
 
@@ -84,11 +84,11 @@ class RunMode(BaseGameMode):
 
     def cmd_move_r(self, data):
         """ Move repeatedly until an ennemy is spotted """
-        self.push(AutoRunMode, action_name='move', action_data=data)
+        self.push(AutoRunMode(action_name='move', action_data=data))
 
     def cmd_autoxplore(self, _):
         """ Same as above, but with an autoexploring move """
-        self.push(AutoRunMode, action_name='xplore')
+        self.push(AutoRunMode(action_name='xplore'))
 
     def process_response(self, r):
         if r.status == 'OK':
@@ -105,7 +105,7 @@ class RunMode(BaseGameMode):
                     'data': {'type': 'change_level'},
                 }:
                     self.__bloodstains = []
-                    self.push(DbgMapMode)
+                    self.push(DbgMapMode())
 
                 case {
                     'type': 'actor_died',
@@ -116,7 +116,7 @@ class RunMode(BaseGameMode):
                     'type': 'actor_died',
                     'data': {'actor': {'actor': {'is_player': True}}},
                 }:
-                    self.replace_with(GameOverMode)
+                    self.replace_with(GameOverMode())
 
             self.log_event(ge)
 
@@ -156,15 +156,15 @@ class AutoRunMode(RunMode):
     Re-run an action until interrupted, either by a game or ui event.
 
     """
-    def __init__(self, client, action_name="", action_data=None):
-        super().__init__(client)
+    def __init__(self, action_name="", action_data=None):
+        super().__init__()
         self.action_name = action_name
         self.action_data = action_data or {}
 
-    def update(self, context):
+    def update(self):
         self.client.send_request(
             Request.action(self.action_name, self.action_data))
-        request = super().update(context)
+        request = super().update()
         if request:
             self.pop()
             return self.client.process_request(request)

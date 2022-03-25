@@ -45,8 +45,8 @@ class BasePromptMode(BaseGameMode):
 
     prompt = ''
 
-    def __init__(self, client, prompt='', *args, **kwargs):
-        super().__init__(client, *args, **kwargs)
+    def __init__(self, prompt='', *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.prompt = prompt or self.prompt
 
     def render(self, gamestate, renderer):

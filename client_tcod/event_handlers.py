@@ -26,11 +26,11 @@ class BaseEventHandler(tcod.event.EventDispatch[None]):
 
     def quit(self):
         from .modes.ui import PromptConfirmMode
-        self.mode.push(
-            PromptConfirmMode,
+        confirm = PromptConfirmMode(
             prompt='Are you sure you want to quit?',
             on_leaving=lambda _: self.mode.pop()
         )
+        self.mode.push(confirm)
 
     def handle(self, ctxt):
         """ Process UI events. """
@@ -48,7 +48,7 @@ class DebugEventsMixin:
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_r):
             from .modes.ui import DbgMapMode    # Avoid circular import
-            return self.mode.push(DbgMapMode)
+            return self.mode.push(DbgMapMode())
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_d):
             constants.MAP_DEBUG = not constants.MAP_DEBUG

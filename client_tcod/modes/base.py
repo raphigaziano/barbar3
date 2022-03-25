@@ -49,30 +49,29 @@ class ModeManager():
         # - if self._modes:
         # -     self.current_mode.on_revealed()
 
-    def push(self, mode_cls, **mode_kwargs):
+    def push(self, new_mode):
         if self._modes:
             self.current_mode.next_mode = None
             # - self.current_mode.on_obscured()
-        new_mode = mode_cls(self.client, **mode_kwargs)
+        new_mode.client = self.client
         self._modes.append(new_mode)
         logger.debug("Mode %s pushed on the stack", self.current_mode)
         logger.debug("Current Mode Stack: %s", self._modes)
 
-    def update(self, client):
+    def update(self):
 
         # Switch mode if requested
 
         # We nedd to grab the next mode now to handle replacement
         # (current_mode will break once it's been popped).
         next_mode = self.current_mode.next_mode
-        next_mode_kwargs = self.current_mode.next_mode_kwargs
         if self.current_mode.done:
             self.pop()
         if next_mode is not None:
-            self.push(next_mode, **next_mode_kwargs)
+            self.push(next_mode)
 
         # Let the current mode do its thing
-        return self.current_mode.update(client.context)
+        return self.current_mode.update()
 
 
 class BaseGameMode:
@@ -81,18 +80,16 @@ class BaseGameMode:
     event_handler_cls = BaseEventHandler
 
     def __init__(
-        self, client,
+        self, 
         on_entered=None, on_leaving=None,
         on_revealed=None, on_obscured=None,
         *args, **kwargs
     ):
-        self.client = client
-        self.done = False
-
+        self.client = None
         self.event_handler = self.event_handler_cls(self)
 
+        self.done = False
         self.next_mode = None
-        self.next_mode_kwargs = None
 
         self._bind(on_entered, '_cb_on_entered')
         self._bind(on_leaving, '_cb_on_leaving')
@@ -114,7 +111,7 @@ class BaseGameMode:
         return cb(**kwargs)
 
     def set_callback_kwargs(self, cb_name, kwargs):
-        setattr(self, f'{cb_name}_kwargs', kwargs)
+        setattr(self, f'_cb_{cb_name}_kwargs', kwargs)
 
     def on_entered(self):
         return self.callback('_cb_on_entered')
@@ -128,15 +125,18 @@ class BaseGameMode:
         """ Signal the Mode manager to pop self. """
         self.done = True
 
-    def push(self, next_mode, **mode_kwargs):
+    def push(self, next_mode):
         """ Signal the Mode manager to push s onto self. """
         self.next_mode = next_mode
-        self.next_mode_kwargs = mode_kwargs
 
-    def replace_with(self, next_mode, **mode_kwargs):
-        """ Shortcut: pop self & push s, effectively replacing self with s. """
+    def replace_with(self, next_mode):
+        """
+        Shortcut: pop self & push next_mode, effectively replacing self 
+        with next_mode.
+
+        """
         self.pop()
-        self.push(next_mode, **mode_kwargs)
+        self.push(next_mode)
 
     # --- Mode run ---
 
@@ -150,8 +150,8 @@ class BaseGameMode:
         setattr(constants, k, v)
         print(f"{k}: {getattr(constants, k)}")
 
-    def update(self, context):
-        return self.event_handler.handle(context)
+    def update(self):
+        return self.event_handler.handle(self.client.context)
 
     def process_request(self, r):
         cmd = r['data'].pop('cmd')
@@ -176,9 +176,9 @@ class InitMode(BaseGameMode):
 
     """
 
-    def update(self, _):
+    def update(self):
         from .run import RunMode
-        self.replace_with(RunMode)
+        self.replace_with(RunMode())
 
 
 class GameOverMode(BaseGameMode):
