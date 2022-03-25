@@ -26,7 +26,8 @@ class RunMode(BaseGameMode):
                 self.client.gamestate.props, 'door')
             if not d['openable']['open']
         ]
-        return self._open_or_close_door(surrounding_doors)
+        if not self._open_or_close_door(surrounding_doors):
+            self.log_msg('There are no closed doors around you.')
 
     def cmd_close_door(self, _):
         surrounding_doors = [
@@ -34,7 +35,8 @@ class RunMode(BaseGameMode):
                 self.client.gamestate.props, 'door')
             if d['openable']['open']
         ]
-        return self._open_or_close_door(surrounding_doors)
+        if not self._open_or_close_door(surrounding_doors):
+            self.log_msg('There are no opened doors around you.')
 
     def _open_or_close_door(self, surrounding_doors):
 
@@ -42,21 +44,24 @@ class RunMode(BaseGameMode):
             self.client.send_request(
                 Request.action('use_prop', {'propx': px, 'propy': py}))
 
-        def use_prop_from_dir(dx, dy):
+        def use_prop_from_dir(_, dx, dy):
             px, py = self.client.gamestate.player['pos']
             use_prop(px + dx, py + dy)
 
         if not surrounding_doors:
-            print('TODO: log err msg')
-        elif len(surrounding_doors) == 1:
+            return False
+
+        if len(surrounding_doors) == 1:
+            # Only one door around, no need to chose
             target_door = surrounding_doors[0]
             tdx, tdy = target_door['pos']
             use_prop(tdx, tdy)
         else:
             # Prompt user for direction
             self.push(
-                PromptDirectionMode,
-                on_leaving=lambda s, dx, dy: use_prop_from_dir(dx, dy))
+                PromptDirectionMode, on_leaving=use_prop_from_dir)
+
+        return True
 
     def get_surrounding_entities(self, entity_list, entity_type=""):
         px, py = self.client.gamestate.player['pos']
