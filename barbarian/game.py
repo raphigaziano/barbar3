@@ -352,10 +352,7 @@ class Game:
         # This should do for now, but we'll surely need a more robust
         # settings system in the long run...
         k = d['key']
-        if d.get('toggle'):
-            new_val = not globals()[k]
-        else:
-            new_val = d['val']    # TODO: handle missing key error
+        new_val = d['val']    # TODO: handle missing key error
 
         globals()[k] = new_val
         logger.debug('Set var %s to %s', k, new_val)

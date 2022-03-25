@@ -31,7 +31,6 @@ class BaseEventHandler(tcod.event.EventDispatch[None]):
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_d):
             constants.MAP_DEBUG = not constants.MAP_DEBUG
             return Request.set('MAP_DEBUG', val=constants.MAP_DEBUG)
-            # return Request.set('MAP_DEBUG', toggle=True)
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_x):
             v = not constants.SHOW_UNEXPLORED_CELLS

@@ -27,8 +27,8 @@ class Request(dict):
     def get(cls): pass # stub
 
     @classmethod
-    def set(cls, key, val=None, toggle=False):
-        d = {'key': key, 'val': val, 'toggle': toggle}
+    def set(cls, key, val=None):
+        d = {'key': key, 'val': val}
         return cls(session_key=cls.session_key, type='SET', data=d)
 
     @classmethod
