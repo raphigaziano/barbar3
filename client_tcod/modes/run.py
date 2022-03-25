@@ -44,7 +44,12 @@ class RunMode(BaseGameMode):
             self.client.send_request(
                 Request.action('use_prop', {'propx': px, 'propy': py}))
 
-        def use_prop_from_dir(_, dx, dy):
+        def use_prop_cb(_, dx, dy):
+            """
+            Prompt will return a direction, use it to get the actual door
+            position.
+
+            """
             px, py = self.client.gamestate.player['pos']
             use_prop(px + dx, py + dy)
 
@@ -58,8 +63,7 @@ class RunMode(BaseGameMode):
             use_prop(tdx, tdy)
         else:
             # Prompt user for direction
-            self.push(
-                PromptDirectionMode, on_leaving=use_prop_from_dir)
+            self.push(PromptDirectionMode, on_leaving=use_prop_cb)
 
         return True
 
