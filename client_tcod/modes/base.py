@@ -9,7 +9,7 @@ avoid confusion with gamestate.
 import logging
 
 from .. import constants
-from ..ui_events import BaseEventHandler, GameOverEventHandler
+from ..event_handlers import BaseEventHandler, GameOverEventHandler
 
 
 # set up logging to console
@@ -43,7 +43,7 @@ class ModeManager():
 
     def pop(self):
         popped = self._modes.pop()
-        popped.callback('on_leaving')
+        popped.on_leaving()
         logger.debug("Mode %s popped off the stack", popped)
         logger.debug("Current Mode Stack: %s", self._modes)
         # - if self._modes:
@@ -78,7 +78,7 @@ class ModeManager():
 class BaseGameMode:
     """ Base Mode class. """
 
-    ui_events = BaseEventHandler()
+    event_handler_cls = BaseEventHandler
 
     def __init__(
         self, client,
@@ -88,13 +88,18 @@ class BaseGameMode:
     ):
         self.client = client
         self.done = False
+
+        self.event_handler = self.event_handler_cls(self)
+
         self.next_mode = None
         self.next_mode_kwargs = None
 
-        self._bind(on_entered, 'on_entered')
-        self._bind(on_leaving, 'on_leaving')
+        self._bind(on_entered, '_cb_on_entered')
+        self._bind(on_leaving, '_cb_on_leaving')
         # self._bind(on_revealed, 'on_revealed')
         # self._bind(on_obscured, 'on_obscured')
+
+    # --- Callback ---
 
     def _bind(self, f, as_name):
         """ https://gist.github.com/hangtwenty/a928b801ca5c7705e94e """
@@ -107,6 +112,17 @@ class BaseGameMode:
         cb = getattr(self, cb_name)
         kwargs = getattr(self, f'{cb_name}_kwargs')
         return cb(**kwargs)
+
+    def set_callback_kwargs(self, cb_name, kwargs):
+        setattr(self, f'{cb_name}_kwargs', kwargs)
+
+    def on_entered(self):
+        return self.callback('_cb_on_entered')
+
+    def on_leaving(self):
+        return self.callback('_cb_on_leaving')
+
+    # --- Fsm management ---
 
     def pop(self):
         """ Signal the Mode manager to pop self. """
@@ -122,21 +138,7 @@ class BaseGameMode:
         self.pop()
         self.push(next_mode, **mode_kwargs)
 
-    # mode command handlers: allow event handler to trigger a mode
-    # change.
-
-    def cmd_push_mode(self, data):
-        new_mode = data['new_mode']
-        new_mode_kwargs = data.get('kwargs', {})
-        self.push(new_mode, **new_mode_kwargs)
-
-    def cmd_pop_mode(self, data):
-        self.pop()
-
-    def cmd_replace_mode_with(self, data):
-        new_mode = data['new_mode']
-        new_mode_kwargs = data.get('kwargs', {})
-        self.replace_with(new_mode, **new_mode_kwargs)
+    # --- Mode run ---
 
     def cmd_setvar(self, data):
         k, v = data['key'], data['val']
@@ -149,7 +151,7 @@ class BaseGameMode:
         print(f"{k}: {getattr(constants, k)}")
 
     def update(self, context):
-        return self.ui_events.handle(context)
+        return self.event_handler.handle(context)
 
     def process_request(self, r):
         cmd = r['data'].pop('cmd')
@@ -180,7 +182,8 @@ class InitMode(BaseGameMode):
 
 
 class GameOverMode(BaseGameMode):
-    ui_events = GameOverEventHandler()
+
+    event_handler_cls = GameOverEventHandler
 
     def render(self, gs, renderer):
         renderer.render_gameover_screen(gs)

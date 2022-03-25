@@ -1,12 +1,15 @@
 from ..modes.base import BaseGameMode, GameOverMode
-from ..ui_events import DbgMapEventHandler, PromptDirectionEventHandler
+from ..event_handlers import (
+    DbgMapEventHandler,
+    PromptConfirmEventHandler,
+    PromptDirectionEventHandler)
 from .. import constants
 
 
 class DbgMapMode(BaseGameMode):
     """ No-op mode used for debug rendering. """
 
-    ui_events = DbgMapEventHandler()
+    event_handler_cls = DbgMapEventHandler
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,22 +41,36 @@ class DbgMapMode(BaseGameMode):
             self.pop()
 
 
-class PromptDirectionMode(BaseGameMode):
+class BasePromptMode(BaseGameMode):
 
-    ui_events = PromptDirectionEventHandler()
+    prompt = ''
 
-    prompt = 'Chose a direction (esc to cancel): '
-
-    def update(self, context):
-
-        res = super().update(context)
-        if isinstance(res, tuple):
-            dx, dy = res
-            self.on_leaving_kwargs['dx'] = dx
-            self.on_leaving_kwargs['dy'] = dy
-            self.pop()
-        else:
-            return res
+    def __init__(self, client, prompt='', *args, **kwargs):
+        super().__init__(client, *args, **kwargs)
+        self.prompt = prompt or self.prompt
 
     def render(self, gamestate, renderer):
         renderer.render_prompt(self.prompt)
+
+
+class PromptConfirmMode(BasePromptMode):
+
+    event_handler_cls = PromptConfirmEventHandler
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prompt = f'{self.prompt} [Yn]'
+        self.confirmed = False
+
+    def confirm(self):
+        self.confirmed = True
+
+    def on_leaving(self):
+        if self.confirmed:
+            self.callback('_cb_on_leaving')
+
+
+class PromptDirectionMode(BasePromptMode):
+
+    event_handler_cls = PromptDirectionEventHandler
+    prompt = 'Chose a direction (esc to cancel): '

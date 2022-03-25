@@ -12,13 +12,34 @@ import tcod.event
 class BaseEventHandler(tcod.event.EventDispatch[None]):
     """ Base handler to process common events. """
 
+    def __init__(self, game_mode, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.mode = game_mode
+
     def ev_quit(self, e: tcod.event.Quit) -> dict:
-        return Request.client('shutdown')
+        return self.quit()
 
     def ev_keydown(self, e: tcod.event.KeyDown) -> dict:
 
         if e.sym == tcod.event.K_ESCAPE:
-            return Request.client('shutdown')
+            return self.quit()
+
+    def quit(self):
+        from .modes.ui import PromptConfirmMode
+        self.mode.push(
+            PromptConfirmMode,
+            prompt='Are you sure you want to quit?',
+            on_leaving=lambda _: self.mode.pop()
+        )
+
+    def handle(self, ctxt):
+        """ Process UI events. """
+        for e in tcod.event.get():
+            ctxt.convert_event(e)
+            return self.dispatch(e)
+
+
+class DebugEventsMixin:
 
     def debug_events(self, e):
 
@@ -27,7 +48,7 @@ class BaseEventHandler(tcod.event.EventDispatch[None]):
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_r):
             from .modes.ui import DbgMapMode    # Avoid circular import
-            return Request.client('push_mode', {'new_mode': DbgMapMode})
+            return self.mode.push(DbgMapMode)
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_d):
             constants.MAP_DEBUG = not constants.MAP_DEBUG
@@ -53,14 +74,8 @@ class BaseEventHandler(tcod.event.EventDispatch[None]):
             return Request.client(
                 'setvar_g', {'key': 'IGNORE_FOV', 'val': v})
 
-    def handle(self, ctxt):
-        """ Process UI events. """
-        for e in tcod.event.get():
-            ctxt.convert_event(e)
-            return self.dispatch(e)
 
-
-class RunEventHandler(BaseEventHandler):
+class RunEventHandler(DebugEventsMixin, BaseEventHandler):
     """ Main hander, used for for actual game commands """
 
     def ev_keydown(self, e):
@@ -102,7 +117,7 @@ class RunEventHandler(BaseEventHandler):
     #     print(ev)
 
 
-class DbgMapEventHandler(BaseEventHandler):
+class DbgMapEventHandler(DebugEventsMixin, BaseEventHandler):
 
     def ev_keydown(self, e):
 
@@ -129,14 +144,36 @@ class GameOverEventHandler(BaseEventHandler):
             return Request.client('start')
 
 
-class PromptDirectionEventHandler(BaseEventHandler):
+class BasePromptEventHandler(BaseEventHandler):
 
     def ev_keydown(self, e):
 
         if e.sym == tcod.event.K_ESCAPE:
-            return Request.client('pop_mode')
+            self.mode.pop()
+
+
+class PromptConfirmEventHandler(BasePromptEventHandler):
+
+    def ev_keydown(self, e):
+
+        super().ev_keydown(e)
+
+        if e.sym == tcod.event.K_y:
+            self.mode.confirm()
+
+        self.mode.pop()
+
+
+class PromptDirectionEventHandler(BasePromptEventHandler):
+
+    def ev_keydown(self, e):
+
+        super().ev_keydown(e)
 
         if e.sym in MOVE_KEYS:
             dir_ = MOVE_KEYS[e.sym]
             if dir_ != (0, 0):
-                return dir_
+                dx, dy = dir_
+                self.mode.set_callback_kwargs(
+                    'on_leaving', {'dx': dx, 'dy': dy})
+                self.mode.pop()

@@ -1,7 +1,7 @@
 from ..modes.base import BaseGameMode, GameOverMode
 from ..modes.ui import DbgMapMode, PromptDirectionMode
 from ..nw import Request
-from ..ui_events import RunEventHandler
+from ..event_handlers import RunEventHandler
 
 import tcod.event
 
@@ -15,7 +15,7 @@ class RunMode(BaseGameMode):
 
     """
 
-    ui_events = RunEventHandler()
+    event_handler_cls = RunEventHandler
 
     __gamelog = []
     __bloodstains = []
