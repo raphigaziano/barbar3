@@ -41,6 +41,10 @@ class ModeManager():
         # TODO: Bettr error handling. Raise a specific exception if empty?
         return self._modes[-1]
 
+    @property
+    def done(self):
+        return not self._modes
+
     def pop(self):
         popped = self._modes.pop()
         popped.on_leaving()
@@ -70,8 +74,9 @@ class ModeManager():
         if next_mode is not None:
             self.push(next_mode)
 
-        # Let the current mode do its thing
-        return self.current_mode.update()
+        if not self.done:
+            # Let the current mode do its thing
+            return self.current_mode.update()
 
 
 class BaseGameMode:

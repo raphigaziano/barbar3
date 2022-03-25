@@ -107,10 +107,7 @@ class BarbarClient:
 
         self.current_mode.process_response(self.response)
 
-    def cmd_start(self, _):
-        self.start(None)
-
-    def cmd_shutdown(self, _):
+    def shutdown(self):
         """ Shutdown systems and exit. """
         self.con.close()
         self.renderer.shutdown_tcod()
@@ -119,9 +116,11 @@ class BarbarClient:
 
     def run(self):
         """ Main client loop. """
-        while True:
+        while not self.game_modes.done:
             self.render()
             request = self.game_modes.update()
             if request:
                 self.process_request(request)
             self.clock.sync()
+
+        return self.shutdown()
