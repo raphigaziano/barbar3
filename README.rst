@@ -37,6 +37,9 @@ Game commands:
 - `<`: use stairs (up)
 - `>`: use stairs (down)
 
+- `Ctrl - o`: Manually open door
+- `Ctrl - c`: Manually close door
+
 - `Shift - <movment key (see above)>`: move until blocked or hostile gets in view
 - `Ctrl - x`: autoexplore
 
