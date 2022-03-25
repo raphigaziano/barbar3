@@ -28,7 +28,6 @@ def use_prop(action, level):
             new_action_args = prop.usable.action
             new_action_args.update(
                 prop.usable.get_actor_and_target(actor, prop))
-            action.accept()
             return Action.from_dict(new_action_args)
         else:
             logger.warning(
@@ -97,5 +96,3 @@ def open_or_close_door(action, level):
         actor.fov.compute(
             level, actor.pos.x, actor.pos.y,
             update_level=actor.is_player)
-
-    action.accept()
