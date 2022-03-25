@@ -42,8 +42,9 @@ class ModeManager():
         return self._modes[-1]
 
     def pop(self):
-        s = self._modes.pop()
-        logger.debug("Mode %s popped off the stack", s)
+        popped = self._modes.pop()
+        popped.callback('on_leaving')
+        logger.debug("Mode %s popped off the stack", popped)
         logger.debug("Current Mode Stack: %s", self._modes)
         # - if self._modes:
         # -     self.current_mode.on_revealed()
@@ -100,6 +101,12 @@ class BaseGameMode:
         if f is None:
             f = lambda s, *args, **kwargs: None
         setattr(self, as_name, f.__get__(self, self.__class__))
+        setattr(self, f'{as_name}_kwargs', {})
+
+    def callback(self, cb_name):
+        cb = getattr(self, cb_name)
+        kwargs = getattr(self, f'{cb_name}_kwargs')
+        return cb(**kwargs)
 
     def pop(self):
         """ Signal the Mode manager to pop self. """

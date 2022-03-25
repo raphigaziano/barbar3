@@ -49,7 +49,8 @@ class PromptDirectionMode(BaseGameMode):
         res = super().update(context)
         if isinstance(res, tuple):
             dx, dy = res
-            self.on_leaving(dx, dy)
+            self.on_leaving_kwargs['dx'] = dx
+            self.on_leaving_kwargs['dy'] = dy
             self.pop()
         else:
             return res
