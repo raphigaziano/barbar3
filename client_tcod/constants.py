@@ -38,20 +38,6 @@ class TileType(Enum):
 
 import tcod
 
-# TILESHEET_NAME = 'dejavu10x10_gs_tc.png'
-# TILESHEET_CELL_W, TILESHEET_CELL_H = 32, 8
-# TILESHEET_CHARMAP = tcod.tileset.CHARMAP_TCOD
-# TILESHEET_NAME = 'Markvii.png'
-# TILESHEET_CELL_W, TILESHEET_CELL_H = 16, 16
-# TILESHEET_CHARMAP = tcod.tileset.CHARMAP_CP437
-# TILESHEET_NAME = 'Cheepicus_14x14.png'
-# TILESHEET_CELL_W, TILESHEET_CELL_H = 16, 16
-# TILESHEET_CHARMAP = tcod.tileset.CHARMAP_CP437
-TILESHEET_NAME = 'terminal10x10_gs_tc.png'
-TILESHEET_CELL_W, TILESHEET_CELL_H = 32, 8
-TILESHEET_CHARMAP = tcod.tileset.CHARMAP_TCOD
-
-
 MOVE_KEYS = {  # key_symbol: (x, y)
     # Arrow keys.
     tcod.event.K_LEFT: (-1, 0),

@@ -126,8 +126,7 @@ class DbgMapEventHandler(DebugEventsMixin, BaseEventHandler):
 
         # Call it *before* super().debug_cmds,to shadow its Alt-r event
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_r):
-            return Request.client(
-                'setvar', {'key': 'mapgen_index', 'val': 0})
+            return Request.client('setvar', {'key': 'mapgen_index', 'val': 0})
 
         if r := super().debug_events(e):
             return r
@@ -172,8 +171,8 @@ class PromptDirectionEventHandler(BasePromptEventHandler):
 
         if e.sym in MOVE_KEYS:
             dir_ = MOVE_KEYS[e.sym]
-            if dir_ != (0, 0):
-                dx, dy = dir_
-                self.mode.set_callback_kwargs(
-                    'on_leaving', {'dx': dx, 'dy': dy})
-                self.mode.pop()
+            if dir_ == (0, 0):
+                return
+            dx, dy = dir_
+            self.mode.set_callback_kwargs('on_leaving', {'dx': dx, 'dy': dy})
+            self.mode.pop()

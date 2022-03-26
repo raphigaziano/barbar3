@@ -11,7 +11,7 @@ from .clock import Clock
 
 
 class BarbarClient:
-    """ 
+    """
     Main client class.
 
     Interact with the game via its connection component,
@@ -19,7 +19,7 @@ class BarbarClient:
     responses, and sending any request returned by the mode over the
     network.
 
-    Also holds a renderer instance which will take care drawing to 
+    Also holds a renderer instance which will take care drawing to
     the screen, as well as the current gamestate (retrieved from
     game responses).
 

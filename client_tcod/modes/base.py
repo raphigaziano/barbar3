@@ -46,6 +46,9 @@ class ModeManager():
         return not self._modes
 
     def pop(self):
+        # Make sure to call leave cb *after* we've popped its mode.
+        # This callback will probably often trigger another mode change, 
+        # which should be handled by its caller mode.
         popped = self._modes.pop()
         popped.on_leaving()
         logger.debug("Mode %s popped off the stack", popped)
@@ -98,8 +101,8 @@ class BaseGameMode:
 
         self._bind(on_entered, '_cb_on_entered')
         self._bind(on_leaving, '_cb_on_leaving')
-        # self._bind(on_revealed, 'on_revealed')
-        # self._bind(on_obscured, 'on_obscured')
+        # self._bind(on_revealed, '_cb_on_revealed')
+        # self._bind(on_obscured, '_cb_on_obscured')
 
     # --- Callback ---
 

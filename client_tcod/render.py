@@ -8,12 +8,25 @@ from . import constants as C
 
 import tcod
 
+# TILESHEET_NAME = 'dejavu10x10_gs_tc.png'
+# TILESHEET_CELL_W, TILESHEET_CELL_H = 32, 8
+# TILESHEET_CHARMAP = tcod.tileset.CHARMAP_TCOD
+# TILESHEET_NAME = 'Markvii.png'
+# TILESHEET_CELL_W, TILESHEET_CELL_H = 16, 16
+# TILESHEET_CHARMAP = tcod.tileset.CHARMAP_CP437
+# TILESHEET_NAME = 'Cheepicus_14x14.png'
+# TILESHEET_CELL_W, TILESHEET_CELL_H = 16, 16
+# TILESHEET_CHARMAP = tcod.tileset.CHARMAP_CP437
+TILESHEET_NAME = 'terminal10x10_gs_tc.png'
+TILESHEET_CELL_W, TILESHEET_CELL_H = 32, 8
+TILESHEET_CHARMAP = tcod.tileset.CHARMAP_TCOD
 
 TileGlyphs = {
     C.TileType.FLOOR: '.',
     C.TileType.WALL: '#',
 }
 
+# fg
 TileColors = {
     C.TileType.FLOOR: tcod.Color(0, 127, 0),
     C.TileType.WALL: tcod.Color(0, 255, 0),
@@ -29,8 +42,32 @@ GFX_DATA = {
     'closed_door': {'fg_color': tcod.yellow},
 }
 
+TRANS_COLOR = tcod.Color(255, 0, 255)
+
+FLOOR_BG = None
+FLOOR_BG_OOF = None
+
 BLOOD_COLOR = tcod.Color(63, 0, 0)
+
 TOOLTIP_FG = tcod.yellow
+TOOLTIP_BG = tcod.black
+
+LOG_FG = tcod.yellow
+LOG_BG = tcod.light_red
+LOG_FRAME_FG = tcod.yellow
+LOG_FRAME_BG = tcod.lighter_red
+
+STATS_FG = tcod.yellow
+STATS_BG = tcod.blue
+STATS_FRAME_FG = tcod.yellow
+STATS_FRAME_BG = tcod.lighter_red
+
+PROMPT_FRAME_FG = tcod.white
+PROMPT_FRAME_BG = tcod.black
+PROMPT_FG = tcod.yellow
+PROMPT_BG = tcod.black
+
+GAMEOVER_FG = tcod.red
 
 CP437_GLYPHS = {
     0:  9,      # Pillar because we can't see neighbors
@@ -71,10 +108,10 @@ class TcodRenderer:
 
     def init_tcod(self):
         tilesheet_path = os.path.join(
-            C.ASSETS_PATH, 'fonts', C.TILESHEET_NAME)
+            C.ASSETS_PATH, 'fonts', TILESHEET_NAME)
         ts = tcod.tileset.load_tilesheet(
             tilesheet_path, 
-            C.TILESHEET_CELL_W, C.TILESHEET_CELL_H, C.TILESHEET_CHARMAP)
+            TILESHEET_CELL_W, TILESHEET_CELL_H, TILESHEET_CHARMAP)
 
         self.context = tcod.context.new(
             columns=C.SCREEN_W, rows=C.SCREEN_H,
@@ -125,10 +162,10 @@ class TcodRenderer:
                 self.map_console.put_char(x, y, ch)
             else:
                 fg_color = TileColors.get(c)
-                bg_color = BLOOD_COLOR if [x,y] in bloodstains else None
+                bg_color = BLOOD_COLOR if [x,y] in bloodstains else FLOOR_BG
                 if not show_whole_map and not visible[cell_idx]:
                     fg_color = tcod.grey
-                    bg_color = None
+                    bg_color = FLOOR_BG_OOF
                 ch = TileGlyphs.get(c, ' ')
                 self.map_console.print(x, y, ch, fg_color, bg_color)
 
@@ -227,29 +264,31 @@ class TcodRenderer:
                 y = my
                 for s in tooltip:
                     self.hud_console.print_box(
-                        left_x, y, width, 1, s, TOOLTIP_FG)
+                        left_x, y, width, 1, s, TOOLTIP_FG, TOOLTIP_BG)
                     y += 1
                 self.hud_console.print(
-                    arrow_pos_x, arrow_pos_y, '->', TOOLTIP_FG)
+                    arrow_pos_x, arrow_pos_y, '->', TOOLTIP_FG, TOOLTIP_BG)
             else:
                 (arrow_pos_x, arrow_pos_y) = mx + 1, my
                 left_x = mx + 3
                 y = my
                 for s in tooltip:
                     self.hud_console.print_box(
-                        left_x + 1, y, width, 1, s, TOOLTIP_FG)
+                        left_x + 1, y, width, 1, s, TOOLTIP_FG, TOOLTIP_BG)
                     y += 1
                 self.hud_console.print(
-                    arrow_pos_x, arrow_pos_y, '<-', TOOLTIP_FG)
+                    arrow_pos_x, arrow_pos_y, '<-', TOOLTIP_FG, TOOLTIP_BG)
 
+    _path_colors = [tcod.yellow, tcod.orange, tcod.red, tcod.purple, tcod.blue]
     _zone_colors = []
     def render_debug_overlays(self, gamestate):
         if C.SHOW_PATH_INFO:
             for idx, cval in enumerate(gamestate.map['pathmap']):
                 x, y = idx_to_c(idx, gamestate.map['width'])
-                cols = [tcod.yellow, tcod.orange, tcod.red, tcod.purple, tcod.blue]
                 col_idx = cval // 10
-                color = cols[col_idx] if col_idx < len(cols) else tcod.white
+                color = (
+                    self._path_colors[col_idx] if col_idx < len(self._path_colors) 
+                    else tcod.white)
                 char = str(cval)[-1]
                 self.hud_console.print(x, y, char, color, bg=tcod.black)
 
@@ -268,7 +307,7 @@ class TcodRenderer:
                     self.hud_console.print(x, y, str(i), color)
 
     def render_hud(self, gamestate):
-        self.hud_console.clear()
+        self.hud_console.clear(bg=TRANS_COLOR)
 
         self.render_debug_overlays(gamestate)
 
@@ -281,31 +320,36 @@ class TcodRenderer:
         self.hud_console.print(
             0, 0, f'median fps: {gamestate.clock.median_fps:.2f}', tcod.yellow)
 
-        self.hud_console.blit(self.map_console, bg_alpha=0.0)
+        self.hud_console.blit(self.map_console, key_color=TRANS_COLOR)
 
     def render_stats(self, gamestate):
-        self.stats_console.clear()
+        self.stats_console.clear(fg=STATS_FG, bg=STATS_BG)
 
         self.stats_console.draw_frame(0, 0, C.STATS_CONSOLE_W, C.STATS_CONSOLE_H)
         self.stats_console.print_box(
-            0, 0, C.STATS_CONSOLE_W, 1, " Stats ", fg=tcod.black, bg=tcod.white, alignment=tcod.CENTER)
+            0, 0, C.STATS_CONSOLE_W, 1, " Stats ",
+            fg=STATS_FRAME_FG, bg=STATS_FRAME_BG, alignment=tcod.CENTER)
 
         cd, md = gamestate.current_depth, gamestate.max_depth
-        self.stats_console.print(1, 1, f'Current depth: {cd}/{md}')
+        self.stats_console.print(
+            1, 1, f'Current depth: {cd}/{md}', fg=STATS_FG, bg=STATS_BG)
 
         hp = gamestate.player['health']['hp']
         str_ = gamestate.player['stats']['strength']
-        self.stats_console.print(1, 3, f'HP: {hp}')
-        self.stats_console.print(1, 4, f'Strength: {str_}')
+        self.stats_console.print(
+            1, 3, f'HP: {hp}', fg=STATS_FG, bg=STATS_BG)
+        self.stats_console.print(
+            1, 4, f'Strength: {str_}', fg=STATS_FG, bg=STATS_BG)
 
         self.stats_console.blit(self.root_console, C.STATS_CONSOLE_X, C.STATS_CONSOLE_Y)
 
     def render_log(self, gamelog):
-        self.log_console.clear()
+        self.log_console.clear(fg=LOG_FG, bg=LOG_BG)
 
         self.log_console.draw_frame(0, 0, C.LOG_CONSOLE_W, C.LOG_CONSOLE_H)
         self.log_console.print_box(
-            0, 0, C.LOG_CONSOLE_W, 1, " Message Log ", fg=tcod.black, bg=tcod.white, alignment=tcod.CENTER)
+            0, 0, C.LOG_CONSOLE_W, 1, " Message Log ",
+            fg=LOG_FRAME_FG, bg=LOG_FRAME_BG, alignment=tcod.CENTER)
 
         log_border = 2
         log_w, log_h = C.LOG_CONSOLE_W - log_border, C.LOG_CONSOLE_H - log_border
@@ -340,7 +384,9 @@ class TcodRenderer:
             y = i
             # print_box or print_rect ?
             offsety += self.log_console.print_box(
-                1, y+offsety, log_w, C.LOG_CONSOLE_H-offsety, msg) - 1
+                1, y+offsety, log_w, C.LOG_CONSOLE_H-offsety, msg,
+                fg=LOG_FG, bg=LOG_BG
+            ) - 1
 
         self.log_console.blit(self.root_console, C.LOG_CONSOLE_X, C.LOG_CONSOLE_Y)
 
@@ -367,10 +413,11 @@ class TcodRenderer:
             prompt_x, prompt_y, 30, 30, prompt)
 
         self.hud_console.draw_frame(
-            prompt_x-2, prompt_y-2, len(prompt) + 4, 5, fg=tcod.white, bg=tcod.black)
+            prompt_x-2, prompt_y-2, len(prompt) + 4, 5,
+            fg=PROMPT_FRAME_FG, bg=PROMPT_FRAME_BG)
         self.hud_console.print_box(
-            prompt_x, prompt_y, len(prompt), prompt_height,
-            prompt, tcod.yellow, tcod.black)
+            prompt_x, prompt_y, len(prompt), prompt_height, prompt,
+            PROMPT_FG, PROMPT_BG)
 
         self.hud_console.blit(self.root_console, key_color=(255, 0, 255))
         self.context.present(self.root_console)
@@ -380,11 +427,11 @@ class TcodRenderer:
 
         msg = 'You are dead!'
         msg_x, msg_y = (C.SCREEN_W // 2) - (len(msg) // 2), 20
-        self.hud_console.print(msg_x, msg_y, msg, tcod.red)
+        self.hud_console.print(msg_x, msg_y, msg, GAMEOVER_FG)
 
         msg = 'Press n to start a new run, or escape to quit.'
         msg_x, msg_y = (C.SCREEN_W // 2) - (len(msg) // 2), 25
-        self.hud_console.print(msg_x, msg_y, msg, tcod.red)
+        self.hud_console.print(msg_x, msg_y, msg, GAMEOVER_FG)
 
         self.hud_console.blit(self.root_console, bg_alpha=0.03)
         self.context.present(self.root_console)
