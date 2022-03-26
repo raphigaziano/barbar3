@@ -53,14 +53,14 @@ TOOLTIP_FG = tcod.yellow
 TOOLTIP_BG = tcod.black
 
 LOG_FG = tcod.yellow
-LOG_BG = tcod.light_red
-LOG_FRAME_FG = tcod.yellow
-LOG_FRAME_BG = tcod.lighter_red
+LOG_BG = tcod.black
+LOG_FRAME_FG = tcod.white
+LOG_FRAME_BG = tcod.black
 
 STATS_FG = tcod.yellow
-STATS_BG = tcod.blue
-STATS_FRAME_FG = tcod.yellow
-STATS_FRAME_BG = tcod.lighter_red
+STATS_BG = tcod.black
+STATS_FRAME_FG = tcod.white
+STATS_FRAME_BG = tcod.black
 
 PROMPT_FRAME_FG = tcod.white
 PROMPT_FRAME_BG = tcod.black
@@ -68,6 +68,7 @@ PROMPT_FG = tcod.yellow
 PROMPT_BG = tcod.black
 
 GAMEOVER_FG = tcod.red
+GAMEOVER_BG = tcod.black
 
 CP437_GLYPHS = {
     0:  9,      # Pillar because we can't see neighbors
@@ -325,7 +326,9 @@ class TcodRenderer:
     def render_stats(self, gamestate):
         self.stats_console.clear(fg=STATS_FG, bg=STATS_BG)
 
-        self.stats_console.draw_frame(0, 0, C.STATS_CONSOLE_W, C.STATS_CONSOLE_H)
+        self.stats_console.draw_frame(
+            0, 0, C.STATS_CONSOLE_W, C.STATS_CONSOLE_H, 
+            fg=STATS_FRAME_FG, bg=STATS_FRAME_BG)
         self.stats_console.print_box(
             0, 0, C.STATS_CONSOLE_W, 1, " Stats ",
             fg=STATS_FRAME_FG, bg=STATS_FRAME_BG, alignment=tcod.CENTER)
@@ -346,7 +349,9 @@ class TcodRenderer:
     def render_log(self, gamelog):
         self.log_console.clear(fg=LOG_FG, bg=LOG_BG)
 
-        self.log_console.draw_frame(0, 0, C.LOG_CONSOLE_W, C.LOG_CONSOLE_H)
+        self.log_console.draw_frame(
+            0, 0, C.LOG_CONSOLE_W, C.LOG_CONSOLE_H,
+            fg=LOG_FRAME_FG, bg=LOG_FRAME_BG)
         self.log_console.print_box(
             0, 0, C.LOG_CONSOLE_W, 1, " Message Log ",
             fg=LOG_FRAME_FG, bg=LOG_FRAME_BG, alignment=tcod.CENTER)
@@ -423,7 +428,8 @@ class TcodRenderer:
         self.context.present(self.root_console)
 
     def render_gameover_screen(self, gamestate):
-        self.render_hud(gamestate)
+
+        self.hud_console.clear(bg=GAMEOVER_BG)
 
         msg = 'You are dead!'
         msg_x, msg_y = (C.SCREEN_W // 2) - (len(msg) // 2), 20
