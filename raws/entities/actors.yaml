@@ -5,6 +5,7 @@ player:
     _parent: _base_actor
     typed:   { type: 'player' }
     actor:   { is_player: True }
+    inventory: {}
     fov:     { range: 10 }      
     health:  { hp: 25 }
     stats:   { strength: 5 }

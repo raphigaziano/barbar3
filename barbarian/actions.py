@@ -34,6 +34,8 @@ class ActionType(StringAutoEnum):
     XPLORE = auto()
     ATTACK = auto()
     INFLICT_DMG = auto()
+    GET_ITEM = auto()
+    DROP_ITEM = auto()
     USE_PROP = auto()
     OPEN_DOOR = auto()
     CLOSE_DOOR = auto()

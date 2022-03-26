@@ -1,16 +1,21 @@
+_base_item:
+    item: {}
 _base_potion:
+    _parent: _base_item
     typed: { type: potion }
     visible:
         glyph: '!'
 health_potion:
     _parent: _base_potion
+    named: { name: health potion }
 _base_scroll:
+    _parent: _base_item
     typed: { type: scroll }
     visible:
         glyph: '#'
 scroll_of_doom:
     _parent: _base_scroll
+    named: { name: scroll of doom }
 scroll_of_woop:
     _parent: _base_scroll
-    visible:
-        glyph: '?'      # FIXME: testing overiding parent data
+    named: { name: scroll of woop }

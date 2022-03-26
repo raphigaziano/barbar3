@@ -95,6 +95,11 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
         if e.sym in (tcod.event.K_COMMA, tcod.event.K_KP_5):
             return Request.action('idle')
 
+        if e.sym in (tcod.event.K_SEMICOLON, tcod.event.K_g):
+            return Request.action('get_item')
+        if e.sym == tcod.event.K_d:
+            return Request.action('drop_item')
+
         if (e.mod & tcod.event.KMOD_LCTRL and e.sym == tcod.event.K_o):
             return Request.client('open_door')
         if (e.mod & tcod.event.KMOD_LCTRL and e.sym == tcod.event.K_c):
