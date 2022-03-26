@@ -25,6 +25,7 @@ def use_prop(action, level):
             if (prop.usable.use_key and
                 prop.usable.use_key != data['use_key']):
                 return action.reject(msg="You can't do that here")
+            action.accept()
             new_action_args = prop.usable.action
             new_action_args.update(
                 prop.usable.get_actor_and_target(actor, prop))
