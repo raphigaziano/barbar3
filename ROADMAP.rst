@@ -10,6 +10,7 @@ Internal
 
 - Add game modes (states) to client. Will be required to handle ui for items
   and other things.
+  - Basics done. API will probably evolve as we add more modes.
 - Action validation
 - Data driven action definitions ?
 - Data driven component definitions ?
