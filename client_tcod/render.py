@@ -67,6 +67,15 @@ PROMPT_FRAME_BG = tcod.black
 PROMPT_FG = tcod.yellow
 PROMPT_BG = tcod.black
 
+MENU_FRAME_FG = tcod.white
+MENU_FRAME_BG = tcod.black
+MENU_BG = tcod.black
+MENU_FG = tcod.white
+MENU_ITEM_FG = tcod.white
+MENU_ITEM_BG = tcod.black
+MENU_CURSOR_FG = tcod.yellow
+MENU_CURSOR_BG = tcod.black
+
 GAMEOVER_FG = tcod.red
 GAMEOVER_BG = tcod.black
 
@@ -411,7 +420,7 @@ class TcodRenderer:
 
     def render_prompt(self, prompt):
 
-        self.hud_console.clear(bg=(255, 0, 255))
+        self.hud_console.clear(bg=TRANS_COLOR)
 
         prompt_x, prompt_y = (C.SCREEN_W // 2) - (len(prompt) // 2), 20
         prompt_height = self.hud_console.get_height_rect(
@@ -424,7 +433,42 @@ class TcodRenderer:
             prompt_x, prompt_y, len(prompt), prompt_height, prompt,
             PROMPT_FG, PROMPT_BG)
 
-        self.hud_console.blit(self.root_console, key_color=(255, 0, 255))
+        self.hud_console.blit(self.root_console, key_color=TRANS_COLOR)
+        self.context.present(self.root_console)
+
+    def render_menu(self, menu_mode):
+
+        self.hud_console.clear(bg=TRANS_COLOR)
+
+        items = menu_mode.menu_items
+        cursor_idx = menu_mode.cursor_idx
+
+        if items:
+            menu_width = max(
+                len(item_name) + 5 for _, item_name in items) + 6
+            menu_height = len(items) + 5
+        else:
+            menu_width, menu_height = 30, 8
+        menu_x, menu_y = (C.SCREEN_W // 2) - (menu_width // 2), 15
+
+        self.hud_console.draw_frame(
+            menu_x, menu_y, menu_width, menu_height,
+            fg=MENU_FRAME_FG, bg=MENU_FRAME_BG)
+        self.hud_console.print_box(
+            menu_x, menu_y, menu_width, 1, f' {menu_mode.title} ',
+            MENU_FRAME_FG, MENU_FRAME_BG, alignment=tcod.CENTER)
+
+        items_offset_x = menu_x + 2
+        items_offset_y = menu_y + 3
+
+        for i, (_, item_name) in enumerate(menu_mode.menu_items):
+            item_str = f'({chr(65 + i)}) - {item_name}'
+            fg = MENU_CURSOR_FG if (i == cursor_idx) else MENU_ITEM_FG
+            bg = MENU_CURSOR_BG if (i == cursor_idx) else MENU_ITEM_BG
+            self.hud_console.print(
+                items_offset_x, items_offset_y + i, item_str, fg=fg, bg=bg)
+
+        self.hud_console.blit(self.root_console, key_color=TRANS_COLOR)
         self.context.present(self.root_console)
 
     def render_gameover_screen(self, gamestate):

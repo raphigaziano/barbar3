@@ -96,9 +96,9 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
             return Request.action('idle')
 
         if e.sym in (tcod.event.K_SEMICOLON, tcod.event.K_g):
-            return Request.action('get_item')
+            return self.mode.get_item()
         if e.sym == tcod.event.K_d:
-            return Request.action('drop_item')
+            return self.mode.drop_item()
 
         if (e.mod & tcod.event.KMOD_LCTRL and e.sym == tcod.event.K_o):
             return Request.client('open_door')
@@ -116,7 +116,7 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
             return Request.client('autoxplore')
 
         if e.sym == tcod.event.K_i:
-            return Request.action('INVALID LOL')
+            self.mode.show_inventory()
 
     # def ev_mousemotion(self, ev):
     #     print(ev)
@@ -148,7 +148,7 @@ class GameOverEventHandler(BaseEventHandler):
             return Request.client('start')
 
 
-class BasePromptEventHandler(BaseEventHandler):
+class BaseUIModalEventHandler(BaseEventHandler):
 
     def ev_keydown(self, e):
 
@@ -156,7 +156,7 @@ class BasePromptEventHandler(BaseEventHandler):
             self.mode.pop()
 
 
-class PromptConfirmEventHandler(BasePromptEventHandler):
+class PromptConfirmEventHandler(BaseUIModalEventHandler):
 
     def ev_keydown(self, e):
 
@@ -168,16 +168,29 @@ class PromptConfirmEventHandler(BasePromptEventHandler):
         self.mode.pop()
 
 
-class PromptDirectionEventHandler(BasePromptEventHandler):
+class PromptDirectionEventHandler(BaseUIModalEventHandler):
 
     def ev_keydown(self, e):
 
         super().ev_keydown(e)
 
-        if e.sym in MOVE_KEYS:
-            dir_ = MOVE_KEYS[e.sym]
+        if (dir_ := MOVE_KEYS.get(e.sym, None)):
             if dir_ == (0, 0):
                 return
             dx, dy = dir_
             self.mode.set_callback_kwargs('on_leaving', {'dx': dx, 'dy': dy})
+            self.mode.pop()
+
+
+class MenuEventHandler(BaseUIModalEventHandler):
+
+    def ev_keydown(self, e):
+
+        super().ev_keydown(e)
+
+        if (dir_ := MOVE_KEYS.get(e.sym, None)):
+            self.mode.set_cursor(dir_)
+
+        if e.sym == tcod.event.K_RETURN:
+            self.mode.select_item()
             self.mode.pop()

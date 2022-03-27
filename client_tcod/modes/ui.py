@@ -2,7 +2,9 @@ from ..modes.base import BaseGameMode, GameOverMode
 from ..event_handlers import (
     DbgMapEventHandler,
     PromptConfirmEventHandler,
-    PromptDirectionEventHandler)
+    PromptDirectionEventHandler,
+    MenuEventHandler,
+)
 from .. import constants
 
 
@@ -67,10 +69,55 @@ class PromptConfirmMode(BasePromptMode):
 
     def on_leaving(self):
         if self.confirmed:
-            self.callback('_cb_on_leaving')
+            super().on_leaving()
 
 
 class PromptDirectionMode(BasePromptMode):
 
     event_handler_cls = PromptDirectionEventHandler
     prompt = 'Chose a direction (esc to cancel): '
+
+
+class MenuMode(BaseGameMode):
+
+    event_handler_cls = MenuEventHandler
+
+    def __init__(self, title, items, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title = title
+        self.menu_items = items
+        self.cursor_idx = 0
+        self._selected = None
+
+    @property
+    def selected(self):
+        if self._selected:
+            return self._selected[0]
+        return None
+
+    def set_cursor(self, cursor_dir):
+        _, dy = cursor_dir
+        if dy == 0:
+            return
+        self.cursor_idx += dy
+        if self.cursor_idx < 0:
+            self.cursor_idx = len(self.menu_items) - 1
+        elif self.cursor_idx == len(self.menu_items):
+            self.cursor_idx = 0
+
+    def select_item(self):
+        self._selected = self.menu_items[self.cursor_idx]
+
+    def on_leaving(self):
+        if self.selected:
+            super().on_leaving()
+
+    def render(self, gamestate, renderer):
+        renderer.render_menu(self)
+
+
+class ItemMenuMode(MenuMode):
+
+    def __init__(self, title, items, *args, **kwargs):
+        items = [(item['id'], item['name']) for item in items]
+        super().__init__(title, items, *args, **kwargs)

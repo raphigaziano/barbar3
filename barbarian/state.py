@@ -31,6 +31,7 @@ class GameState:
         self._state = {
             'tick': game.ticks,
             'player': game.player.serialize(),
+            'inventory': [item.serialize() for item in game.player.inventory.items],
             'current_depth': game.world.current_depth,
             'max_depth': game.world.max_depth,
             'map': game.current_level.map.serialize(),

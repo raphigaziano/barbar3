@@ -5,6 +5,25 @@ Item handling logic.
 from barbarian.components.physics import Position
 
 
+def _select_items(action_data, item_list):
+    """
+    Filter `item_list`.
+
+    If action_data contains a `item_id_list` iterable, then any items which
+    an id not in said list will be excluded.
+    Otherwise, all items are returned.
+
+    Note: the id used for filtering is the barbarian's entity _id field, 
+    *not* python's object id.
+
+    """
+    data = action_data or {}
+    if item_id_list := data.get('item_id_list', []):
+        return [item for item in item_list if item._id in item_id_list]
+    else:
+        return item_list
+
+
 def get_item(action, level):
     """
     Get items (single or all) lying on the tile `actor` is standing on.
@@ -17,15 +36,20 @@ def get_item(action, level):
     if not level.items[actor.pos.x, actor.pos.y]:
         return action.reject(msg='No items here')
 
+    items = _select_items(data, level.items[actor.pos.x, actor.pos.y])
+    processed = []
+
     # We do not care (yet?) about actual ordering (which is why we use
     # python's object id as a key), we just want to ensure consistent
     # display.
-    for item in sorted(level.items[actor.pos.x, actor.pos.y], key=id):
+    for item in sorted(items, key=id):
         level.items.remove_e(item)
         item.remove_component('pos')
         actor.inventory.items.append(item)
+        processed.append(item)
 
-    action.accept(msg='Picked up all the items')
+    picked_up_str = ', '.join(i.name for i in processed)
+    action.accept(msg=f'Picked up: {picked_up_str}')
 
 
 def drop_item(action, level):
@@ -41,9 +65,15 @@ def drop_item(action, level):
     if not actor.inventory.items:
         return action.reject(msg="Nothing to drop")
 
-    while actor.inventory.items:
-        item = actor.inventory.items.pop()
+    items = _select_items(data, actor.inventory.items)
+    processed = []
+
+    # Sorting is even less usefull here, but do it anyway to be consistent.
+    for item in sorted(items, key=id):
+        actor.inventory.items.remove(item)
         item.add_component('pos', Position(actor.pos.x, actor.pos.y))
         level.items.add_e(item)
+        processed.append(item)
 
-    action.accept(msg='Dropped all the items')
+    droped_str = ', '.join(i.name for i in processed)
+    action.accept(msg=f'Dropped: {droped_str}')

@@ -1,5 +1,5 @@
 from ..modes.base import BaseGameMode, GameOverMode
-from ..modes.ui import DbgMapMode, PromptDirectionMode
+from ..modes.ui import DbgMapMode, PromptDirectionMode, ItemMenuMode
 from ..nw import Request
 from ..event_handlers import RunEventHandler
 
@@ -89,6 +89,40 @@ class RunMode(BaseGameMode):
     def cmd_autoxplore(self, _):
         """ Same as above, but with an autoexploring move """
         self.push(AutoRunMode(action_name='xplore'))
+
+    def show_inventory(self):
+        self.push(ItemMenuMode('Inventory', self.client.gamestate.inventory))
+
+    def select_items(self, title, items, select_callback):
+        self.push(ItemMenuMode(title, items, on_leaving=select_callback))
+
+    def get_item(self):
+        ppos = self.client.gamestate.player['pos']
+        items = [
+            item for item in self.client.gamestate.items
+            if item['pos'] == ppos]
+        if len(items) <= 1:
+            return Request.action('get_item')
+        else:
+            return self.select_items(
+                'Get items:', items,
+                lambda menu: self._item_selection_callback('get_item', menu)
+            )
+
+    def drop_item(self):
+        items = self.client.gamestate.inventory
+        if len(items) == 0:
+            self.log_msg("You don't have any item to drop")
+        else:
+            return self.select_items(
+                'Drop items:', items,
+                lambda menu: self._item_selection_callback('drop_item', menu)
+            )
+
+    def _item_selection_callback(self, action_name, menu):
+        return self.client.send_request(
+            Request.action(action_name, {'item_id_list': [menu.selected]})
+        )
 
     def process_response(self, r):
         if r.status == 'OK':
