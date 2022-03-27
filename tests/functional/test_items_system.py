@@ -3,10 +3,10 @@ from unittest.mock import Mock, patch
 from .base import BaseFunctionalTestCase
 from barbarian.actions import Action, ActionType
 
-from barbarian.systems.items import get_item, drop_item
+from barbarian.systems.inventory import get_items, drop_items
 
 
-class TestItems(BaseFunctionalTestCase):
+class TestInventory(BaseFunctionalTestCase):
 
     def get_action(self, a, d=None):
         return Action(ActionType.GET_ITEM, a, data=d)
@@ -31,7 +31,7 @@ class TestItems(BaseFunctionalTestCase):
         self.assertEqual(3, len(level.items))
         self.assertEqual(0, len(actor.inventory.items))
 
-        self.assert_action_accepted(get_item, action, level)
+        self.assert_action_accepted(get_items, action, level)
 
         self.assertEqual(1, len(level.items))
         self.assertEqual(2, len(actor.inventory.items))
@@ -65,7 +65,7 @@ class TestItems(BaseFunctionalTestCase):
         self.assertEqual(0, len(level.items))
         self.assertEqual(3, len(actor.inventory.items))
 
-        self.assert_action_accepted(drop_item, action, level)
+        self.assert_action_accepted(drop_items, action, level)
 
         self.assertEqual(2, len(level.items))
         self.assertEqual(1, len(actor.inventory.items))
@@ -94,7 +94,7 @@ class TestItems(BaseFunctionalTestCase):
         self.assertEqual(2, len(level.items))
         self.assertEqual(0, len(actor.inventory.items))
 
-        self.assert_action_accepted(get_item, action, level)
+        self.assert_action_accepted(get_items, action, level)
 
         self.assertEqual(0, len(level.items))
         self.assertEqual(2, len(actor.inventory.items))
@@ -112,7 +112,7 @@ class TestItems(BaseFunctionalTestCase):
         self.assertEqual(0, len(level.items))
         self.assertEqual(0, len(actor.inventory.items))
 
-        self.assert_action_rejected(get_item, action, level)
+        self.assert_action_rejected(get_items, action, level)
 
         self.assertEqual(0, len(level.items))
         self.assertEqual(0, len(actor.inventory.items))
@@ -131,7 +131,7 @@ class TestItems(BaseFunctionalTestCase):
         self.assertEqual(0, len(level.items))
         self.assertEqual(2, len(actor.inventory.items))
 
-        self.assert_action_accepted(drop_item, action, level)
+        self.assert_action_accepted(drop_items, action, level)
 
         self.assertEqual(2, len(level.items))
         self.assertEqual(0, len(actor.inventory.items))
@@ -150,7 +150,7 @@ class TestItems(BaseFunctionalTestCase):
         self.assertEqual(0, len(level.items))
         self.assertEqual(0, len(actor.inventory.items))
 
-        self.assert_action_rejected(drop_item, action, level)
+        self.assert_action_rejected(drop_items, action, level)
 
         self.assertEqual(0, len(level.items))
         self.assertEqual(0, len(actor.inventory.items))

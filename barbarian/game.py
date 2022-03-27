@@ -254,9 +254,9 @@ class Game:
                 new_action = systems.props.use_prop(action, self.current_level)
 
             case ActionType.GET_ITEM:
-                systems.items.get_item(action, self.current_level)
+                systems.inventory.get_items(action, self.current_level)
             case ActionType.DROP_ITEM:
-                systems.items.drop_item(action, self.current_level)
+                systems.inventory.drop_items(action, self.current_level)
 
             case ActionType.OPEN_DOOR | ActionType.CLOSE_DOOR:
                 systems.props.open_or_close_door(action, self.current_level)
