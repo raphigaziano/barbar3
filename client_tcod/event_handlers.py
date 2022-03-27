@@ -2,9 +2,11 @@
 Tcod event processing.
 
 """
+from string import ascii_lowercase
+
 from .nw import Request
 from . import constants
-from .constants import MOVE_KEYS
+from .constants import VI_KEYS, MOVE_KEYS
 
 import tcod.event
 
@@ -189,8 +191,17 @@ class MenuEventHandler(BaseUIModalEventHandler):
         super().ev_keydown(e)
 
         if (dir_ := MOVE_KEYS.get(e.sym, None)):
-            self.mode.set_cursor(dir_)
+            if not (e.sym in VI_KEYS and
+                    not e.mod & tcod.event.KMOD_LSHIFT):
+                self.mode.set_cursor(dir_)
 
         if e.sym == tcod.event.K_RETURN:
             self.mode.select_item()
-            self.mode.pop()
+
+        try:
+            # Maj key is ignored, so sym should always be lowercase
+            if chr(e.sym) in ascii_lowercase:
+                idx = e.sym - 97
+                self.mode.select_item(idx)
+        except ValueError:
+            pass

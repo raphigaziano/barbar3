@@ -38,7 +38,18 @@ class TileType(Enum):
 
 import tcod
 
-MOVE_KEYS = {  # key_symbol: (x, y)
+VI_KEYS = {
+    tcod.event.K_h: (-1, 0),
+    tcod.event.K_j: (0, 1),
+    tcod.event.K_k: (0, -1),
+    tcod.event.K_l: (1, 0),
+    tcod.event.K_y: (-1, -1),
+    tcod.event.K_u: (1, -1),
+    tcod.event.K_b: (-1, 1),
+    tcod.event.K_n: (1, 1),
+}
+
+_MOVE_KEYS = {  # key_symbol: (x, y)
     # Arrow keys.
     tcod.event.K_LEFT: (-1, 0),
     tcod.event.K_RIGHT: (1, 0),
@@ -59,13 +70,6 @@ MOVE_KEYS = {  # key_symbol: (x, y)
     tcod.event.K_KP_8: (0, -1),
     tcod.event.K_KP_9: (1, -1),
     tcod.event.K_CLEAR: (0, 0),  # Numpad `clear` key.
-    # Vi Keys.
-    tcod.event.K_h: (-1, 0),
-    tcod.event.K_j: (0, 1),
-    tcod.event.K_k: (0, -1),
-    tcod.event.K_l: (1, 0),
-    tcod.event.K_y: (-1, -1),
-    tcod.event.K_u: (1, -1),
-    tcod.event.K_b: (-1, 1),
-    tcod.event.K_n: (1, 1),
 }
+
+MOVE_KEYS = _MOVE_KEYS | VI_KEYS

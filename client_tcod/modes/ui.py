@@ -95,6 +95,14 @@ class MenuMode(BaseGameMode):
             return self._selected[0]
         return None
 
+    def select_item(self, idx=None):
+        select_idx = idx or self.cursor_idx
+        try:
+            self._selected = self.menu_items[select_idx]
+            self.pop()
+        except IndexError:
+            pass
+
     def set_cursor(self, cursor_dir):
         _, dy = cursor_dir
         if dy == 0:
@@ -104,9 +112,6 @@ class MenuMode(BaseGameMode):
             self.cursor_idx = len(self.menu_items) - 1
         elif self.cursor_idx == len(self.menu_items):
             self.cursor_idx = 0
-
-    def select_item(self):
-        self._selected = self.menu_items[self.cursor_idx]
 
     def on_leaving(self):
         if self.selected:
