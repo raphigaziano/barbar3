@@ -37,6 +37,10 @@ Game commands:
 - `<`: use stairs (up)
 - `>`: use stairs (down)
 
+- `I`: Show inventory
+- `G`: Get item
+- `D`: Drop item
+
 - `Ctrl - o`: Manually open door
 - `Ctrl - c`: Manually close door
 
