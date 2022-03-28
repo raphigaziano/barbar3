@@ -264,7 +264,24 @@ class Game:
                 systems.inventory.drop_items(action, self.current_level)
 
             case ActionType.USE_ITEM:
+                # Wait until item's action is processed to try and
+                # deplete its charges (this avoids consuming an item
+                # if its action is invalid, ie trying to drink a health pot
+                # while at full health).
+                # We could also handle this by reacting to the
+                # ACTION_ACCEPTED & USE_ITEM event, which feels cleaner
+                # but is harder to test. Let's wait and see if keeping it
+                # here causes shenanigans...
+                actor = action.actor
+                item_id = action.data['item_id']
                 new_action = systems.items.use_item(action)
+                while not new_action.processed:
+                    new_action = self.process_action(new_action)
+                    if new_action.valid:
+                        logger.debug(
+                            f'Deplete charges for item {item_id} after '
+                            f'validating action {new_action}')
+                        systems.items.consume_item(actor, item_id)
 
             case ActionType.OPEN_DOOR | ActionType.CLOSE_DOOR:
                 systems.props.open_or_close_door(action, self.current_level)

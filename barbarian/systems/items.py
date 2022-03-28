@@ -13,6 +13,21 @@ def _get_item(actor, item_id):
     raise ValueError(f'Item id {item_id} could not be found.')
 
 
+def consume_item(actor, item_id):
+    """
+    Decrement item charges by one and remove it from `actor`'s inventory
+    if charges reaches zero.
+
+    No-op is item is not consumable.
+
+    """
+    item = _get_item(actor, item_id)
+    if item.consumable:
+        item.consumable.charges -= 1
+        if item.consumable.depleted:
+            actor.inventory.items.remove(item)
+
+
 def use_item(action):
     """ Item usage. """
     actor, _, data = action.unpack()
@@ -20,13 +35,6 @@ def use_item(action):
     item = _get_item(actor, data['item_id'])
     if not item.usable:
         return action.reject(msg=f'Item {item.name} cannot be used')
-
-    # FIXME: this should be handled elsewhere, to avoid consuming the
-    # item if its action is rejected...
-    if item.consumable:
-        item.consumable.charges -= 1
-        if item.consumable.depleted:
-            actor.inventory.items.remove(item)
 
     new_action_args = item.usable.action
     new_action_args.update(
