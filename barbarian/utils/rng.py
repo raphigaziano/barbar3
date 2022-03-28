@@ -12,7 +12,7 @@ class RngError(Exception):
     pass
 
 
-class DiceError(RngError, ValueError):
+class RngDiceError(RngError, ValueError):
     pass
 
 
@@ -77,7 +77,7 @@ class _Rng(random.Random):
         try:
             num, faces = dice_string.upper().split('D')
         except (ValueError, AttributeError) as e:
-            raise DiceError(
+            raise RngDiceError(
                 f"Invalid dice string: {dice_string}") from e
         try:
             faces, mod = faces.split('+')
@@ -91,7 +91,7 @@ class _Rng(random.Random):
         try:
             num, faces, mod = int(num), int(faces), int(mod)
         except ValueError as e:
-            raise DiceError(f"Invalid dice string: {dice_string}") from e
+            raise RngDiceError(f"Invalid dice string: {dice_string}") from e
 
         return self.roll_dice(num, faces, mod)
 

@@ -2,7 +2,7 @@
 Entity stats management
 
 """
-from barbarian.utils.rng import Rng, DiceError
+from barbarian.utils.rng import Rng, RngDiceError
 from barbarian.events import Event, EventType
 
 
@@ -43,7 +43,7 @@ def heal(action):
 
     try:
         amount = Rng.roll_dice_str(data['amount'])
-    except DiceError:
+    except RngDiceError:
         amount = data['amount']
 
     pre_heal_hp = target.health.hp

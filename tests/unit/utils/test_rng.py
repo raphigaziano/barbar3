@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 import random
 
-from barbarian.utils.rng import Rng, RngError, DiceError, _RngMeta
+from barbarian.utils.rng import Rng, RngError, RngDiceError, _RngMeta
 
 
 class TestRngRoot(unittest.TestCase):
@@ -148,29 +148,29 @@ class TestRandomHelpers(unittest.TestCase):
         mocked_rd.assert_called_with(2, 8, -2)
 
     def test_roll_dice_string_non_string_arg(self):
-        self.assertRaises(DiceError, Rng.roll_dice_str, 32)
-        self.assertRaises(DiceError, Rng.roll_dice_str, 22.2)
-        self.assertRaises(DiceError, Rng.roll_dice_str, True)
-        self.assertRaises(DiceError, Rng.roll_dice_str, [])
-        self.assertRaises(DiceError, Rng.roll_dice_str, {})
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, 32)
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, 22.2)
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, True)
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, [])
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, {})
 
     def test_roll_dice_str_invalid_dice_separator(self):
-        self.assertRaises(DiceError, Rng.roll_dice_str, '2f8')
-        self.assertRaises(DiceError, Rng.roll_dice_str, '2WAT8')
-        self.assertRaises(DiceError, Rng.roll_dice_str, '28')
-        self.assertRaises(DiceError, Rng.roll_dice_str, '2.8')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, '2f8')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, '2WAT8')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, '28')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, '2.8')
 
     def test_roll_dice_str_invalid_mod_separator(self):
-        self.assertRaises(DiceError, Rng.roll_dice_str, '2d8{}8')
-        self.assertRaises(DiceError, Rng.roll_dice_str, '2D8B8')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, '2d8{}8')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, '2D8B8')
 
     def test_roll_dice_invalid_values(self):
-        self.assertRaises(DiceError, Rng.roll_dice_str, '3do')
-        self.assertRaises(DiceError, Rng.roll_dice_str, 'ad6')
-        self.assertRaises(DiceError, Rng.roll_dice_str, '3d20-X')
-        self.assertRaises(DiceError, Rng.roll_dice_str, 'ado')
-        self.assertRaises(DiceError, Rng.roll_dice_str, ';DW$')
-        self.assertRaises(DiceError, Rng.roll_dice_str, '8dWUT+lol')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, '3do')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, 'ad6')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, '3d20-X')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, 'ado')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, ';DW$')
+        self.assertRaises(RngDiceError, Rng.roll_dice_str, '8dWUT+lol')
 
     def test_roll_table(self):
 
