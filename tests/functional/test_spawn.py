@@ -22,7 +22,7 @@ class TestSpawnZone(BaseFunctionalTestCase):
         spawn_table = [(5, 'orc'), (3, 'kobold'), (3, 'player')]
 
         # Ignore weights
-        roll_results = ['health_potion', 'trap', 'kobold', 'scroll_of_doom']
+        roll_results = ['health_potion', 'trap', 'kobold', 'scroll_blink']
 
         with patch(
                 'barbarian.utils.rng._Rng.roll_table',

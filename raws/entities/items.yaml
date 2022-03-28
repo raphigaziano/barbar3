@@ -31,9 +31,3 @@ scroll_blink:
     usable:
         action: { type: blink }
     consumable: {}
-scroll_of_doom:
-    _parent: _base_scroll
-    named: { name: scroll of doom }
-scroll_of_woop:
-    _parent: _base_scroll
-    named: { name: scroll of woop }

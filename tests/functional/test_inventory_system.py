@@ -17,9 +17,9 @@ class TestInventory(BaseFunctionalTestCase):
         level = self.build_dummy_level()
         first_item = self.spawn_item(0, 0, 'health_potion')
         level.items.add_e(first_item)
-        second_item = self.spawn_item(0, 0, 'scroll_of_doom')
+        second_item = self.spawn_item(0, 0, 'scroll_blink')
         level.items.add_e(second_item)
-        third_item = self.spawn_item(0, 0, 'scroll_of_woop')
+        third_item = self.spawn_item(0, 0, 'scroll_teleport')
         level.items.add_e(third_item)
 
         actor = self.spawn_actor(0, 0, 'player')
@@ -49,8 +49,8 @@ class TestInventory(BaseFunctionalTestCase):
 
         level = self.build_dummy_level()
         first_item = self.spawn_item(0, 0, 'health_potion')
-        second_item = self.spawn_item(0, 0, 'scroll_of_doom')
-        third_item = self.spawn_item(0, 0, 'scroll_of_woop')
+        second_item = self.spawn_item(0, 0, 'scroll_blink')
+        third_item = self.spawn_item(0, 0, 'scroll_teleport')
 
         actor = self.spawn_actor(0, 0, 'player')
         for item in [first_item, second_item, third_item]:
@@ -120,7 +120,7 @@ class TestInventory(BaseFunctionalTestCase):
         level = self.build_dummy_level()
         actor = self.spawn_actor(0, 0, 'player')
         for _ in range(2):
-            item = self.spawn_item(0, 0, 'scroll_of_doom')
+            item = self.spawn_item(0, 0, 'scroll_blink')
             item.remove_component('pos')
             actor.inventory.items.append(item)
 
