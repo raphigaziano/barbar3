@@ -1,5 +1,3 @@
-from unittest.mock import Mock, patch
-
 from .base import BaseFunctionalTestCase
 from barbarian.actions import Action, ActionType
 
