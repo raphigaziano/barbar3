@@ -148,26 +148,16 @@ class BaseGameMode:
 
     # --- Mode run ---
 
-    def cmd_setvar(self, data):
-        k, v = data['key'], data['val']
+    def setvar(self, k, v):
         setattr(self, k, v)
         print(f"{k}: {getattr(self, k)}")
 
-    def cmd_setvar_g(self, data):
-        k, v = data['key'], data['val']
+    def setvar_g(self, k, v):
         setattr(constants, k, v)
         print(f"{k}: {getattr(constants, k)}")
 
     def update(self):
         return self.event_handler.handle(self.client.context)
-
-    def process_request(self, r):
-        cmd = r['data'].pop('cmd')
-        handler = getattr(self, f"cmd_{cmd}", None)
-        if handler:
-            handler(r['data'])
-        else:
-            print(f'No handler for command type {cmd}')
 
     def process_response(self, r):
         pass    # No-op

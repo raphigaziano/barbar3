@@ -20,7 +20,7 @@ class RunMode(BaseGameMode):
     __gamelog = []
     __bloodstains = []
 
-    def cmd_open_door(self, _):
+    def open_door(self):
         surrounding_doors = [
             d for d in self.get_surrounding_entities(
                 self.client.gamestate.props, 'door')
@@ -29,7 +29,7 @@ class RunMode(BaseGameMode):
         if not self._open_or_close_door(surrounding_doors):
             self.log_msg('There are no closed doors around you.')
 
-    def cmd_close_door(self, _):
+    def close_door(self):
         surrounding_doors = [
             d for d in self.get_surrounding_entities(
                 self.client.gamestate.props, 'door')
@@ -82,11 +82,11 @@ class RunMode(BaseGameMode):
 
         return [e for e in entity_list if predicate(e)]
 
-    def cmd_move_r(self, data):
+    def move_r(self, data):
         """ Move repeatedly until an ennemy is spotted """
         self.push(AutoRunMode(action_name='move', action_data=data))
 
-    def cmd_autoxplore(self, _):
+    def autoxplore(self):
         """ Same as above, but with an autoexploring move """
         self.push(AutoRunMode(action_name='xplore'))
 

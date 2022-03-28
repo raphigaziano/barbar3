@@ -297,7 +297,7 @@ class TcodRenderer:
                 x, y = idx_to_c(idx, gamestate.map['width'])
                 col_idx = cval // 10
                 color = (
-                    self._path_colors[col_idx] if col_idx < len(self._path_colors) 
+                    self._path_colors[col_idx] if col_idx < len(self._path_colors)
                     else tcod.white)
                 char = str(cval)[-1]
                 self.hud_console.print(x, y, char, color, bg=tcod.black)
@@ -314,7 +314,7 @@ class TcodRenderer:
                 else:
                     color = self._zone_colors[i]
                 for x, y in zone:
-                    self.hud_console.print(x, y, str(i), color)
+                    self.hud_console.print(x, y, str(i), color, bg=tcod.black)
 
     def render_hud(self, gamestate):
         self.hud_console.clear(bg=TRANS_COLOR)

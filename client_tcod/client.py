@@ -71,28 +71,6 @@ class BarbarClient:
         self.response = self.con.send(r)
         self.process_response()
 
-    def process_request(self, r):
-        """
-        Preprocess a request before sending it.
-
-        Some requests (called `client` requests) will be handled
-        by the client and not sent to the game: this is where
-        we handle this distinction.
-
-        """
-        if r['type'] in ('ACT', 'GET', 'SET'):
-            self.send_request(r)
-        # Special case for client requests
-        else:
-            # First see if the client has a hendler for this
-            cmd = r['data']['cmd']
-            handler = getattr(self, f"cmd_{cmd}", None)
-            if handler:
-                handler(r['data'])
-            # If not, then delegate to the current mode
-            else:
-                self.current_mode.process_request(r)
-
     def process_response(self):
         """
         Preprocess a response (mainly by nabbing its gamesate)
@@ -120,7 +98,7 @@ class BarbarClient:
             self.render()
             request = self.game_modes.update()
             if request:
-                self.process_request(request)
+                self.send_request(request)
             self.clock.sync()
 
         return self.shutdown()

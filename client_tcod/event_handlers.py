@@ -58,23 +58,19 @@ class DebugEventsMixin:
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_x):
             v = not constants.SHOW_UNEXPLORED_CELLS
-            return Request.client(
-                'setvar_g', {'key': 'SHOW_UNEXPLORED_CELLS', 'val': v})
+            return self.mode.setvar_g('SHOW_UNEXPLORED_CELLS', v)
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_p):
             v = not constants.SHOW_PATH_INFO
-            return Request.client(
-                'setvar_g', {'key': 'SHOW_PATH_INFO', 'val': v})
+            return self.mode.setvar_g('SHOW_PATH_INFO', v)
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_v):
             v = not constants.SHOW_SPAWN_ZONES
-            return Request.client(
-                'setvar_g', {'key': 'SHOW_SPAWN_ZONES', 'val': v})
+            return self.mode.setvar_g('SHOW_SPAWN_ZONES', v)
 
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_f):
             v = not constants.IGNORE_FOV
-            return Request.client(
-                'setvar_g', {'key': 'IGNORE_FOV', 'val': v})
+            return self.mode.setvar_g('IGNORE_FOV', v)
 
 
 class RunEventHandler(DebugEventsMixin, BaseEventHandler):
@@ -90,7 +86,7 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
 
         if e.sym in MOVE_KEYS:
             if e.mod & tcod.event.KMOD_LSHIFT:
-                return Request.client('move_r', {'dir': MOVE_KEYS[e.sym]})
+                return self.mode.move_r({'dir': MOVE_KEYS[e.sym]})
             else:
                 return Request.action('move', {'dir': MOVE_KEYS[e.sym]})
 
@@ -103,9 +99,9 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
             return self.mode.drop_item()
 
         if (e.mod & tcod.event.KMOD_LCTRL and e.sym == tcod.event.K_o):
-            return Request.client('open_door')
+            return self.mode.open_door()
         if (e.mod & tcod.event.KMOD_LCTRL and e.sym == tcod.event.K_c):
-            return Request.client('close_door')
+            return self.mode.close_door()
 
         if e.sym == tcod.event.K_LESS:
             if e.mod & tcod.event.KMOD_LSHIFT:
@@ -115,7 +111,7 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
             return Request.action('use_prop', {'use_key': use_key})
 
         if (e.mod & tcod.event.KMOD_LCTRL and e.sym == tcod.event.K_x):
-            return Request.client('autoxplore')
+            return self.mode.autoxplore()
 
         if e.sym == tcod.event.K_i:
             self.mode.show_inventory()
@@ -133,7 +129,7 @@ class DbgMapEventHandler(DebugEventsMixin, BaseEventHandler):
 
         # Call it *before* super().debug_cmds,to shadow its Alt-r event
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_r):
-            return Request.client('setvar', {'key': 'mapgen_index', 'val': 0})
+            return self.mode.setvar('mapgen_index', 0)
 
         if r := super().debug_events(e):
             return r
@@ -147,7 +143,7 @@ class GameOverEventHandler(BaseEventHandler):
             return r
 
         if e.sym == tcod.event.K_n:
-            return Request.client('start')
+            return self.mode.client.start(None)
 
 
 class BaseUIModalEventHandler(BaseEventHandler):

@@ -31,12 +31,6 @@ class Request(dict):
         d = {'key': key, 'val': val}
         return cls(session_key=cls.session_key, type='SET', data=d)
 
-    @classmethod
-    def client(cls, cmd, data=None):
-        d = data or {}
-        d['cmd'] = cmd
-        return cls(session_key=cls.session_key, type='CLIENT', data=d)
-
 
 class Response(SimpleNamespace):
 
