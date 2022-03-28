@@ -89,6 +89,12 @@ class TestEntity(unittest.TestCase):
         e.remove_component('dummy')
         self.assertIsNone(e.dummy)
 
+    def test_remove_unset_component(self):
+        e = Entity()
+        # This should fail silently
+        e.remove_component('dummy')
+        self.assertIsNone(e.dummy)
+
     def test_replace_comopnent(self):
         e = Entity()
         old_c = self.Dummy(x=1, y=2)

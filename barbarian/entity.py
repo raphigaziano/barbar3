@@ -112,8 +112,10 @@ class Entity:
         Remove (and deltes the corresponding attribute) component `cname`
 
         """
-        if hasattr(self, cname):
+        try:
             del self.__dict__[cname]
+        except KeyError:
+            pass
 
     def replace_component(self, new_component):
         """ Rm old, add new. """
