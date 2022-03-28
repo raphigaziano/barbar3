@@ -32,6 +32,8 @@ class ActionType(StringAutoEnum):
     IDLE = auto()
     MOVE = auto()
     XPLORE = auto()
+    BLINK = auto()
+    TELEPORT = auto()
     ATTACK = auto()
     INFLICT_DMG = auto()
     HEAL = auto()

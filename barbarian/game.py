@@ -250,6 +250,11 @@ class Game:
             case ActionType.XPLORE:
                 new_action = systems.movement.xplore(action, self.current_level)
 
+            case ActionType.BLINK:
+                systems.movement.blink(action, self.current_level)
+            case ActionType.TELEPORT:
+                systems.movement.teleport(action, self.current_level)
+
             case ActionType.USE_PROP:
                 new_action = systems.props.use_prop(action, self.current_level)
 

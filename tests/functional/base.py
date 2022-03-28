@@ -35,8 +35,23 @@ class BaseFunctionalTestCase(unittest.TestCase):
 
         level = Level(w, h)
         level.map = Map(w, h, [
-            TileType(char) for row in self.dummy_map for char in row
+            TileType.WALL if char == '#' else TileType.FLOOR
+            for row in self.dummy_map for char in row
         ])
+
+        for y, row in enumerate(self.dummy_map):
+            for x, char in enumerate(row):
+                if char in ('.', '#'):
+                    continue
+                if char == '@':
+                    level.actors.add_e(self.spawn_actor(x, y, 'player'))
+                elif char == 'o':
+                    level.actors.add_e(self.spawn_actor(x, y, 'orc'))
+                elif char == '+':
+                    level.props.add_e(self.spawn_prop(x, y, 'door'))
+                else:
+                    raise ValueError(f'Unknown char: {char}')
+
         level.init_fov_map()
 
         return level

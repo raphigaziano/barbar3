@@ -5,6 +5,7 @@ Logic to handle entity movement.
 import logging
 
 from barbarian import systems
+from barbarian.utils.rng import Rng
 from barbarian.actions import Action
 from barbarian.events import Event, EventType
 from barbarian.components.use import PropActivationMode
@@ -146,3 +147,44 @@ def spot_entities(actor, level):
                 Event.emit(
                     EventType.ACTOR_SPOTTED,
                     event_data={'actor': actor, 'target': p})
+
+
+def blink(action, level):
+    """ Instant move to a random spot in visible range. """
+    actor = action.actor
+
+    if not actor.fov:
+        return action.reject(msg=f'{actor} cant blink: no fov')
+
+    cells_in_range = list(actor.fov.visible_cells)
+    while dest := Rng.choice(cells_in_range):
+
+        dest_x, dest_y = dest
+        if actor.pos.distance_from(dest_x, dest_y) <= 1:
+            continue
+
+        dx, dy = actor.pos.vector_to(dest_x, dest_y, normalize=False)
+        if level.move_actor(actor, dx, dy):
+            actor.fov.compute(
+                level, actor.pos.x, actor.pos.y, update_level=actor.is_player)
+            return action.accept()
+
+
+def teleport(action, level):
+    """ Instant move to a random spot outside visible range. """
+    actor = action.actor
+
+    if not actor.fov:
+        return action.reject(msg=f'{actor} cant teleport: no fov')
+
+    while dest := Rng.choice([(x, y) for x, y, _ in level.map]):
+
+        dest_x, dest_y = dest
+        if (dest_x, dest_y) in actor.fov.visible_cells:
+            continue
+
+        dx, dy = actor.pos.vector_to(dest_x, dest_y, normalize=False)
+        if level.move_actor(actor, dx, dy):
+            actor.fov.compute(
+                level, actor.pos.x, actor.pos.y, update_level=actor.is_player)
+            return action.accept()

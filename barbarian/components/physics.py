@@ -26,9 +26,13 @@ class Position(Component):
         """
         return int(math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2))
 
-    def vector_to(self, target_x, target_y):
+    def vector_to(self, target_x, target_y, normalize=True):
         """ Return a normalized vector pointing to position (target_x, target_y) """
         dx, dy = target_x - self.x, target_y - self.y
+
+        if not normalize:
+            return dx, dy
+
         vx = vy = 0
 
         if dx > 0:      vx = 1

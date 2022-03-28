@@ -7,6 +7,7 @@ from barbarian.events import Event, EventType
 
 from barbarian.systems.movement import (
     move_actor, xplore, change_level, spot_entities,
+    blink, teleport,
 )
 
 
@@ -300,7 +301,7 @@ class TestXplore(BaseFunctionalTestCase):
 
     def test_level_fully_explored_actor_is_player(self):
         # This is almost the same as the test above, except
-        # that explored cells are retrieved differently if 
+        # that explored cells are retrieved differently if
         # actor == player
 
         level = self.build_dummy_level()
@@ -440,3 +441,126 @@ class TestSpotEntities(BaseFunctionalTestCase):
         spot_entities(actor, level)
 
         mock_emit.assert_not_called()
+
+
+class TestBlink(BaseFunctionalTestCase):
+
+    dummy_map = (
+        '###########',
+        '#.........#',
+        '#..+......#',  # spawn door at 3, 2
+        '#.........#',  # spawn player at 5, 3
+        '#..#......#',  # wall at 3, 4
+        '#......o..#',  # orc at 7, 5
+        '###########',
+    )
+    valid_cells = (
+        (3, 1), (4, 1), (5, 1), (6, 1), (7, 1),
+        (7, 2),
+        (2, 3), (3, 3), (7, 3), (8, 3),
+        (7, 4),
+        (3, 5), (4, 5), (5, 5), (6, 5)
+    )
+
+    def blink_action(self, actor):
+        return Action(ActionType.BLINK, actor=actor)
+
+    def test_blink(self):
+
+        for _ in range(200):
+
+            level = self.build_dummy_level()
+            actor = self.spawn_actor(5, 3, 'player')
+            actor.fov.range = 3
+            level.enter(actor)
+            actor.fov.compute(level, actor.pos.x, actor.pos.y)
+
+            action = self.blink_action(actor)
+            self.assert_action_accepted(blink, action, level)
+
+            pt = (actor.pos.x, actor.pos.y)
+            self.assertIn(pt, self.valid_cells)
+
+    def test_blink_recompute_fov(self):
+
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(5, 3, 'player')
+
+        actor.fov.compute(level, actor.pos.x, actor.pos.y)
+
+        with patch('barbarian.components.actor.Fov.compute') as mock_fov:
+            action = self.blink_action(actor)
+            self.assert_action_accepted(blink, action, level)
+
+            mock_fov.assert_called_once()
+
+    def test_blink_no_fov(self):
+
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(5, 3, 'player')
+        actor.remove_component('fov')
+
+        action = self.blink_action(actor)
+        self.assert_action_rejected(blink, action, level)
+
+
+class TestTeleport(BaseFunctionalTestCase):
+
+    dummy_map = (
+        '###########',
+        '#+........#',  # spawn door at 1, 1
+        '#.......o.#',  # spawn orc at 8, 2
+        '#.........#',  # spawn player at 5, 3
+        '#.........#',
+        '#.#.....#.#',  # wall at 2, 5 & 8, 5
+        '###########',
+    )
+    valid_cells = (
+        (2, 1), (3, 1), (4, 1), (6, 1), (7, 1), (8, 1), (9, 1),
+        (1, 2), (2, 2), (3, 2), (7, 2), (9, 2),
+        (1, 3), (2, 3), (8, 3), (9, 3),
+        (1, 4), (2, 4), (3, 4), (7, 4), (8, 4), (9, 4),
+        (1, 5), (3, 5), (4, 5), (6, 5), (7, 5), (9, 5)
+    )
+
+    def teleport_action(self, actor):
+        return Action(ActionType.TELEPORT, actor=actor)
+
+    def test_teleport(self):
+
+        for _ in range(200):
+
+            level = self.build_dummy_level()
+            actor = self.spawn_actor(5, 3, 'player')
+            actor.fov.range = 2
+            level.enter(actor)
+            actor.fov.compute(level, actor.pos.x, actor.pos.y)
+
+            action = self.teleport_action(actor)
+            self.assert_action_accepted(teleport, action, level)
+
+            pt = (actor.pos.x, actor.pos.y)
+            self.assertIn(pt, self.valid_cells)
+
+    def test_teleport_recompute_fov(self):
+
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(5, 3, 'player')
+        actor.fov.range = 3
+
+        actor.fov.compute(level, actor.pos.x, actor.pos.y)
+
+        with patch('barbarian.components.actor.Fov.compute') as mock_fov:
+            action = self.teleport_action(actor)
+            self.assert_action_accepted(teleport, action, level)
+
+            mock_fov.assert_called_once()
+
+    def test_teleport_no_fov(self):
+
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(5, 3, 'player')
+        actor.remove_component('fov')
+
+        action = self.teleport_action(actor)
+        self.assert_action_rejected(teleport, action, level)

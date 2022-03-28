@@ -2,7 +2,7 @@
 - {name: orc, weight: 1}
 - {name: kobold_buddy, weight: 1}   # Not implemented
 - {name: health_potion, weight: 7}
-- {name: scroll_of_doom, weight: 2}
-- {name: scroll_of_woop, weight: 2}
+- {name: scroll_teleport, weight: 2}
+- {name: scroll_blink, weight: 2}
 - {name: trap, weight: 5}
 

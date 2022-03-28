@@ -19,6 +19,18 @@ _base_scroll:
     typed: { type: scroll }
     visible:
         glyph: '#'
+scroll_teleport:
+    _parent: _base_scroll
+    named: { name: scroll of teleportation }
+    usable:
+        action: { type: teleport }
+    consumable: {}
+scroll_blink:
+    _parent: _base_scroll
+    named: { name: scroll of blinking }
+    usable:
+        action: { type: blink }
+    consumable: {}
 scroll_of_doom:
     _parent: _base_scroll
     named: { name: scroll of doom }
