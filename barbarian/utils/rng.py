@@ -76,7 +76,7 @@ class _Rng(random.Random):
         # TODO: just use a regex to find our values.
         try:
             num, faces = dice_string.upper().split('D')
-        except ValueError as e:
+        except (ValueError, AttributeError) as e:
             raise DiceError(
                 f"Invalid dice string: {dice_string}") from e
         try:

@@ -83,6 +83,15 @@ class Trigger(Usable):
         self.activation_mode = PropActivationMode(self.activation_mode)
 
 
+class Consumable(Component):
+
+    charges: int = 1
+
+    @property
+    def depleted(self):
+        return self.charges == 0
+
+
 class Openable(Component):
     __serialize__ = True
 

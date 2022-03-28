@@ -258,6 +258,9 @@ class Game:
             case ActionType.DROP_ITEM:
                 systems.inventory.drop_items(action, self.current_level)
 
+            case ActionType.USE_ITEM:
+                new_action = systems.items.use_item(action)
+
             case ActionType.OPEN_DOOR | ActionType.CLOSE_DOOR:
                 systems.props.open_or_close_door(action, self.current_level)
 
@@ -272,6 +275,9 @@ class Game:
 
             case ActionType.INFLICT_DMG:
                 new_action = systems.stats.inflict_damage(action)
+
+            case ActionType.HEAL:
+                systems.stats.heal(action)
 
         if new_action is None and not action.processed:
             logger.warning(

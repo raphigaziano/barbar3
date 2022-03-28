@@ -20,6 +20,9 @@ class Health(Component):
     def is_dead(self):
         return self.hp <= 0
 
+    def __post_init__(self):
+        self.max_hp = self.hp
+
 
 class Stats(Component):
     __serialize__ = True

@@ -147,6 +147,13 @@ class TestRandomHelpers(unittest.TestCase):
         res = Rng.roll_dice_str('2d8-2')
         mocked_rd.assert_called_with(2, 8, -2)
 
+    def test_roll_dice_string_non_string_arg(self):
+        self.assertRaises(DiceError, Rng.roll_dice_str, 32)
+        self.assertRaises(DiceError, Rng.roll_dice_str, 22.2)
+        self.assertRaises(DiceError, Rng.roll_dice_str, True)
+        self.assertRaises(DiceError, Rng.roll_dice_str, [])
+        self.assertRaises(DiceError, Rng.roll_dice_str, {})
+
     def test_roll_dice_str_invalid_dice_separator(self):
         self.assertRaises(DiceError, Rng.roll_dice_str, '2f8')
         self.assertRaises(DiceError, Rng.roll_dice_str, '2WAT8')

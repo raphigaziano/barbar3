@@ -91,7 +91,17 @@ class RunMode(BaseGameMode):
         self.push(AutoRunMode(action_name='xplore'))
 
     def show_inventory(self):
-        self.push(ItemMenuMode('Inventory', self.client.gamestate.inventory))
+        def use_on_close_cb(menu):
+            self.client.send_request(
+                Request.action(
+                    'use_item', data={'item_id': menu.selected})
+            )
+
+        self.push(
+            ItemMenuMode(
+                'Inventory', self.client.gamestate.inventory,
+                on_leaving=use_on_close_cb)
+        )
 
     def select_items(self, title, items, select_callback):
         self.push(ItemMenuMode(title, items, on_leaving=select_callback))
@@ -106,7 +116,7 @@ class RunMode(BaseGameMode):
         else:
             return self.select_items(
                 'Get items:', items,
-                lambda menu: self._item_selection_callback('get_item', menu)
+                lambda menu: self._inventory_selection_callback('get_item', menu)
             )
 
     def drop_item(self):
@@ -116,10 +126,10 @@ class RunMode(BaseGameMode):
         else:
             return self.select_items(
                 'Drop items:', items,
-                lambda menu: self._item_selection_callback('drop_item', menu)
+                lambda menu: self._inventory_selection_callback('drop_item', menu)
             )
 
-    def _item_selection_callback(self, action_name, menu):
+    def _inventory_selection_callback(self, action_name, menu):
         return self.client.send_request(
             Request.action(action_name, {'item_id_list': [menu.selected]})
         )
@@ -162,11 +172,12 @@ class RunMode(BaseGameMode):
     # on the client).
     def log_event(self, e):
         # Action failed, not initiated by the player
-        if (
-            e['type'] == 'action_rejected'
-            and not e['data']['actor']['actor']['is_player']
-        ):
-            return
+        if e['type'] == 'action_rejected':
+            actor, target = e['data']['actor'], e['data']['target']
+            if 'actor' in actor and not actor['actor']['is_player']:
+                return
+            if target and 'actor' in target and not target['actor']['is_player']:
+                return
         if e['msg']:
             self.log_msg(e['msg'])
         # else:
