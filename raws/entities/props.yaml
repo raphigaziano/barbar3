@@ -41,4 +41,4 @@ trap:
         target: actor
         action:
             type: inflict_dmg
-            data: {dmg: 10}
+            data: {dmg: 3d2+2}  # 5-8

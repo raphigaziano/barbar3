@@ -53,6 +53,18 @@ class TestInflictDmg(BaseFunctionalTestCase):
             event_data={'actor': hurted, 'slayer': hurter}
         )
 
+    @patch('barbarian.utils.rng._Rng.roll_dice', return_value=4)
+    def test_dmg_dice_string(self, _):
+
+        hurter = self.spawn_actor(0, 0, 'orc')
+        hurted = self.spawn_actor(0, 0, 'player')
+
+        # starting hp should be 15 for player
+
+        dmg_action = self.damage_action(hurter, hurted, '1d8')
+        self.assert_action_accepted(inflict_damage, dmg_action)
+        self.assertEqual(11, hurted.health.hp)
+
 
 class TestHeal(BaseFunctionalTestCase):
 

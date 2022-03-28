@@ -7,7 +7,7 @@ player:
     typed:   { type: 'player' }
     actor:   { is_player: True }
     fov:     { range: 10 }      
-    health:  { hp: 25 }
+    health:  { hp: 15 }
     stats:   { strength: 5 }
     visible: { glyph: '@' }
 kobold:

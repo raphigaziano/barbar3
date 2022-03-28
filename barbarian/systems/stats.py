@@ -12,7 +12,11 @@ def inflict_damage(action):
 
     assert target.health
 
-    dmg = data['dmg']
+    try:
+        dmg = Rng.roll_dice_str(data['dmg'])
+    except RngDiceError:
+        dmg = data['dmg']
+
     if dmg < 0:
         raise ValueError(
             f"Damage can't be negative (received dmg: {dmg})")
