@@ -150,6 +150,16 @@ def spot_entities(actor, level):
                     event_data={'actor': actor, 'target': p})
 
 
+def _teleport(actor, level, dest_x, dest_y):
+    """ Actual teleport logic, used by both blink and teleport spells. """
+    dx, dy = vector_to(actor.pos.x, actor.pos.y, dest_x, dest_y, normalize=False)
+    if level.move_actor(actor, dx, dy):
+        actor.fov.compute(
+            level, actor.pos.x, actor.pos.y, update_level=actor.is_player)
+        return True
+    return False
+
+
 def blink(action, level):
     """ Instant move to a random spot in visible range. """
     actor = action.actor
@@ -164,11 +174,7 @@ def blink(action, level):
         if distance_from(actor.pos.x, actor.pos.y, dest_x, dest_y) <= 1:
             continue
 
-        dx, dy = vector_to(
-            actor.pos.x, actor.pos.y, dest_x, dest_y, normalize=False)
-        if level.move_actor(actor, dx, dy):
-            actor.fov.compute(
-                level, actor.pos.x, actor.pos.y, update_level=actor.is_player)
+        if _teleport(actor, level, dest_x, dest_y):
             return action.accept()
 
 
@@ -185,9 +191,5 @@ def teleport(action, level):
         if (dest_x, dest_y) in actor.fov.visible_cells:
             continue
 
-        dx, dy = vector_to(
-            actor.pos.x, actor.pos.y, dest_x, dest_y, normalize=False)
-        if level.move_actor(actor, dx, dy):
-            actor.fov.compute(
-                level, actor.pos.x, actor.pos.y, update_level=actor.is_player)
+        if _teleport(actor, level, dest_x, dest_y):
             return action.accept()
