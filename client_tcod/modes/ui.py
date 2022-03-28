@@ -124,5 +124,43 @@ class MenuMode(BaseGameMode):
 class ItemMenuMode(MenuMode):
 
     def __init__(self, title, items, *args, **kwargs):
-        items = [(item['id'], item['name']) for item in items]
+        items = self.stack_items(items)
         super().__init__(title, items, *args, **kwargs)
+
+    def stack_items(self, flat_item_list):
+
+        counter = {}
+        for item in flat_item_list:
+            if 'consumable' in item:
+                charges, max_charges = (
+                    item['consumable']['charges'],
+                    item['consumable']['max_charges'])
+            else:
+                charges, max_charges = 0, 0
+            item_key = (item['name'], charges, max_charges)
+            item_count = counter.get(item_key, (0, None))[0]
+            counter[item_key] = (item_count +1, item['id'])
+
+        item_list = []
+        for item_key, item_val in counter.items():
+            item_name, charges, max_charges = item_key
+            count, item_id = item_val
+            display_str = self.get_display_string(
+                count, item_name, charges, max_charges)
+            item_list.append((item_id, display_str))
+
+        # Sort by (name, count) ?
+
+        return item_list
+
+    def get_display_string(self, count, item_name, charges, max_charges):
+
+        display_str = (
+            f'({count}) {item_name}' if count > 1 else item_name)
+
+        # TODO: We'll probably want to list *some* but not
+        # all, 1 charges items (ie, wands)
+        if charges != max_charges or charges > 1:
+            display_str += f' (remaining charges: {charges}'
+
+        return display_str

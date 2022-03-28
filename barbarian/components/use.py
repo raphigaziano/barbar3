@@ -84,8 +84,13 @@ class Trigger(Usable):
 
 
 class Consumable(Component):
+    __serialize__ = True
 
     charges: int = 1
+    max_charges: int = field(default=None, init=False)
+
+    def __post_init__(self):
+        self.max_charges = self.charges
 
     @property
     def depleted(self):
