@@ -70,8 +70,7 @@ class TestConsumableItem(BaseItemTestCase):
         actor.inventory.items.append(item)
         actor.health.hp = 1
 
-        # Both the use action is accepted ans the heal action it
-        # returns are accepted
+        # Both the use action and the heal action it returns are accepted
         new_action = self.assert_action_accepted(
             game.process_action, self.use_action(actor, item))
 
