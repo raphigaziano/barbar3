@@ -5,6 +5,7 @@ Common geometric utilities.
 Mostly useful for manipulating the map.
 
 """
+import math
 
 
 class Rect:
@@ -71,3 +72,36 @@ class Circle:
                     self.r * self.r + self.r
                 ):
                     yield x, y
+
+
+def distance_from(from_x, from_y, to_x, to_y):
+    """
+    Return the distance between the entity and a point located
+    at (x, y)
+
+    """
+    return int(math.sqrt((to_x - from_x) ** 2 + (to_y - from_y) ** 2))
+
+
+def vector_to(from_x, from_y, target_x, target_y, normalize=True):
+    """ 
+    Return a vector pointing to position (target_x, target_y).
+
+    If param `normalize` is True, then the vector will be reduced to
+    len(1).
+
+    """
+    dx, dy = target_x - from_x, target_y - from_y
+
+    if not normalize:
+        return dx, dy
+
+    vx = vy = 0
+
+    if dx > 0:      vx = 1
+    elif dx < 0:    vx = -1
+
+    if dy > 0:      vy = 1
+    elif dy < 0:    vy = -1
+
+    return vx, vy

@@ -2,6 +2,7 @@
 Ai routines.
 
 """
+from barbarian.utils.geometry import vector_to
 from barbarian.utils.rng import Rng
 from barbarian.actions import Action, ActionType
 
@@ -13,7 +14,8 @@ def tmp_ai(actor, game):
 
     # If player can see me, then I can see him
     if game.player.fov.is_in_fov(actor.pos.x, actor.pos.y):
-        dx, dy = actor.pos.vector_to(game.player.pos.x, game.player.pos.y)
+        dx, dy = vector_to(
+            actor.pos.x, actor.pos.y, game.player.pos.x, game.player.pos.y)
         return Action.move(actor, d={'dir': (dx, dy)})
 
     # Can't spot the player, so move randomly

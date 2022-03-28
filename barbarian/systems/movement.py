@@ -6,6 +6,7 @@ import logging
 
 from barbarian import systems
 from barbarian.utils.rng import Rng
+from barbarian.utils.geometry import distance_from, vector_to
 from barbarian.actions import Action
 from barbarian.events import Event, EventType
 from barbarian.components.use import PropActivationMode
@@ -160,10 +161,11 @@ def blink(action, level):
     while dest := Rng.choice(cells_in_range):
 
         dest_x, dest_y = dest
-        if actor.pos.distance_from(dest_x, dest_y) <= 1:
+        if distance_from(actor.pos.x, actor.pos.y, dest_x, dest_y) <= 1:
             continue
 
-        dx, dy = actor.pos.vector_to(dest_x, dest_y, normalize=False)
+        dx, dy = vector_to(
+            actor.pos.x, actor.pos.y, dest_x, dest_y, normalize=False)
         if level.move_actor(actor, dx, dy):
             actor.fov.compute(
                 level, actor.pos.x, actor.pos.y, update_level=actor.is_player)
@@ -183,7 +185,8 @@ def teleport(action, level):
         if (dest_x, dest_y) in actor.fov.visible_cells:
             continue
 
-        dx, dy = actor.pos.vector_to(dest_x, dest_y, normalize=False)
+        dx, dy = vector_to(
+            actor.pos.x, actor.pos.y, dest_x, dest_y, normalize=False)
         if level.move_actor(actor, dx, dy):
             actor.fov.compute(
                 level, actor.pos.x, actor.pos.y, update_level=actor.is_player)
