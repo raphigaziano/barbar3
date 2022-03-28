@@ -2,6 +2,8 @@
 Components defining an acting entity.
 
 """
+from dataclasses import field
+
 from barbarian.components.base import Component
 
 
@@ -15,13 +17,14 @@ class Health(Component):
     __serialize__ = True
 
     hp: int
+    max_hp: int = field(default=None, init=False)
+
+    def __post_init__(self):
+        self.max_hp = self.hp
 
     @property
     def is_dead(self):
         return self.hp <= 0
-
-    def __post_init__(self):
-        self.max_hp = self.hp
 
 
 class Stats(Component):

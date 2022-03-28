@@ -347,9 +347,10 @@ class TcodRenderer:
             1, 1, f'Current depth: {cd}/{md}', fg=STATS_FG, bg=STATS_BG)
 
         hp = gamestate.player['health']['hp']
+        max_hp = gamestate.player['health']['max_hp']
         str_ = gamestate.player['stats']['strength']
         self.stats_console.print(
-            1, 3, f'HP: {hp}', fg=STATS_FG, bg=STATS_BG)
+            1, 3, f'HP: {hp}/{max_hp}', fg=STATS_FG, bg=STATS_BG)
         self.stats_console.print(
             1, 4, f'Strength: {str_}', fg=STATS_FG, bg=STATS_BG)
 
