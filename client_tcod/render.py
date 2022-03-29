@@ -37,6 +37,7 @@ GFX_DATA = {
     'orc': {'glyph': 'O', 'fg_color': tcod.green},
     'kobold': {'glyph': 'k', 'fg_color': tcod.red},
     'trap': {'fg_color': tcod.red},
+    'trap_depleted': {'fg_color': tcod.grey},
     'open_door': {
         'glyph': '+', 'fg_color': TileColors[C.TileType.FLOOR]},
     'closed_door': {'fg_color': tcod.yellow},
@@ -192,6 +193,9 @@ class TcodRenderer:
                 return GFX_DATA['open_door']
             else:
                 return GFX_DATA['closed_door']
+        if e['type'] == 'trap':
+            if e['consumable']['charges'] <= 0:
+                return GFX_DATA['trap_depleted']
 
         return GFX_DATA.get(e['type'], {})
 

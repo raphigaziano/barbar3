@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 from .base import BaseFunctionalTestCase
 from barbarian.actions import Action, ActionType
+from barbarian.events import EventType
 
 from barbarian.systems.props import (
     use_prop, trigger, open_or_close_door
@@ -139,9 +140,12 @@ class TestTrigger(BaseFunctionalTestCase):
             self.assertEqual(prop, triggered_action.target)
             self.assertEqual(ActionType.OPEN_DOOR, triggered_action.type)
 
-    def test_trap(self):
+    @patch('barbarian.events.Event.emit')
+    def test_trap(self, mocked_event_emit):
 
         for actor in self.actor_list(0, 0, 'player', 'orc'):
+
+            mocked_event_emit.reset_mock()
 
             prop = self.spawn_prop(2, 2, 'trap')
 
@@ -151,6 +155,19 @@ class TestTrigger(BaseFunctionalTestCase):
             self.assertEqual(prop, triggered_action.actor)
             self.assertEqual(actor, triggered_action.target)
             self.assertEqual(ActionType.INFLICT_DMG, triggered_action.type)
+
+            mocked_event_emit.assert_called_once_with(
+                EventType.ENTITY_CONSUMED, data={'entity': prop})
+
+    def test_trap_dont_trigger_if_depleted(self):
+
+        for actor in self.actor_list(0, 0, 'player', 'orc'):
+
+            prop = self.spawn_prop(2, 2, 'trap')
+            prop.consumable.charges = 0
+
+            triggered_action = trigger(actor, prop)
+            self.assertIsNone(triggered_action)
 
 
 class OpenCloseDoorTest(BaseFunctionalTestCase):

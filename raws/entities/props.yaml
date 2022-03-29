@@ -42,3 +42,4 @@ trap:
         action:
             type: inflict_dmg
             data: {dmg: 3d2+2}  # 5-8
+    consumable: {}

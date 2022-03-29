@@ -5,8 +5,28 @@ Prop logic
 import logging
 
 from barbarian.actions import Action, ActionType
+from barbarian.events import Event, EventType
+
 
 logger = logging.getLogger(__name__)
+
+
+def _use_prop(actor, prop, use_component):
+    """
+    Actual prop use.
+
+    Check charges and return a new action if prop is still charged.
+
+    """
+    if prop.consumable:
+        if prop.consumable.charges <= 0:
+            return None
+        event_data = {'entity': prop}
+        Event.emit(EventType.ENTITY_CONSUMED, data=event_data)
+    new_action_args = use_component.action
+    new_action_args.update(
+        use_component.get_actor_and_target(actor, prop))
+    return Action.from_dict(new_action_args)
 
 
 def use_prop(action, level):
@@ -25,11 +45,10 @@ def use_prop(action, level):
             if (prop.usable.use_key and
                 prop.usable.use_key != data['use_key']):
                 return action.reject(msg="You can't do that here")
-            action.accept()
-            new_action_args = prop.usable.action
-            new_action_args.update(
-                prop.usable.get_actor_and_target(actor, prop))
-            return Action.from_dict(new_action_args)
+            if (new_action := _use_prop(actor, prop, prop.usable)):
+                action.accept()
+                return new_action
+            return action.reject()
         else:
             logger.warning(
                 'Trying to use prop with no use function: %s', prop)
@@ -45,9 +64,8 @@ def trigger(actor, prop):
     """
     assert prop.trigger
 
-    action_args = prop.trigger.action
-    action_args.update(prop.trigger.get_actor_and_target(actor, prop))
-    return Action.from_dict(action_args)
+    if (new_action := _use_prop(actor, prop, prop.trigger)):
+        return new_action
 
 
 def open_or_close_door(action, level):
