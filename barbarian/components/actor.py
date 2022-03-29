@@ -5,6 +5,7 @@ Components defining an acting entity.
 from dataclasses import field
 
 from barbarian.components.base import Component
+from barbarian.settings import DEFAULT_REGEN_RATE, DEFAULT_REGEN_AMOUNT
 
 
 class Actor(Component):
@@ -25,6 +26,12 @@ class Health(Component):
     @property
     def is_dead(self):
         return self.hp <= 0
+
+
+class Regen(Component):
+
+    rate: int = DEFAULT_REGEN_RATE
+    amount: int = DEFAULT_REGEN_AMOUNT
 
 
 class Stats(Component):

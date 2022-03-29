@@ -85,13 +85,13 @@ class TestGame(BaseGameTest):
 
         game.process_set_request({'key': 'MAP_DEBUG', 'val': True})
         action = Action(ActionType.CHANGE_LEVEL)
-        game.process_action(action)
+        game.dispatch_action(action)
         patched_change_level.assert_called_with(
             action, game.world, game.player, debug=True)
 
         game.process_set_request({'key': 'MAP_DEBUG', 'val': False})
         action = Action(ActionType.CHANGE_LEVEL)
-        game.process_action(action)
+        game.dispatch_action(action)
         patched_change_level.assert_called_with(
             action, game.world, game.player, debug=False)
 
@@ -152,7 +152,7 @@ class TestGameLoop(BaseGameTest):
         ) as mock_take_turn:
 
             with patch.object(
-                Game, 'process_action', side_effect=EndTurn()
+                Game, 'dispatch_action', side_effect=EndTurn()
             ):
                 gl.send(Action(ActionType.IDLE))
 
@@ -191,7 +191,7 @@ class TestGameLoop(BaseGameTest):
             return a
 
         with patch.object(
-            self.game, 'process_action', wraps=reject_action
+            self.game, 'dispatch_action', wraps=reject_action
         ):
             with self.assertLogs('barbarian.game', 'CRITICAL'):
                 gl.send(Action(ActionType.IDLE, actor=self.game.player))

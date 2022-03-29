@@ -174,7 +174,7 @@ class RunMode(BaseGameMode):
         # Action failed, not initiated by the player
         if e['type'] == 'action_rejected':
             actor, target = e['data']['actor'], e['data']['target']
-            if 'actor' in actor and not actor['actor']['is_player']:
+            if actor and 'actor' in actor and not actor['actor']['is_player']:
                 return
             if target and 'actor' in target and not target['actor']['is_player']:
                 return

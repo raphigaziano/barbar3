@@ -157,9 +157,9 @@ class Game:
             # Game actions
             try:
                 for actor in self.actors:
+                    self.begin_turn(actor)
                     yield from self.take_turn(actor)
-                    systems.visibility.spot_entities(actor, self.current_level)
-                    self.handle_events()
+                    self.end_turn(actor)
             except EndTurn:
                 logger.debug("Turn ended prematurely")
 
@@ -168,6 +168,17 @@ class Game:
 
             self.ticks += 1
             logger.debug('tick: %d', self.ticks)
+
+    def begin_turn(self, actor):
+        """ Start individual actor's turn. """
+        self._process_action(
+            systems.stats.regenerate(actor, self.ticks))
+
+    def end_turn(self, actor):
+        """ End individual actor's turn. """
+        self._process_action(
+            systems.visibility.spot_entities(actor, self.current_level))
+        self.handle_events()
 
     def take_turn(self, actor):
         """
@@ -189,22 +200,32 @@ class Game:
             self.state.update(self)
             action = yield
 
-        # Loop until action is processed (so that processing can return
-        # a new action).
+        action = self._process_action(action)
+        # Invalid action: request a new one.
+        if action.processed and not action.valid:
+            try:
+                yield from self.take_turn(actor)
+            except RecursionError:
+                logger.critical(
+                    "Maximum recursion limit reached while trying to proccess "
+                    "action: %s", action)
+
+    def _process_action(self, action):
+        """
+        Dispatch the passed action to the relevent system, looping
+        as long as said system doens't return a new action.
+
+        """
+        if action is None:
+            return
+
         while not action.processed:
             try:
-                action = self.process_action(action)
+                action = self.dispatch_action(action)
             except ActionError as e:
                 logger.exception(e)
                 return
-            # Invalid action: request a new one.
-            if action.processed and not action.valid:
-                try:
-                    yield from self.take_turn(actor)
-                except RecursionError:
-                    logger.critical(
-                        "Maximum recursion limit reached while trying "
-                        "to proccess action: %s", action)
+        return action
 
     def chose_action(self, actor):
         """
@@ -223,7 +244,7 @@ class Game:
             return
         return systems.ai.tmp_ai(actor, self)
 
-    def process_action(self, action):
+    def dispatch_action(self, action):
         """
         Dispatch action to the appropriate system to handle it.
 

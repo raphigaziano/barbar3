@@ -3,6 +3,7 @@ Entity stats management
 
 """
 from barbarian.utils.rng import Rng, RngDiceError
+from barbarian.actions import Action, ActionType
 from barbarian.events import Event, EventType
 
 
@@ -55,3 +56,13 @@ def heal(action):
 
     healed = target.health.hp - pre_heal_hp
     action.accept(msg=f'{target.name} was healed for {healed} hp')
+
+
+def regenerate(actor, current_tick):
+    """ Heal actor by `regen.amount` every `regen.rate` tick. """
+    if (regen := actor.regen) is None:
+        return
+
+    if regen.rate > 0 and (current_tick % regen.rate == 0):
+        return Action(
+            ActionType.HEAL, target=actor, data={'amount': regen.amount})

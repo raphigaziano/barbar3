@@ -2,6 +2,7 @@ _base_actor:
     actor: {}
     inventory: {}
     physics: {}
+    regen:   {}
 player:
     _parent: _base_actor
     typed:   { type: 'player' }
