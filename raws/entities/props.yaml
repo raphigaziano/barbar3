@@ -4,21 +4,21 @@ _stairs:
     _parent: _base_prop
     typed: { type: stairs }
     usable:
-        action: {type: change_level}
+        action_data: {type: change_level}
 stairs_down:
     _parent: _stairs
     visible:
         glyph: '>'
     usable:
         use_key: 'down'
-        action: { data: {dir: down} }
+        action_data: { data: {dir: down} }
 stairs_up:
     _parent: _stairs
     visible:
         glyph: '<'
     usable:
         use_key: 'up'
-        action: { data: {dir: up} }
+        action_data: { data: {dir: up} }
 # All doors are spawned closed
 door:
     _parent: _base_prop
@@ -27,10 +27,10 @@ door:
     visible:
         glyph: '+'
     physics: {blocks: True, blocks_sight: True}
-    usable: { action: { type: open_door } }
+    usable: { action_data: { type: open_door } }
     trigger:
         activation_mode:  actor_bump
-        action: {type: open_door}
+        action_data: {type: open_door}
 trap:
     _parent: _base_prop
     typed: { type: trap }
@@ -39,7 +39,7 @@ trap:
     trigger:
         activation_mode:  actor_on_tile
         target: actor
-        action:
+        action_data:
             type: inflict_dmg
             data: {dmg: 3d2+2}  # 5-8
     consumable: {}

@@ -10,7 +10,7 @@ health_potion:
     named: { name: health potion }
     usable:
       target: actor
-      action:
+      action_data:
         type: heal
         data: {amount: 2D3+4}   # 6-10
     consumable: {}
@@ -23,11 +23,11 @@ scroll_teleport:
     _parent: _base_scroll
     named: { name: scroll of teleportation }
     usable:
-        action: { type: teleport }
+        action_data: { type: teleport }
     consumable: {}
 scroll_blink:
     _parent: _base_scroll
     named: { name: scroll of blinking }
     usable:
-        action: { type: blink }
+        action_data: { type: blink }
     consumable: {}

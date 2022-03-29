@@ -28,7 +28,4 @@ def use_item(action):
 
     action.accept()
 
-    new_action_args = item.usable.action
-    new_action_args.update(
-        item.usable.get_actor_and_target(actor, item))
-    return Action.from_dict(new_action_args)
+    return item.usable.get_action(actor, item)

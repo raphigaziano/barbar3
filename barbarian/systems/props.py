@@ -23,10 +23,7 @@ def _use_prop(actor, prop, use_component):
             return None
         event_data = {'entity': prop}
         Event.emit(EventType.ENTITY_CONSUMED, data=event_data)
-    new_action_args = use_component.action
-    new_action_args.update(
-        use_component.get_actor_and_target(actor, prop))
-    return Action.from_dict(new_action_args)
+    return use_component.get_action(actor, prop)
 
 
 def use_prop(action, level):

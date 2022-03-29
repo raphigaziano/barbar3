@@ -191,14 +191,14 @@ class OpenCloseDoorTest(BaseFunctionalTestCase):
         self.assertTrue(door.openable.open)
         self.assertFalse(door.physics.blocks)
         self.assertFalse(door.physics.blocks_sight)
-        self.assertEqual('close_door', door.usable.action['type'])
+        self.assertEqual('close_door', door.usable.action_data['type'])
         # Fu testing glyph & name
 
     def assert_closed(self, door):
         self.assertFalse(door.openable.open)
         self.assertTrue(door.physics.blocks)
         self.assertTrue(door.physics.blocks_sight)
-        self.assertEqual('open_door', door.usable.action['type'])
+        self.assertEqual('open_door', door.usable.action_data['type'])
         # Fu testing glyph & name
 
     def test_open_door(self):
@@ -246,10 +246,6 @@ class OpenCloseDoorTest(BaseFunctionalTestCase):
             door = self.get_door_entity(opened=False)
             action = self.close_door(actor, door)
 
-            print(type(door.usable.action))
-            from pprint import pprint
-            pprint(vars(door))
-            pprint(vars(action))
             self.assert_action_rejected(open_or_close_door, action, level)
             self.assert_closed(door)
             self.assertIn('already close', action.msg)

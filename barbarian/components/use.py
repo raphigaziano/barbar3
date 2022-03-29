@@ -8,6 +8,7 @@ from dataclasses import field, KW_ONLY
 
 from barbarian.utils.types import StringAutoEnum, FrozenDict
 from barbarian.components.base import Component
+from barbarian.actions import Action
 
 
 class UseTarget(StringAutoEnum):
@@ -25,8 +26,8 @@ class PropActivationMode(StringAutoEnum):
 class Usable(Component):
     __flyweight__ = True
 
-    action: dict
-    _action: FrozenDict = field(default=None, init=False, repr=False)
+    action_data: dict
+    _action_data: FrozenDict = field(default=None, init=False, repr=False)
     target: UseTarget = UseTarget.SELF
     use_key: str = ""
 
@@ -34,12 +35,23 @@ class Usable(Component):
         self.target = UseTarget(self.target)
 
     @property
-    def action(self):
-        return self._action.copy() if self._action is not None else None
+    def action_data(self):
+        return self._action_data.copy() if self._action_data is not None else None
 
-    @action.setter
-    def action(self, v):
-        self._action = FrozenDict(v)
+    @action_data.setter
+    def action_data(self, v):
+        self._action_data = FrozenDict(v)
+
+    def get_action(self, actor, entity):
+        """
+        Return an `Action` instance built from `action_data` and the
+        passed `actor`, `entity` pair.
+
+        """
+        new_action_args = self.action_data
+        new_action_args.update(
+            self.get_actor_and_target(actor, entity))
+        return Action.from_dict(new_action_args)
 
     def get_actor_and_target(self, user, usable_entity):
         """
@@ -68,8 +80,8 @@ class Usable(Component):
         cls = self.__class__
 
         kwargs = self.as_dict()# .copy()
-        del kwargs['_action']
-        kwargs['action'] = new_action_data
+        del kwargs['_action_data']
+        kwargs['action_data'] = new_action_data
         return cls(**kwargs)
 
 
