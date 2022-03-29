@@ -3,6 +3,7 @@ Item usage logic.
 
 """
 from barbarian.actions import Action
+from barbarian.events import Event, EventType
 
 
 def _get_item(actor, item_id):
@@ -11,21 +12,6 @@ def _get_item(actor, item_id):
         if item._id == item_id:
             return item
     raise ValueError(f'Item id {item_id} could not be found.')
-
-
-def consume_item(actor, item_id):
-    """
-    Decrement item charges by one and remove it from `actor`'s inventory
-    if charges reaches zero.
-
-    No-op is item is not consumable.
-
-    """
-    item = _get_item(actor, item_id)
-    if item.consumable:
-        item.consumable.charges -= 1
-        if item.consumable.depleted:
-            actor.inventory.items.remove(item)
 
 
 def use_item(action):
@@ -40,4 +26,9 @@ def use_item(action):
     new_action_args.update(
         item.usable.get_actor_and_target(actor, item))
     action.accept()
+
+    if item.consumable:
+        event_data = {'entity': item, 'owner': actor}
+        Event.emit(EventType.ENTITY_CONSUMED, data=event_data)
+
     return Action.from_dict(new_action_args)

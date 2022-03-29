@@ -19,6 +19,7 @@ class EventType(StringAutoEnum):
     ACTION_REJECTED = auto()
     ACTOR_SPOTTED = auto()
     ACTOR_DIED = auto()
+    ENTITY_CONSUMED = auto()
 
 
 @dataclass()
