@@ -22,13 +22,13 @@ def use_item(action):
     if not item.usable:
         return action.reject(msg=f'Item {item.name} cannot be used')
 
-    new_action_args = item.usable.action
-    new_action_args.update(
-        item.usable.get_actor_and_target(actor, item))
-    action.accept()
-
     if item.consumable:
         event_data = {'entity': item, 'owner': actor}
         Event.emit(EventType.ENTITY_CONSUMED, data=event_data)
 
+    action.accept()
+
+    new_action_args = item.usable.action
+    new_action_args.update(
+        item.usable.get_actor_and_target(actor, item))
     return Action.from_dict(new_action_args)
