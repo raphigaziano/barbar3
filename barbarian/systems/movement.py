@@ -8,7 +8,6 @@ from barbarian import systems
 from barbarian.utils.rng import Rng
 from barbarian.utils.geometry import distance_from, vector_to
 from barbarian.actions import Action
-from barbarian.events import Event, EventType
 from barbarian.components.use import PropActivationMode
 from barbarian.utils.structures.dijkstra import DijkstraGrid
 
@@ -48,7 +47,6 @@ def move_actor(action, level):
         if actor.fov:
             actor.fov.compute(
                 level, destx, desty, update_level=actor.is_player)
-            spot_entities(actor, level)
         if (prop := level.props[destx, desty]) and (
             prop.trigger and
             prop.trigger.activation_mode == PropActivationMode.ACTOR_ON_TILE
@@ -121,33 +119,6 @@ def change_level(action, world, player, debug=False):
 
     world.change_level(delta, player, debug)
     action.accept(msg='You enter a new level!')
-
-
-def spot_entities(actor, level):
-    """
-    Spot "interesting" entities in visible range.
-
-    For now, this simply emits an event if the spotted entity is deemed
-    dangerous. We'll probably add more logic in the future (like an
-    actual spot mechanic, ie for trap detection).
-
-    """
-    assert actor.fov
-
-    # FIXME: add a "dangerous" component / component prop and just
-    # check for it
-    for x, y in actor.fov.visible_cells:
-        if a := level.actors[x,y]:
-            if a is actor:
-                continue
-            Event.emit(
-                EventType.ACTOR_SPOTTED,
-                event_data={'actor': actor, 'target': a})
-        if p := level.props[x,y]:
-            if p.typed.type == 'trap':
-                Event.emit(
-                    EventType.ACTOR_SPOTTED,
-                    event_data={'actor': actor, 'target': p})
 
 
 def _teleport(actor, level, dest_x, dest_y):

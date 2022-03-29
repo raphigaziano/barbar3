@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
-from barbarian.systems.ai import _spot_player
+from barbarian.systems.visibility import spot_player
 
 
 class TestSpotPlayer(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestSpotPlayer(unittest.TestCase):
         actor.fov.visible_cells = []
         player = Mock()
 
-        _spot_player(actor, player)
+        spot_player(actor, player)
 
         player.fov.is_in_fov.assert_not_called()
 
@@ -22,6 +22,6 @@ class TestSpotPlayer(unittest.TestCase):
         actor.fov = None
         player = Mock()
 
-        _spot_player(actor, player)
+        spot_player(actor, player)
 
         player.fov.is_in_fov.assert_called()

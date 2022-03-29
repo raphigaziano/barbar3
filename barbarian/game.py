@@ -158,6 +158,7 @@ class Game:
             try:
                 for actor in self.actors:
                     yield from self.take_turn(actor)
+                    systems.visibility.spot_entities(actor, self.current_level)
                     self.handle_events()
             except EndTurn:
                 logger.debug("Turn ended prematurely")

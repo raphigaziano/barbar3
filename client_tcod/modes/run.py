@@ -224,6 +224,11 @@ class AutoRunMode(RunMode):
                     },
                 } if ge['data']['type'] == self.action_name:
                     self.pop()
-                case {'type': 'actor_spotted'}:
+                case {
+                    'type': 'actor_spotted',
+                    'data': {
+                        'spotter': {'name': 'player'},
+                    },
+                }:
                     self.log_msg('Something dangerous is in view')
                     self.pop()
