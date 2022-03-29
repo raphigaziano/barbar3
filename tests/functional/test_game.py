@@ -1,4 +1,4 @@
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, DEFAULT
 import inspect
 
 from .base import BaseFunctionalTestCase
@@ -129,15 +129,27 @@ class TestGameLoop(BaseGameTest):
     def test_basic_turn(self):
 
         gl = self.get_gameloop()
+        this = self
 
-        with patch.object(
-            self.game, 'take_turn', wraps=self.game.take_turn,
-        ) as mock_take_turn:
+        class MethodsMock(Mock):
+            def __init__(self, *args, **kwargs):
+                kwargs['wraps'] = getattr(this.game, kwargs['name'])
+                super().__init__(*args, **kwargs)
+
+        with patch.multiple(
+            self.game,
+            new_callable=MethodsMock,
+            begin_turn=DEFAULT,
+            take_turn=DEFAULT,
+            end_turn=DEFAULT,
+        ) as mocks:
 
             gl.send(Action(ActionType.IDLE))
 
             # 2 actors => 2 calls
-            self.assertEqual(2, mock_take_turn.call_count)
+            self.assertEqual(2, mocks['begin_turn'].call_count)
+            self.assertEqual(2, mocks['take_turn'].call_count)
+            self.assertEqual(2, mocks['end_turn'].call_count)
 
             # Event queue cleared, turn counter incremented
             self.assertEqual(0, len(Event.queue))
