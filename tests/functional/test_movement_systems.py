@@ -145,36 +145,6 @@ class TestMoveActor(BaseFunctionalTestCase):
         mock_fov_compute.assert_called_once_with(
             level, actor.pos.x, actor.pos.y, update_level=True)
 
-    @skip('Call to spot_entities has been moved to the middle if the '
-          'game loop, so testing it was called is suddenly *not trivial*...')
-    @patch('barbarian.components.actor.Fov.compute')
-    @patch('barbarian.systems.visibility.spot_entities')
-    def test_no_spot_entities_if_no_fov(self, mock_spot, _):
-
-        level = self.build_dummy_level()
-        actor = self.spawn_actor(4, 2, 'kobold')
-        level.actors.add_e(actor)
-
-        move_action = self.move_action(actor, 1, 1)
-        move_actor(move_action, level)
-
-        mock_spot.assert_not_called()
-
-    @skip('Call to spot_entities has been moved to the middle if the '
-          'game loop, so testing it was called is suddenly *not trivial*...')
-    @patch('barbarian.components.actor.Fov.compute')
-    @patch('barbarian.systems.visibility.spot_entities')
-    def test_spot_entities_if_has_fov(self, mock_spot, _):
-
-        level = self.build_dummy_level()
-        actor = self.spawn_actor(4, 2, 'player')
-        level.actors.add_e(actor)
-
-        move_action = self.move_action(actor, 1, 1)
-        move_actor(move_action, level)
-
-        mock_spot.assert_called_once_with(actor, level)
-
     def test_attack_actor_on_dest_cell(self):
 
         for actor in self.actor_list(4, 2, 'player', 'orc'):
