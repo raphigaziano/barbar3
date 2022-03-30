@@ -153,9 +153,7 @@ class TestGameLoop(BaseGameTest):
         ) as mock_take_turn:
 
             self.advance_gameloop(
-                action=Action(ActionType.USE_PROP,
-                              actor=self.game.player,
-                              data={})
+                Action(ActionType.USE_PROP, actor=self.game.player, data={})
             )
 
             # Action rejected => only one call
@@ -178,7 +176,7 @@ class TestGameLoop(BaseGameTest):
         ):
             with self.assertLogs('barbarian.game', 'CRITICAL'):
                 self.advance_gameloop(
-                    action=Action(ActionType.IDLE, actor=self.game.player))
+                    Action(ActionType.IDLE, actor=self.game.player))
 
     def test_log_warning_if_action_cant_be_processed(self):
 
@@ -190,7 +188,7 @@ class TestGameLoop(BaseGameTest):
         ):
             with self.assertLogs('barbarian.game', 'WARNING'):
                 self.advance_gameloop(
-                    action=Action(
+                    Action(
                         ActionType.MOVE, actor=self.game.player,
                         data={'dir': (0, 0)})
                 )
@@ -201,7 +199,7 @@ class TestGameLoop(BaseGameTest):
 
         try:
             self.advance_gameloop(
-                action=Action.inflict_dmg(Mock(), self.game.player, {'dmg': 9999}))
+                Action.inflict_dmg(Mock(), self.game.player, {'dmg': 9999}))
         except StopIteration:
             # This is handled by the game during normal run.
             pass
