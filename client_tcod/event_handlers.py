@@ -24,15 +24,19 @@ class BaseEventHandler(tcod.event.EventDispatch[None]):
     def ev_keydown(self, e: tcod.event.KeyDown) -> dict:
 
         if e.sym == tcod.event.K_ESCAPE:
-            return self.quit()
+            confirm = not e.mod & tcod.event.KMOD_LSHIFT
+            return self.quit(confirm)
 
-    def quit(self):
+    def quit(self, confirm=True):
         from .modes.ui import PromptConfirmMode
-        confirm = PromptConfirmMode(
-            prompt='Are you sure you want to quit?',
-            on_leaving=lambda _: self.mode.pop()
-        )
-        self.mode.push(confirm)
+        if confirm:
+            confirm = PromptConfirmMode(
+                prompt='Are you sure you want to quit?',
+                on_leaving=lambda _: self.mode.pop()
+            )
+            self.mode.push(confirm)
+        else:
+            self.mode.pop()
 
     def handle(self, ctxt):
         """ Process UI events. """
