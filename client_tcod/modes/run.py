@@ -212,7 +212,6 @@ class AutoRunMode(RunMode):
         request = super().update()
         if request:
             self.pop()
-            return self.client.process_request(request)
 
     def process_game_events(self, game_events):
         for ge in game_events:
