@@ -110,3 +110,36 @@ class TestHeal(BaseFunctionalTestCase):
         heal_action = self.heal_action(actor, '2D4')
         self.assert_action_accepted(heal, heal_action)
         self.assertEqual(5, actor.health.hp)
+
+
+class TestRegen(BaseFunctionalTestCase):
+
+    def test_regen_triggered_at_turn_start(self):
+
+        game = self.build_dummy_game()
+        game.player.regen.rate = 3
+        game.player.health.hp = 1
+
+        self.advance_gameloop()
+        self.assertEqual(1, self.game.player.health.hp)
+
+        # tick = regen.rate - 1 (loop yields *before* the end of the
+        # turn, so restarting it will increment game ticks and only then
+        # process actors)
+        self.game.ticks = 2
+        self.advance_gameloop()
+        self.assertEqual(2, self.game.player.health.hp)
+
+        self.game.ticks = 4
+        self.advance_gameloop()
+        self.assertEqual(2, self.game.player.health.hp)
+
+        # tick = (rgen.rate * 2) - 1 - see above
+        self.game.ticks = 5
+        self.advance_gameloop()
+        self.assertEqual(3, self.game.player.health.hp)
+
+        # tick = (rgen.rate * 3) - 1 - see above
+        self.game.ticks = 8
+        self.advance_gameloop()
+        self.assertEqual(4, self.game.player.health.hp)

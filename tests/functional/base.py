@@ -40,7 +40,12 @@ class BaseFunctionalTestCase(unittest.TestCase):
 
         game.player = self.spawn_actor(1, 1, 'player')
         level.enter(game.player)
-        mob = self.spawn_actor(3, 3, 'orc')
+        # Try and spwan mop as far as possible from the player (to avoid
+        # an attack while we're testing something else),
+        # but not on map border, in case its random move tries to move out
+        # of bounds (no big deal usually, but will mess up take_turn's
+        # call_count)
+        mob = self.spawn_actor(map_w - 2, map_h - 2, 'orc')
         level.actors.add_e(mob)
 
         world.insert_level(level)
