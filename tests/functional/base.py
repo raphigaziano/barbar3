@@ -2,18 +2,21 @@ import unittest
 from unittest.mock import patch
 
 from barbarian import settings
+from barbarian.game import Game
 from barbarian.components import init_components
-from barbarian.world import Level
+from barbarian.world import World, Level
 from barbarian.map import Map, TileType
 from barbarian.raws import get_entity_data
 from barbarian.spawn import spawn_entity
 
 
 class BaseFunctionalTestCase(unittest.TestCase):
-    """ Base test case for functional tests, providing commone helpers. """
+    """ Base test case for functional tests, providing common helpers. """
 
     test_raws_root = 'tests/raws/path'
     dummy_map = ('.',)
+
+    MAP_W, MAP_H = 10, 10
 
     def setUp(self):
         init_components()
@@ -22,6 +25,31 @@ class BaseFunctionalTestCase(unittest.TestCase):
         raws_root_patcher.start()
 
         self.addCleanup(raws_root_patcher.stop)
+
+    def build_dummy_game(self, map_w, map_h):
+
+        game = Game()
+
+        world = World(self.MAP_W, self.MAP_H)
+        level = Level(self.MAP_W, self.MAP_H)
+        level.map = Map(
+            self.MAP_W, self.MAP_H,
+            [TileType.FLOOR for _ in range(self.MAP_W * self.MAP_H)]
+        )
+        level.start_pos = 1, 1
+        level.exit_pos = 8, 8
+        level.init_fov_map()
+
+        game.player = self.spawn_actor(1, 1, 'player')
+        level.enter(game.player)
+        mob = self.spawn_actor(3, 3, 'orc')
+        level.actors.add_e(mob)
+
+        world.insert_level(level)
+        game.world = world
+
+        self.game = game
+        return game
 
     def build_dummy_level(self):
 

@@ -5,11 +5,10 @@ from .base import BaseFunctionalTestCase
 from barbarian.utils.rng import Rng
 from barbarian.actions import Action, ActionType
 from barbarian.events import Event
-from barbarian.world import World, Level
 from barbarian.map import Map, TileType
+from barbarian.settings import MAP_W, MAP_H
 
 from barbarian.game import Game, EndTurn
-from barbarian.settings import MAP_W, MAP_H
 
 
 class BaseGameTest(BaseFunctionalTestCase):
@@ -23,7 +22,7 @@ class TestGame(BaseGameTest):
     # This seems to generate a fastish map.
     seed = '4876877298345515653'
 
-    @patch('barbarian.genmap.common.BaseMapBuilder')
+    @patch('barbarian.genmap.common.BaseMapBuilder.build')
     def test_game_start(self, _):
 
         game = Game()
@@ -59,7 +58,7 @@ class TestGame(BaseGameTest):
         self.assertEqual(inspect.GEN_SUSPENDED, loop_state)
         self.assertEqual(1, game.ticks) # Still processing first turn
 
-    @patch('barbarian.genmap.common.BaseMapBuilder')
+    @patch('barbarian.genmap.common.BaseMapBuilder.build')
     @patch.object(Rng, 'init_root')
     def test_seed_is_passed_to_root_rng(self, mock_init_root_rng, _):
         game = Game()
@@ -100,31 +99,10 @@ class TestGameLoop(BaseGameTest):
 
     def get_gameloop(self):
         """ Return a minimal game object and return its gameloop """
-        self.game = Game()
-
-        map_w, map_h = MAP_W, MAP_H
-        world = World(map_w, map_h)
-        level = Level(map_w, map_h)
-        level.map = Map(
-            map_w, map_h,
-            [TileType.FLOOR for _ in range(map_w * map_h)]
-        )
-        level.start_pos = 1, 1
-        level.exit_pos = 8, 8
-        level.init_fov_map()
-
-        self.game.player = self.spawn_actor(1, 1, 'player')
-        level.enter(self.game.player)
-        mob = self.spawn_actor(3, 3, 'orc')
-        level.actors.add_e(mob)
-
-        world.insert_level(level)
-        self.game.world = world
-
-        self.game.is_running = True
-
-        self.game.start_gameloop()
-        return self.game.gameloop
+        game = super().build_dummy_game(self.MAP_W, self.MAP_H)
+        game.is_running = True
+        game.start_gameloop()
+        return game.gameloop
 
     def test_basic_turn(self):
 
