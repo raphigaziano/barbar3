@@ -4,7 +4,6 @@ import inspect
 from .base import BaseFunctionalTestCase
 from barbarian.utils.rng import Rng
 from barbarian.actions import Action, ActionType
-from barbarian.events import Event
 from barbarian.map import Map, TileType
 from barbarian.settings import MAP_W, MAP_H
 
@@ -95,9 +94,16 @@ class TestGame(BaseGameTest):
             action, game.world, game.player, debug=False)
 
 
+@patch('barbarian.events.Event.clear_queue')
 class TestGameLoop(BaseGameTest):
 
-    def test_basic_turn(self):
+    dummy_map = (
+        '...',
+        '...',
+        '...',
+    )
+
+    def test_basic_turn(self, mock_event_clear):
 
         self.build_dummy_game()
         this = self
@@ -115,16 +121,38 @@ class TestGameLoop(BaseGameTest):
 
             self.advance_gameloop()
 
+            # 1 actors => 1 calls
+            self.assertEqual(1, mocks['begin_turn'].call_count)
+            self.assertEqual(1, mocks['take_turn'].call_count)
+            self.assertEqual(1, mocks['end_turn'].call_count)
+
+            # Event queue cleared, turn counter incremented
+            self.assertEqual(1, mock_event_clear.call_count)
+            self.assertEqual(2, self.game.ticks)
+
+        with patch.multiple(
+            self.game,
+            new_callable=MethodsMock,
+            begin_turn=DEFAULT, take_turn=DEFAULT, end_turn=DEFAULT,
+        ) as mocks:
+
+            # spawning at 0,0 seems to move the new actor first in the
+            # actor queue... We need a scheduler...
+            new_actor = self.spawn_actor(0, 0, 'orc')
+            self.game.current_level.actors.add_e(new_actor)
+
+            self.advance_gameloop()
+
             # 2 actors => 2 calls
             self.assertEqual(2, mocks['begin_turn'].call_count)
             self.assertEqual(2, mocks['take_turn'].call_count)
             self.assertEqual(2, mocks['end_turn'].call_count)
 
             # Event queue cleared, turn counter incremented
-            self.assertEqual(0, len(Event.queue))
-            self.assertEqual(2, self.game.ticks)
+            self.assertEqual(2, mock_event_clear.call_count)
+            self.assertEqual(3, self.game.ticks)
 
-    def test_turn_aborted(self):
+    def test_turn_aborted(self, mock_event_clear):
 
         self.build_dummy_game()
 
@@ -141,10 +169,10 @@ class TestGameLoop(BaseGameTest):
                 self.assertEqual(1, mock_take_turn.call_count)
 
                 # Event queue cleared, turn counter incremented
-                self.assertEqual(0, len(Event.queue))
+                self.assertEqual(1, mock_event_clear.call_count)
                 self.assertEqual(2, self.game.ticks)
 
-    def test_take_turn_invalid_player_action(self):
+    def test_take_turn_invalid_player_action(self, mock_event_clear):
 
         self.build_dummy_game()
 
@@ -160,12 +188,13 @@ class TestGameLoop(BaseGameTest):
             self.assertEqual(1, mock_take_turn.call_count)
 
             # Event queue *not* cleared, turn counter *not* incremented
-            self.assertNotEqual(0, len(Event.queue))
+            self.assertEqual(0, mock_event_clear.call_count)
             self.assertEqual(1, self.game.ticks)
 
-    def test_max_recursion_is_caught(self):
+    def test_max_recursion_is_caught(self, _):
 
         self.build_dummy_game()
+        self.game.current_level.actors.add_e(self.spawn_actor(0, 0, 'orc'))
 
         def reject_action(a):
             a.accept() if a.actor.is_player else a.reject()
@@ -178,7 +207,7 @@ class TestGameLoop(BaseGameTest):
                 self.advance_gameloop(
                     Action(ActionType.IDLE, actor=self.game.player))
 
-    def test_log_warning_if_action_cant_be_processed(self):
+    def test_log_warning_if_action_cant_be_processed(self, _):
 
         self.build_dummy_game()
 
@@ -193,7 +222,7 @@ class TestGameLoop(BaseGameTest):
                         data={'dir': (0, 0)})
                 )
 
-    def test_player_death_stops_the_loop(self):
+    def test_player_death_stops_the_loop(self, _):
 
         self.build_dummy_game()
 

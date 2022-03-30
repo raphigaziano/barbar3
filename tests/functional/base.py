@@ -2,11 +2,13 @@ import unittest
 from unittest.mock import patch
 
 from barbarian import settings
+from barbarian.utils.rng import Rng
 from barbarian.game import Game
 from barbarian.components import init_components
 from barbarian.world import World, Level
 from barbarian.map import Map, TileType
 from barbarian.actions import Action, ActionType
+from barbarian.events import Event
 from barbarian.raws import get_entity_data
 from barbarian.spawn import spawn_entity
 
@@ -14,6 +16,7 @@ from barbarian.spawn import spawn_entity
 class BaseFunctionalTestCase(unittest.TestCase):
     """ Base test case for functional tests, providing common helpers. """
 
+    rng_seed = None
     test_raws_root = 'tests/raws/path'
     dummy_map = ('.',)
 
@@ -25,34 +28,33 @@ class BaseFunctionalTestCase(unittest.TestCase):
 
         self.addCleanup(raws_root_patcher.stop)
 
-    def build_dummy_game(self, map_w=10, map_h=10, running=True):
+        Event.clear_queue()
+        Rng.init_root(self.rng_seed)
+
+    def build_dummy_game(self, running=True):
 
         game = Game()
 
+        map_h = len(self.dummy_map)
+        map_w = len(self.dummy_map[0])
+
         world = World(map_w, map_h)
-        level = Level(map_w, map_h)
-        level.map = Map(
-            map_w, map_h, [TileType.FLOOR for _ in range(map_w * map_h)]
+
+        level = self.build_dummy_level()
+        level.start_pos = (
+            1 if map_w > 1 else 0,
+            1 if map_h > 1 else 0
         )
-        level.start_pos = 1, 1
-        level.exit_pos = 8, 8
+        level.exit_pos = map_w - 1, map_h - 1
         level.init_fov_map()
 
-        game.player = self.spawn_actor(1, 1, 'player')
+        game.player = self.spawn_actor(*level.start_pos, 'player')
         level.enter(game.player)
-        # Try and spwan mop as far as possible from the player (to avoid
-        # an attack while we're testing something else),
-        # but not on map border, in case its random move tries to move out
-        # of bounds (no big deal usually, but will mess up take_turn's
-        # call_count)
-        mob = self.spawn_actor(map_w - 2, map_h - 2, 'orc')
-        level.actors.add_e(mob)
 
         world.insert_level(level)
         game.world = world
 
         if running:
-            game.is_running = True
             game.start_gameloop()
 
         self.game = game
@@ -64,11 +66,6 @@ class BaseFunctionalTestCase(unittest.TestCase):
         game.gameloop.send(action)
 
     def build_dummy_level(self):
-
-        if not hasattr(self, 'dummy_map'):
-            self.fail(
-                'Test setup error: TestCases must defined a dummy_map '
-                'attribute to use the build_dummy_level helper.')
 
         h = len(self.dummy_map)
         w = len(self.dummy_map[0])
