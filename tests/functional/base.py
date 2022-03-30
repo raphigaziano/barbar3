@@ -6,6 +6,7 @@ from barbarian.game import Game
 from barbarian.components import init_components
 from barbarian.world import World, Level
 from barbarian.map import Map, TileType
+from barbarian.actions import Action, ActionType
 from barbarian.raws import get_entity_data
 from barbarian.spawn import spawn_entity
 
@@ -16,8 +17,6 @@ class BaseFunctionalTestCase(unittest.TestCase):
     test_raws_root = 'tests/raws/path'
     dummy_map = ('.',)
 
-    MAP_W, MAP_H = 10, 10
-
     def setUp(self):
         init_components()
         raws_root_patcher = patch(
@@ -26,15 +25,14 @@ class BaseFunctionalTestCase(unittest.TestCase):
 
         self.addCleanup(raws_root_patcher.stop)
 
-    def build_dummy_game(self, map_w, map_h):
+    def build_dummy_game(self, map_w=10, map_h=10, running=True):
 
         game = Game()
 
-        world = World(self.MAP_W, self.MAP_H)
-        level = Level(self.MAP_W, self.MAP_H)
+        world = World(map_w, map_h)
+        level = Level(map_w, map_h)
         level.map = Map(
-            self.MAP_W, self.MAP_H,
-            [TileType.FLOOR for _ in range(self.MAP_W * self.MAP_H)]
+            map_w, map_h, [TileType.FLOOR for _ in range(map_w * map_h)]
         )
         level.start_pos = 1, 1
         level.exit_pos = 8, 8
@@ -48,8 +46,17 @@ class BaseFunctionalTestCase(unittest.TestCase):
         world.insert_level(level)
         game.world = world
 
+        if running:
+            game.is_running = True
+            game.start_gameloop()
+
         self.game = game
         return game
+
+    def advance_gameloop(self, action=None, game=None):
+        action = action or Action(ActionType.IDLE)
+        game = game or self.game
+        game.gameloop.send(action)
 
     def build_dummy_level(self):
 

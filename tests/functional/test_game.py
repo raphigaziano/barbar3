@@ -97,16 +97,9 @@ class TestGame(BaseGameTest):
 
 class TestGameLoop(BaseGameTest):
 
-    def get_gameloop(self):
-        """ Return a minimal game object and return its gameloop """
-        game = super().build_dummy_game(self.MAP_W, self.MAP_H)
-        game.is_running = True
-        game.start_gameloop()
-        return game.gameloop
-
     def test_basic_turn(self):
 
-        gl = self.get_gameloop()
+        self.build_dummy_game()
         this = self
 
         class MethodsMock(Mock):
@@ -117,12 +110,10 @@ class TestGameLoop(BaseGameTest):
         with patch.multiple(
             self.game,
             new_callable=MethodsMock,
-            begin_turn=DEFAULT,
-            take_turn=DEFAULT,
-            end_turn=DEFAULT,
+            begin_turn=DEFAULT, take_turn=DEFAULT, end_turn=DEFAULT,
         ) as mocks:
 
-            gl.send(Action(ActionType.IDLE))
+            self.advance_gameloop()
 
             # 2 actors => 2 calls
             self.assertEqual(2, mocks['begin_turn'].call_count)
@@ -135,7 +126,7 @@ class TestGameLoop(BaseGameTest):
 
     def test_turn_aborted(self):
 
-        gl = self.get_gameloop()
+        self.build_dummy_game()
 
         with patch.object(
             self.game, 'take_turn', wraps=self.game.take_turn,
@@ -144,7 +135,7 @@ class TestGameLoop(BaseGameTest):
             with patch.object(
                 Game, 'dispatch_action', side_effect=EndTurn()
             ):
-                gl.send(Action(ActionType.IDLE))
+                self.advance_gameloop()
 
                 # First turn aborted => only one call
                 self.assertEqual(1, mock_take_turn.call_count)
@@ -155,14 +146,16 @@ class TestGameLoop(BaseGameTest):
 
     def test_take_turn_invalid_player_action(self):
 
-        gl = self.get_gameloop()
+        self.build_dummy_game()
 
         with patch.object(
             self.game, 'take_turn', wraps=self.game.take_turn,
         ) as mock_take_turn:
 
-            gl.send(
-                Action(ActionType.USE_PROP, actor=self.game.player, data={})
+            self.advance_gameloop(
+                action=Action(ActionType.USE_PROP,
+                              actor=self.game.player,
+                              data={})
             )
 
             # Action rejected => only one call
@@ -174,7 +167,7 @@ class TestGameLoop(BaseGameTest):
 
     def test_max_recursion_is_caught(self):
 
-        gl = self.get_gameloop()
+        self.build_dummy_game()
 
         def reject_action(a):
             a.accept() if a.actor.is_player else a.reject()
@@ -184,30 +177,31 @@ class TestGameLoop(BaseGameTest):
             self.game, 'dispatch_action', wraps=reject_action
         ):
             with self.assertLogs('barbarian.game', 'CRITICAL'):
-                gl.send(Action(ActionType.IDLE, actor=self.game.player))
+                self.advance_gameloop(
+                    action=Action(ActionType.IDLE, actor=self.game.player))
 
     def test_log_warning_if_action_cant_be_processed(self):
 
-        gl = self.get_gameloop()
+        self.build_dummy_game()
 
         # Returning None should simulate a missing match case
         with patch(
             'barbarian.systems.movement.move_actor', return_value=None
         ):
             with self.assertLogs('barbarian.game', 'WARNING'):
-                gl.send(
-                    Action(
+                self.advance_gameloop(
+                    action=Action(
                         ActionType.MOVE, actor=self.game.player,
                         data={'dir': (0, 0)})
                 )
 
     def test_player_death_stops_the_loop(self):
 
-        gl = self.get_gameloop()
+        self.build_dummy_game()
 
         try:
-            gl.send(
-                Action.inflict_dmg(Mock(), self.game.player, {'dmg': 9999}))
+            self.advance_gameloop(
+                action=Action.inflict_dmg(Mock(), self.game.player, {'dmg': 9999}))
         except StopIteration:
             # This is handled by the game during normal run.
             pass
