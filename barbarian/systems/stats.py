@@ -21,11 +21,15 @@ def inflict_damage(action):
     if dmg < 0:
         raise ValueError(
             f"Damage can't be negative (received dmg: {dmg})")
+
     target.health.hp -= dmg
-    action.accept(
-        msg=f'{actor.name} hits {target.name} for {dmg} hit points!',
-        event_data={'dmg': dmg},
-    )
+
+    if not (msg := data.get('msg', '')):
+        msg=f'{actor.name} hits {target.name} for {dmg} hit points!'
+    else:
+        msg = msg.format(actor=actor, target=target, dmg=dmg)
+
+    action.accept(msg=msg, event_data={'dmg': dmg})
 
     if target.health.is_dead:
         if target.is_player:

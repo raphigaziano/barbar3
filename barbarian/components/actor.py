@@ -3,9 +3,14 @@ Components defining an acting entity.
 
 """
 from dataclasses import field
+from enum import auto
 
+from barbarian.utils.types import StringAutoEnum
 from barbarian.components.base import Component
-from barbarian.settings import DEFAULT_REGEN_RATE, DEFAULT_REGEN_AMOUNT
+from barbarian.settings import (
+    DEFAULT_REGEN_RATE, DEFAULT_REGEN_AMOUNT,
+    DEFAULT_HUNGER_RATE, MAX_HUNGER_SATIATION, HUNGER_STATES
+)
 
 
 class Actor(Component):
@@ -32,6 +37,45 @@ class Regen(Component):
 
     rate: int = DEFAULT_REGEN_RATE
     amount: int = DEFAULT_REGEN_AMOUNT
+
+
+class HungerClock(Component):
+
+    __attr_name__ = 'hunger_clock'
+    __serialize__ = True
+
+    rate: int = DEFAULT_HUNGER_RATE
+    satiation: int = MAX_HUNGER_SATIATION
+
+    @property
+    def state(self):
+        for state_name, threshold in HUNGER_STATES:
+            if self.satiation < threshold:
+                return state_name
+        return 'full'
+
+    @property
+    def full(self):
+        return self.state == 'full'
+
+    @property
+    def satiated(self):
+        return self.state == 'satiated'
+
+    @property
+    def hungry(self):
+        return self.state == 'hungry'
+
+    @property
+    def very_hungry(self):
+        return self.state == 'very hungry'
+
+    @property
+    def starving(self):
+        return self.state == 'starving'
+
+    def serialize(self):
+        return self.state
 
 
 class Stats(Component):

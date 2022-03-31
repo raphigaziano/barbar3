@@ -42,3 +42,16 @@ MAX_SPAWNS = 4  # per zone
 
 DEFAULT_REGEN_RATE = 10
 DEFAULT_REGEN_AMOUNT = 1
+
+DEFAULT_HUNGER_RATE = 5
+MAX_HUNGER_SATIATION = 20
+HUNGER_DMG_CHANCE = 30
+HUNGER_DMG = '1d2'
+
+HUNGER_STATES = (
+    # (State name, threshold)
+    ('starving',     (MAX_HUNGER_SATIATION // 3) // 2),
+    ('very hungry',  MAX_HUNGER_SATIATION // 3),
+    ('hungry',       (MAX_HUNGER_SATIATION // 3) * 2),
+    ('satiated',     MAX_HUNGER_SATIATION),
+)

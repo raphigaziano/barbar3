@@ -226,13 +226,8 @@ class TestGameLoop(BaseGameTest):
 
         self.build_dummy_game()
 
-        try:
-            self.advance_gameloop(
-                Action.inflict_dmg(Mock(), self.game.player, {'dmg': 9999}))
-        except StopIteration:
-            # This is handled by the game during normal run.
-            pass
-
+        self.advance_gameloop(
+            Action.inflict_dmg(Mock(), self.game.player, {'dmg': 9999}))
         self.assertFalse(self.game.is_running)
 
     # - take_turn ActionError (?)

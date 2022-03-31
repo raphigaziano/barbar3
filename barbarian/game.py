@@ -171,8 +171,8 @@ class Game:
 
     def begin_turn(self, actor):
         """ Start individual actor's turn. """
-        self._process_action(
-            systems.stats.regenerate(actor, self.ticks))
+        self._process_action(systems.stats.regenerate(actor, self.ticks))
+        self._process_action(systems.hunger.tick(actor, self.ticks))
 
     def end_turn(self, actor):
         """ End individual actor's turn. """

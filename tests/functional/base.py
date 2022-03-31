@@ -63,7 +63,11 @@ class BaseFunctionalTestCase(unittest.TestCase):
     def advance_gameloop(self, action=None, game=None):
         action = action or Action(ActionType.IDLE)
         game = game or self.game
-        game.gameloop.send(action)
+        try:
+            game.gameloop.send(action)
+        except StopIteration:
+            # This is handled by the game during normal run.
+            pass
 
     def build_dummy_level(self):
 

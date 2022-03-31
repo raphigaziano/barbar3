@@ -10,6 +10,7 @@ player:
     fov:     { range: 10 }      
     health:  { hp: 15 }
     stats:   { strength: 5 }
+    hunger_clock: {}
     visible: { glyph: '@' }
 kobold:
     _parent: _base_actor

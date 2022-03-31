@@ -32,6 +32,14 @@ TileColors = {
     C.TileType.WALL: tcod.Color(0, 255, 0),
 }
 
+HUNGER_STATE_COLORS = {
+    'full': tcod.green,
+    'satiated': tcod.yellow,
+    'hungry': tcod.amber,
+    'very hungry': tcod.orange,
+    'starving': tcod.red,
+}
+
 GFX_DATA = {
     'player': {'glyph': '@', 'fg_color': tcod.yellow},
     'orc': {'glyph': 'O', 'fg_color': tcod.green},
@@ -295,6 +303,7 @@ class TcodRenderer:
 
     _path_colors = [tcod.yellow, tcod.orange, tcod.red, tcod.purple, tcod.blue]
     _zone_colors = []
+
     def render_debug_overlays(self, gamestate):
         if C.SHOW_PATH_INFO:
             for idx, cval in enumerate(gamestate.map['pathmap']):
@@ -340,7 +349,7 @@ class TcodRenderer:
         self.stats_console.clear(fg=STATS_FG, bg=STATS_BG)
 
         self.stats_console.draw_frame(
-            0, 0, C.STATS_CONSOLE_W, C.STATS_CONSOLE_H, 
+            0, 0, C.STATS_CONSOLE_W, C.STATS_CONSOLE_H,
             fg=STATS_FRAME_FG, bg=STATS_FRAME_BG)
         self.stats_console.print_box(
             0, 0, C.STATS_CONSOLE_W, 1, " Stats ",
@@ -357,6 +366,18 @@ class TcodRenderer:
             1, 3, f'HP: {hp}/{max_hp}', fg=STATS_FG, bg=STATS_BG)
         self.stats_console.print(
             1, 4, f'Strength: {str_}', fg=STATS_FG, bg=STATS_BG)
+
+        self.stats_console.print_box(
+            1, 6, C.STATS_CONSOLE_W, 1, 'Status',
+            fg=STATS_FG, bg=STATS_BG, alignment=tcod.CENTER)
+
+        hunger_label = 'Hunger: '
+        hunger_status = gamestate.player['hunger_clock']
+        hunger_color = HUNGER_STATE_COLORS.get(hunger_status, STATS_FG)
+        self.stats_console.print(1, 8, hunger_label, fg=STATS_FG, bg=STATS_BG)
+        self.stats_console.print(
+            1 + len(hunger_label), 8, hunger_status.capitalize(),
+            fg=hunger_color, bg=STATS_BG)
 
         self.stats_console.blit(self.root_console, C.STATS_CONSOLE_X, C.STATS_CONSOLE_Y)
 

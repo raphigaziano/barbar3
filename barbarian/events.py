@@ -20,6 +20,7 @@ class EventType(StringAutoEnum):
     ACTOR_SPOTTED = auto()
     ACTOR_DIED = auto()
     ENTITY_CONSUMED = auto()
+    FOOD_STATE_UPDATED = auto()
 
 
 @dataclass()
