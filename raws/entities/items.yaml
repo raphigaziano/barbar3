@@ -1,5 +1,15 @@
 _base_item:
     item: {}
+food_ration:
+    _parent: _base_item
+    typed: {type: food }
+    visible:
+        glyph: '%'
+    usable:
+      action_data:
+        type: eat
+    consumable: {}
+    edible: { nutrition: 20 }
 _base_potion:
     _parent: _base_item
     typed: { type: potion }

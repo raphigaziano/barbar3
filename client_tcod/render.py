@@ -49,6 +49,7 @@ GFX_DATA = {
     'open_door': {
         'glyph': '+', 'fg_color': TileColors[C.TileType.FLOOR]},
     'closed_door': {'fg_color': tcod.yellow},
+    'food': {'fg_color': tcod.green},
 }
 
 TRANS_COLOR = tcod.Color(255, 0, 255)

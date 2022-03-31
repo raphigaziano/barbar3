@@ -113,3 +113,8 @@ class Openable(Component):
     __serialize__ = True
 
     open: bool = False
+
+
+class Edible(Component):
+
+    nutrition: int

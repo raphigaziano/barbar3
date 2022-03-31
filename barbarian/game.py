@@ -308,6 +308,9 @@ class Game:
             case ActionType.HEAL:
                 systems.stats.heal(action)
 
+            case ActionType.EAT:
+                systems.hunger.eat(action)
+
         if new_action is None and not action.processed:
             logger.warning(
                 'action of type %s could not be processed', action.type)

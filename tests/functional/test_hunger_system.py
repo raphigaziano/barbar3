@@ -1,8 +1,9 @@
 from unittest.mock import patch, ANY
 from .base import BaseFunctionalTestCase
 
+from barbarian.actions import Action, ActionType
 from barbarian.events import EventType
-from barbarian.systems.hunger import tick
+from barbarian.systems.hunger import eat
 
 
 class TestHunger(BaseFunctionalTestCase):
@@ -47,22 +48,24 @@ class TestHunger(BaseFunctionalTestCase):
         game.player.hunger_clock.rate = 5
         game.player.hunger_clock.satiation = 100
 
-        self.advance_gameloop()
-        self.assertEqual(100, game.player.hunger_clock.satiation)
+        with patch('barbarian.systems.hunger.MAX_HUNGER_SATIATION', 100):
 
-        game.ticks = 4
-        self.advance_gameloop()
-        self.assertEqual(99, game.player.hunger_clock.satiation)
-        self.advance_gameloop()
-        self.assertEqual(99, game.player.hunger_clock.satiation)
+            self.advance_gameloop()
+            self.assertEqual(100, game.player.hunger_clock.satiation)
 
-        game.ticks = 9
-        self.advance_gameloop()
-        self.assertEqual(98, game.player.hunger_clock.satiation)
-        self.advance_gameloop()
-        self.assertEqual(98, game.player.hunger_clock.satiation)
+            game.ticks = 4
+            self.advance_gameloop()
+            self.assertEqual(99, game.player.hunger_clock.satiation)
+            self.advance_gameloop()
+            self.assertEqual(99, game.player.hunger_clock.satiation)
 
-        # ...
+            game.ticks = 9
+            self.advance_gameloop()
+            self.assertEqual(98, game.player.hunger_clock.satiation)
+            self.advance_gameloop()
+            self.assertEqual(98, game.player.hunger_clock.satiation)
+
+            # ...
 
     def _test_state_change(
             self, game, new_state, mock_emit, *emit_args, **emit_kwargs):
@@ -82,7 +85,7 @@ class TestHunger(BaseFunctionalTestCase):
     @patch('barbarian.events.Event.emit')
     def test_event_emitted_on_state_change(self, mock_event_emit):
 
-        with patch('barbarian.settings.MAX_HUNGER_SATIATION', 100):
+        with patch('barbarian.systems.hunger.MAX_HUNGER_SATIATION', 100):
             game = self.build_dummy_game()
             game.player.hunger_clock.rate = 1
             game.player.hunger_clock.satiation = 100
@@ -141,3 +144,44 @@ class TestHunger(BaseFunctionalTestCase):
             # cmd roll chance passed
             self.assertEqual(0, game.player.health.hp)
             self.assertTrue(game.player.health.is_dead)
+
+
+class TestEat(BaseFunctionalTestCase):
+
+    def eat_action(self, a, t):
+        return Action(ActionType.EAT, actor=a, target=t)
+
+    @patch('barbarian.events.Event.emit')
+    def test_eat(self, mock_event_emit):
+
+        actor = self.spawn_actor(0, 0, 'player')
+        actor.hunger_clock.satiation = 10
+        food_item = self.spawn_item(0, 0, 'food_ration')
+        food_item.edible.nutrition = 5
+
+        eat_action = self.eat_action(actor, food_item)
+        self.assert_action_accepted(eat, self.eat_action(actor, food_item))
+
+        self.assertEqual(15, actor.hunger_clock.satiation)
+        # 1 call for eat action acceptance, + one for hunger_clock status update
+        self.assertEqual(2, mock_event_emit.call_count)
+
+    def test_eaction_no_hunger_clock(self):
+
+        actor = self.spawn_actor(0, 0, 'player')
+        actor.remove_component('hunger_clock')
+        food_item = self.spawn_item(0, 0, 'food_ration')
+
+        eat_action = self.eat_action(actor, food_item)
+        self.assertRaises(AssertionError, eat, self.eat_action(actor, food_item))
+
+    @patch('barbarian.systems.hunger._update_hunger_clock')
+    def test_eat_clock_full(self, mock_update_clock):
+
+        actor = self.spawn_actor(0, 0, 'player')
+        food_item = self.spawn_item(0, 0, 'food_ration')
+
+        eat_action = self.eat_action(actor, food_item)
+        self.assert_action_rejected(eat, self.eat_action(actor, food_item))
+
+        mock_update_clock.assert_not_called()

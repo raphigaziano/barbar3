@@ -37,6 +37,7 @@ class ActionType(StringAutoEnum):
     ATTACK = auto()
     INFLICT_DMG = auto()
     HEAL = auto()
+    EAT = auto()
     GET_ITEM = auto()
     DROP_ITEM = auto()
     USE_ITEM = auto()

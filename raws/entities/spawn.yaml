@@ -1,6 +1,7 @@
 - {name: kobold, weight: 10}
 - {name: orc, weight: 1}
 - {name: kobold_buddy, weight: 1}   # Not implemented
+- {name: food_ration, weight: 10}
 - {name: health_potion, weight: 7}
 - {name: scroll_teleport, weight: 2}
 - {name: scroll_blink, weight: 2}
