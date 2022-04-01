@@ -68,6 +68,9 @@ def regenerate(actor, current_tick):
     if (regen := actor.regen) is None:
         return
 
+    if actor.health.hp == actor.health.max_hp:
+        return
+
     if ((hunger_clock := actor.hunger_clock) and
         hunger_clock.state in NO_REGEN_HUNGER_STATES
     ):

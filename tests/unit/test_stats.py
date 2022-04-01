@@ -9,6 +9,8 @@ class TestRegen(unittest.TestCase):
 
     def test_regen(self):
         actor = Mock()
+        actor.health.max_hp = 50
+        actor.health.hp = 30
         actor.regen.rate = 1
         actor.regen.amount = 10
 
@@ -16,6 +18,17 @@ class TestRegen(unittest.TestCase):
         self.assertIsNotNone(res)
         self.assertEqual(ActionType.HEAL, res.type)
         self.assertDictEqual({'amount': 10}, res.data)
+
+    def test_no_heal_action_if_already_at_max_hp(self):
+
+        actor = Mock()
+        actor.health.max_hp = 50
+        actor.health.hp = 50
+        actor.regen.rate = 1
+        actor.regen.amount = 10
+
+        res = regenerate(actor, 1)
+        self.assertIsNone(res)
 
     def test_regen_no_regen(self):
 
