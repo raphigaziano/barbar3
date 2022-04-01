@@ -28,7 +28,7 @@ def _update_hunger_clock(actor, delta):
 def eat(action):
     """ Consume food item if actor is not full. """
 
-    actor, target, data = action.unpack()
+    actor, target, _ = action.unpack()
 
     assert actor.hunger_clock and target.edible
 
@@ -49,7 +49,6 @@ def tick(actor, current_tick):
     """
     if not (clock := actor.hunger_clock):
         return
-
 
     if clock.rate > 0 and (current_tick % clock.rate == 0):
         _update_hunger_clock(actor, -1)
