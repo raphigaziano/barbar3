@@ -41,7 +41,7 @@ def spot_entities(actor, level):
                 EventType.ACTOR_SPOTTED,
                 event_data={'spotter': actor, 'spotted': a})
         if p := level.props[x,y]:
-            if p.typed.type == 'trap':
+            if p.typed.type == 'trap' and not p.consumable.depleted:
                 Event.emit(
                     EventType.ACTOR_SPOTTED,
                     event_data={'spotter': actor, 'spotted': p})
