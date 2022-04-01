@@ -2,7 +2,7 @@
 Item usage logic.
 
 """
-from barbarian.actions import Action
+from barbarian.actions import UnknownActionTypeError
 from barbarian.events import Event, EventType
 
 
@@ -26,6 +26,11 @@ def use_item(action):
         event_data = {'entity': item, 'owner': actor}
         Event.emit(EventType.ENTITY_CONSUMED, data=event_data)
 
-    action.accept()
+    try:
+        item_action = item.usable.get_action(actor, item)
+    except UnknownActionTypeError:
+        action.reject()
+        raise   # Let the game catch and log the error
 
-    return item.usable.get_action(actor, item)
+    action.accept()
+    return item_action

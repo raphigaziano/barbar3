@@ -45,6 +45,18 @@ class TestUseItem(BaseItemTestCase):
 
         self.assert_action_rejected(use_item, self.use_action(actor, item))
 
+    def test_use_item_invalid_action(self):
+
+        game = self.build_dummy_game()
+
+        item = self.spawn_item(0, 0, 'health_potion')
+        item.usable = item.usable.new_action({'type': 'invalid'})
+        game.player.inventory.items.append(item)
+
+        with self.assertLogs('barbarian.game', 'WARNING'):
+            self.advance_gameloop(self.use_action(game.player, item))
+
+
 class TestConsumableItem(BaseItemTestCase):
 
     def test_charges_depleted(self):
@@ -94,22 +106,39 @@ class TestConsumableItem(BaseItemTestCase):
 
     def test_item_not_consumed_if_action_is_rejected(self):
 
-        game = Game()
-        game.init_rng(None)
+        game = self.build_dummy_game()
 
-        actor = self.spawn_actor(0, 0, 'orc')
+        actor = game.player
         item = self.spawn_item(0, 0, 'health_potion')
         actor.inventory.items.append(item)
 
         # Use action is accepted, but the heal action it returns is not
         use_action = self.use_action(actor, item)
-        with patch.object(Game, 'chose_action', return_value=use_action):
 
-            # take turn is a generator, we need to iterate over it
-            # to make it do its thing
-            list(game.take_turn(actor))
-            game.handle_events()
+        self.advance_gameloop(use_action)
+        # Ensure item is not consumed on the next turn
+        self.advance_gameloop()
 
-            # Item still in  from inventory
-            self.assertEqual(1, item.consumable.charges)
-            self.assertIn(item, actor.inventory.items)
+        # Item still in  from inventory
+        self.assertEqual(1, item.consumable.charges)
+        self.assertIn(item, actor.inventory.items)
+
+    def test_item_not_consumed_if_action_is_invalid(self):
+
+        game = self.build_dummy_game()
+
+        actor = game.player
+        item = self.spawn_item(0, 0, 'health_potion')
+        item.usable = item.usable.new_action({'type': 'invalid'})
+        actor.inventory.items.append(item)
+
+        # Invalid action type: use_action is rejected
+        use_action = self.use_action(actor, item)
+
+        self.advance_gameloop(use_action)
+        # Ensure item is not consumed on the next turn
+        self.advance_gameloop()
+
+        # Item still in  from inventory
+        self.assertEqual(1, item.consumable.charges)
+        self.assertIn(item, actor.inventory.items)

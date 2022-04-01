@@ -188,7 +188,7 @@ class TestGameLoop(BaseGameTest):
             self.assertEqual(1, mock_take_turn.call_count)
 
             # Event queue cleared, turn counter *not* incremented
-            self.assertNotEqual(0, len(Event.queue))
+            self.assertEqual(0, len(Event.queue))
             self.assertEqual(1, self.game.ticks)
 
     def test_max_recursion_is_caught(self):
