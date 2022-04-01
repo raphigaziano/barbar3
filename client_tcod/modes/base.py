@@ -19,7 +19,7 @@ console.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.addHandler(console)
 logger.setLevel(logging.INFO)
 
