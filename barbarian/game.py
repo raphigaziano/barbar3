@@ -163,9 +163,6 @@ class Game:
             except EndTurn:
                 logger.debug("Turn ended prematurely")
 
-            # Post acting stuff that should happen at the end of a turn
-            Event.clear_queue()
-
             self.ticks += 1
             logger.debug('tick: %d', self.ticks)
 
@@ -198,6 +195,7 @@ class Game:
         # Player action: wait for input
         if action.type == ActionType.REQUEST_INPUT:
             self.state.update(self)
+            Event.clear_queue()
             action = yield
 
         action = self._process_action(action)

@@ -4,6 +4,7 @@ import inspect
 from .base import BaseFunctionalTestCase
 from barbarian.utils.rng import Rng
 from barbarian.actions import Action, ActionType
+from barbarian.events import Event
 from barbarian.map import Map, TileType
 from barbarian.settings import MAP_W, MAP_H
 
@@ -94,7 +95,6 @@ class TestGame(BaseGameTest):
             action, game.world, game.player, debug=False)
 
 
-@patch('barbarian.events.Event.clear_queue')
 class TestGameLoop(BaseGameTest):
 
     dummy_map = (
@@ -103,7 +103,7 @@ class TestGameLoop(BaseGameTest):
         '...',
     )
 
-    def test_basic_turn(self, mock_event_clear):
+    def test_basic_turn(self):
 
         self.build_dummy_game()
         this = self
@@ -127,7 +127,7 @@ class TestGameLoop(BaseGameTest):
             self.assertEqual(1, mocks['end_turn'].call_count)
 
             # Event queue cleared, turn counter incremented
-            self.assertEqual(1, mock_event_clear.call_count)
+            self.assertEqual(0, len(Event.queue))
             self.assertEqual(2, self.game.ticks)
 
         with patch.multiple(
@@ -149,10 +149,10 @@ class TestGameLoop(BaseGameTest):
             self.assertEqual(2, mocks['end_turn'].call_count)
 
             # Event queue cleared, turn counter incremented
-            self.assertEqual(2, mock_event_clear.call_count)
+            self.assertEqual(0, len(Event.queue))
             self.assertEqual(3, self.game.ticks)
 
-    def test_turn_aborted(self, mock_event_clear):
+    def test_turn_aborted(self):
 
         self.build_dummy_game()
 
@@ -169,10 +169,10 @@ class TestGameLoop(BaseGameTest):
                 self.assertEqual(1, mock_take_turn.call_count)
 
                 # Event queue cleared, turn counter incremented
-                self.assertEqual(1, mock_event_clear.call_count)
+                self.assertEqual(0, len(Event.queue))
                 self.assertEqual(2, self.game.ticks)
 
-    def test_take_turn_invalid_player_action(self, mock_event_clear):
+    def test_take_turn_invalid_player_action(self):
 
         self.build_dummy_game()
 
@@ -187,11 +187,11 @@ class TestGameLoop(BaseGameTest):
             # Action rejected => only one call
             self.assertEqual(1, mock_take_turn.call_count)
 
-            # Event queue *not* cleared, turn counter *not* incremented
-            self.assertEqual(0, mock_event_clear.call_count)
+            # Event queue cleared, turn counter *not* incremented
+            self.assertEqual(0, len(Event.queue))
             self.assertEqual(1, self.game.ticks)
 
-    def test_max_recursion_is_caught(self, _):
+    def test_max_recursion_is_caught(self):
 
         self.build_dummy_game()
         self.game.current_level.actors.add_e(self.spawn_actor(0, 0, 'orc'))
@@ -207,7 +207,7 @@ class TestGameLoop(BaseGameTest):
                 self.advance_gameloop(
                     Action(ActionType.IDLE, actor=self.game.player))
 
-    def test_log_warning_if_action_cant_be_processed(self, _):
+    def test_log_warning_if_action_cant_be_processed(self):
 
         self.build_dummy_game()
 
@@ -222,7 +222,7 @@ class TestGameLoop(BaseGameTest):
                         data={'dir': (0, 0)})
                 )
 
-    def test_player_death_stops_the_loop(self, _):
+    def test_player_death_stops_the_loop(self):
 
         self.build_dummy_game()
 
