@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from barbarian.actions import ActionType
 from barbarian.systems.stats import regenerate
@@ -39,3 +39,17 @@ class TestRegen(unittest.TestCase):
         self.assertIsNone(regenerate(actor, 8))
         self.assertIsNotNone(regenerate(actor, 9))
         self.assertIsNone(regenerate(actor, 10))
+
+    def test_no_regen_if_too_hungry(self):
+
+        with patch(
+            'barbarian.systems.stats.NO_REGEN_HUNGER_STATES', ('starving', )
+        ):
+            actor = Mock()
+            actor.regen.rate = 1
+            actor.hunger_clock.state = 'hungry'
+
+            self.assertIsNotNone(regenerate(actor, 1))
+
+            actor.hunger_clock.state = 'starving'
+            self.assertIsNone(regenerate(actor, 1))

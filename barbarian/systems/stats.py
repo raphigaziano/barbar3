@@ -5,6 +5,7 @@ Entity stats management
 from barbarian.utils.rng import Rng, RngDiceError
 from barbarian.actions import Action, ActionType
 from barbarian.events import Event, EventType
+from barbarian.settings import NO_REGEN_HUNGER_STATES
 
 
 def inflict_damage(action):
@@ -65,6 +66,11 @@ def heal(action):
 def regenerate(actor, current_tick):
     """ Heal actor by `regen.amount` every `regen.rate` tick. """
     if (regen := actor.regen) is None:
+        return
+
+    if ((hunger_clock := actor.hunger_clock) and
+        hunger_clock.state in NO_REGEN_HUNGER_STATES
+    ):
         return
 
     if regen.rate > 0 and (current_tick % regen.rate == 0):

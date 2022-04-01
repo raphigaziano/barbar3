@@ -55,3 +55,5 @@ HUNGER_STATES = (
     ('hungry',       (MAX_HUNGER_SATIATION // 3) * 2),
     ('satiated',     MAX_HUNGER_SATIATION),
 )
+
+NO_REGEN_HUNGER_STATES = ('very hungry', 'starving')
