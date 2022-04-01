@@ -201,8 +201,8 @@ class AutoRunMode(RunMode):
     Re-run an action until interrupted, either by a game or ui event.
 
     """
-    def __init__(self, action_name="", action_data=None):
-        super().__init__()
+    def __init__(self, action_name="", action_data=None, **kwargs):
+        super().__init__(**kwargs)
         self.action_name = action_name
         self.action_data = action_data or {}
 
@@ -224,6 +224,14 @@ class AutoRunMode(RunMode):
                 } if ge['data']['type'] == self.action_name:
                     self.pop()
                 case {
+                    'type': 'action_accepted',
+                    'data': {
+                        'type': 'inflict_dmg',
+                        'target': {'name': 'player'},
+                    },
+                }:
+                    self.pop()
+                case {
                     'type': 'actor_spotted',
                     'data': {
                         'spotter': {'name': 'player'},
@@ -231,3 +239,5 @@ class AutoRunMode(RunMode):
                 }:
                     self.log_msg('Something dangerous is in view')
                     self.pop()
+
+        super().process_game_events(game_events)

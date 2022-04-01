@@ -168,6 +168,8 @@ class Game:
 
     def begin_turn(self, actor):
         """ Start individual actor's turn. """
+        if actor.is_player:
+            Event.clear_queue()
         self._process_action(systems.stats.regenerate(actor, self.ticks))
         self._process_action(systems.hunger.tick(actor, self.ticks))
 
@@ -195,7 +197,6 @@ class Game:
         # Player action: wait for input
         if action.type == ActionType.REQUEST_INPUT:
             self.state.update(self)
-            Event.clear_queue()
             action = yield
 
         action = self._process_action(action)
