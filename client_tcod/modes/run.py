@@ -178,6 +178,12 @@ class RunMode(BaseGameMode):
                 return
             if target and 'actor' in target and not target['actor']['is_player']:
                 return
+        if (
+            e['type'] == 'food_state_updated' and
+            e['data']['state'] in ('full', 'satiated') and
+            e['data']['previous_state'] in ('full',)
+        ):
+            return
         if e['msg']:
             self.log_msg(e['msg'])
         # else:

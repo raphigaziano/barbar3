@@ -22,7 +22,8 @@ def _update_hunger_clock(actor, delta):
         msg = f'{actor.name} is {clock.state}'
         Event.emit(
             EventType.FOOD_STATE_UPDATED,
-            msg=msg, event_data={'actor': actor, 'state': clock.state})
+            msg=msg, event_data={'actor': actor, 'state': clock.state,
+                                 'previous_state': pre_update_state})
 
 
 def eat(action):

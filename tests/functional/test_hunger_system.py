@@ -97,21 +97,27 @@ class TestHunger(BaseFunctionalTestCase):
                 game, 'satiated', mock_event_emit,
                 EventType.FOOD_STATE_UPDATED,
                 msg=ANY,
-                event_data={'actor': game.player, 'state': 'satiated'})
+                event_data={'actor': game.player,
+                            'state': 'satiated',
+                            'previous_state': 'full'})
 
             game.player.hunger_clock.satiation = 66
             self._test_state_change(
                 game, 'hungry', mock_event_emit,
                 EventType.FOOD_STATE_UPDATED,
                 msg=ANY,
-                event_data={'actor': game.player, 'state': 'hungry'})
+                event_data={'actor': game.player,
+                            'state': 'hungry',
+                            'previous_state': 'satiated'})
 
             game.player.hunger_clock.satiation = 33
             self._test_state_change(
                 game, 'very hungry', mock_event_emit,
                 EventType.FOOD_STATE_UPDATED,
                 msg=ANY,
-                event_data={'actor': game.player, 'state': 'very hungry'})
+                event_data={'actor': game.player,
+                            'state': 'very hungry',
+                            'previous_state': 'hungry'})
 
             # Ensure no starve damage for this test
             with patch('barbarian.utils.rng.Rng.randint', return_value=100):
@@ -120,7 +126,9 @@ class TestHunger(BaseFunctionalTestCase):
                     game, 'starving', mock_event_emit,
                     EventType.FOOD_STATE_UPDATED,
                     msg=ANY,
-                    event_data={'actor': game.player, 'state': 'starving'})
+                    event_data={'actor': game.player,
+                                'state': 'starving',
+                                'previous_state': 'very hungry'})
 
     @patch('barbarian.systems.hunger.HUNGER_DMG', 5)
     def test_starving_damage(self):
@@ -165,8 +173,14 @@ class TestEat(BaseFunctionalTestCase):
         self.assertEqual(15, actor.hunger_clock.satiation)
         # 1 call for eat action acceptance, + one for hunger_clock status update
         self.assertEqual(2, mock_event_emit.call_count)
+        mock_event_emit.assert_called_with(
+            EventType.FOOD_STATE_UPDATED,
+            msg=ANY,
+            event_data={'actor': actor,
+                        'state': 'satiated',
+                        'previous_state': 'hungry'})
 
-    def test_eaction_no_hunger_clock(self):
+    def test_eat_action_no_hunger_clock(self):
 
         actor = self.spawn_actor(0, 0, 'player')
         actor.remove_component('hunger_clock')
