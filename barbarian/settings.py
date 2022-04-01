@@ -44,7 +44,7 @@ DEFAULT_REGEN_RATE = 10
 DEFAULT_REGEN_AMOUNT = 1
 
 DEFAULT_HUNGER_RATE = 5
-MAX_HUNGER_SATIATION = 20
+MAX_HUNGER_SATIATION = 120
 HUNGER_DMG_CHANCE = 30
 HUNGER_DMG = '1d2'
 
@@ -53,7 +53,7 @@ HUNGER_STATES = (
     ('starving',     (MAX_HUNGER_SATIATION // 3) // 2),
     ('very hungry',  MAX_HUNGER_SATIATION // 3),
     ('hungry',       (MAX_HUNGER_SATIATION // 3) * 2),
-    ('satiated',     MAX_HUNGER_SATIATION),
+    ('satiated',     MAX_HUNGER_SATIATION - ((MAX_HUNGER_SATIATION // 5) // 2)),
 )
 
 NO_REGEN_HUNGER_STATES = ('very hungry', 'starving')

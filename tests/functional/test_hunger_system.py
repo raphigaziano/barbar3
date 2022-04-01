@@ -6,7 +6,7 @@ from barbarian.events import EventType
 from barbarian.systems.hunger import eat
 
 
-class TestHunger(BaseFunctionalTestCase):
+class PatchHungerSettingsMixin:
 
     MAX_SATIATION = 100
     HUNGER_STATES = (
@@ -28,6 +28,9 @@ class TestHunger(BaseFunctionalTestCase):
 
         self.addCleanup(max_satiation_patcher.stop)
         self.addCleanup(hunger_states_patcher.stop)
+
+
+class TestHunger(PatchHungerSettingsMixin, BaseFunctionalTestCase):
 
     def test_no_op_if_no_clock(self):
 
@@ -154,7 +157,7 @@ class TestHunger(BaseFunctionalTestCase):
             self.assertTrue(game.player.health.is_dead)
 
 
-class TestEat(BaseFunctionalTestCase):
+class TestEat(PatchHungerSettingsMixin, BaseFunctionalTestCase):
 
     def eat_action(self, a, t):
         return Action(ActionType.EAT, actor=a, target=t)
@@ -171,14 +174,8 @@ class TestEat(BaseFunctionalTestCase):
         self.assert_action_accepted(eat, self.eat_action(actor, food_item))
 
         self.assertEqual(15, actor.hunger_clock.satiation)
-        # 1 call for eat action acceptance, + one for hunger_clock status update
-        self.assertEqual(2, mock_event_emit.call_count)
-        mock_event_emit.assert_called_with(
-            EventType.FOOD_STATE_UPDATED,
-            msg=ANY,
-            event_data={'actor': actor,
-                        'state': 'satiated',
-                        'previous_state': 'hungry'})
+        # 1 call for eat action acceptance
+        self.assertEqual(1, mock_event_emit.call_count)
 
     def test_eat_action_no_hunger_clock(self):
 
@@ -199,3 +196,24 @@ class TestEat(BaseFunctionalTestCase):
         self.assert_action_rejected(eat, self.eat_action(actor, food_item))
 
         mock_update_clock.assert_not_called()
+
+    @patch('barbarian.events.Event.emit')
+    def test_eat_emits_clock_update_event(self, mock_event_emit):
+
+        actor = self.spawn_actor(0, 0, 'player')
+        actor.hunger_clock.satiation = 62
+        food_item = self.spawn_item(0, 0, 'food_ration')
+        food_item.edible.nutrition = 5
+
+        eat_action = self.eat_action(actor, food_item)
+        self.assert_action_accepted(eat, self.eat_action(actor, food_item))
+        print(actor.hunger_clock.satiation)
+
+        # 1 call for eat action acceptance, + one for hunger_clock status update
+        self.assertEqual(2, mock_event_emit.call_count)
+        mock_event_emit.assert_called_with(
+            EventType.FOOD_STATE_UPDATED,
+            msg=ANY,
+            event_data={'actor': actor,
+                        'state': 'satiated',
+                        'previous_state': 'hungry'})
