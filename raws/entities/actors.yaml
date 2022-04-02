@@ -12,15 +12,21 @@ player:
     stats:   { strength: 5 }
     hunger_clock: {}
     visible: { glyph: '@' }
+rat:
+    _parent: _base_actor
+    typed:   { type: 'rat' }
+    health:  { hp: 1 }
+    stats:   { strength: 2 }
+    visible: { glyph: r }
 kobold:
     _parent: _base_actor
     typed:   { type: 'kobold' }
     health:  { hp: 2 }
-    stats:   { strength: 2 }
+    stats:   { strength: 3 }
     visible: { glyph: k }
 orc:
     _parent: _base_actor
     typed:   { type: 'orc' }
     health:  { hp: 3 }
-    stats:   { strength: 3 }
+    stats:   { strength: 4 }
     visible: { glyph: o }

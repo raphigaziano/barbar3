@@ -2,7 +2,9 @@
 Spawn logic.
 
 """
+from collections import Counter
 import logging
+from pprint import pformat
 
 from barbarian.raws import get_spawn_data, get_entity_data
 from barbarian.entity import Entity
@@ -15,12 +17,20 @@ from barbarian.settings import MAX_SPAWNS
 logger = logging.getLogger(__name__)
 
 
+_entity_counter = Counter()
+
+
 def spawn_entity(x, y, entity_data):
     """ Actual entity spawning. """
     if entity_data is None:
         return
     entity_data['pos'] = {'x': x, 'y': y}
-    return Entity.from_dict(entity_data)
+    e =  Entity.from_dict(entity_data)
+    try:
+        _entity_counter[e.name] += 1
+    except AttributeError:
+        pass
+    return e
 
 
 def spawn_player(x, y):
@@ -91,6 +101,9 @@ def spawn_door(level, x, y):
 
 def spawn_level(level, spawn_zones):
     """ Spawn all the things on the passed in level. """
+
+    _entity_counter.clear()
+
     ### Static props: Stairs ###
 
     spx, spy = level.start_pos
@@ -116,7 +129,30 @@ def spawn_level(level, spawn_zones):
 
     ### Active entities: actors, items, props ###
 
-    sd = get_spawn_data()
-    spawn_table = [(e['weight'], e['name']) for e in sd]
+    spawn_table = build_spawn_table(level)
     for z in spawn_zones:
         spawn_zone(level, z, spawn_table)
+
+    for entity_name, n in _entity_counter.items():
+        logger.debug(
+            'Spawned entities for depth %d: %d %s', level.depth, n, entity_name)
+
+
+def build_spawn_table(level):
+    """
+    Build the spawn table and return it.
+
+    Weights will be adjusted according to the current depth according to
+    the forumla (weight = entity.weight + (depth * entity.depth_mod))
+
+    """
+    def _adjust_entity_weight(entity):
+        return max(
+            0,
+            entity['weight'] + (level.depth * entity.get('depth_mod', 0))
+        )
+
+    sd = get_spawn_data()
+    st =  [(_adjust_entity_weight(e), e['name']) for e in sd]
+    logger.debug('Built spawn_table:\n%s', pformat(st))
+    return st

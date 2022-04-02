@@ -43,7 +43,7 @@ class TestSpawnZone(BaseFunctionalTestCase):
             self.assertIn('potion', (i.typed.type for _, __, i in level.items))
             self.assertIn('scroll', (i.typed.type for _, __, i in level.items))
 
-    # Need to ansure we'll spawn at least one entity, otherwise
+    # Need to ensure we'll spawn at least one entity, otherwise
     # nothing will be logged
     @patch('barbarian.utils.rng._Rng.randint', return_value=1)
     def test_invalid_entity_name(self, _):

@@ -183,7 +183,7 @@ class TestRandomHelpers(unittest.TestCase):
 
         for rval in range(1, total_weights + 1):
             with patch(
-                'barbarian.utils.rng._Rng.randint', return_value=rval
+                'barbarian.utils.rng._Rng.uniform', return_value=rval
             ):
                 chosen = Rng.roll_table(table)
                 if rval in range(1, 11):
@@ -204,15 +204,15 @@ class TestRandomHelpers(unittest.TestCase):
         ]
 
         with patch(
-            'barbarian.utils.rng._Rng.randint', return_value=1
+            'barbarian.utils.rng._Rng.uniform', return_value=1
         ):
             self.assertEqual('one', Rng.roll_table(table))
         with patch(
-            'barbarian.utils.rng._Rng.randint', return_value=2
+            'barbarian.utils.rng._Rng.uniform', return_value=2
         ):
             self.assertEqual('two', Rng.roll_table(table))
         with patch(
-            'barbarian.utils.rng._Rng.randint', return_value=3
+            'barbarian.utils.rng._Rng.uniform', return_value=3
         ):
             self.assertEqual('three', Rng.roll_table(table))
 

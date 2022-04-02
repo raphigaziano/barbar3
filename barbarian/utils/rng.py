@@ -108,9 +108,9 @@ class _Rng(random.Random):
         total_weight = sum(w for w, _ in table)
 
         try:
-            roll = self.randint(1, total_weight)
+            roll = self.uniform(1, total_weight)
         except ValueError:
-            raise RngError(f'Invalid weights (total={total_weight}')
+            raise RngError(f'Invalid weights (total={total_weight})')
 
         running_sum = 0
         for weight, obj in table:
