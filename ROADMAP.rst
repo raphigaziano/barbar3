@@ -1,16 +1,24 @@
 Features
 ========
 
-- Items pickup & drop.
-- Item usage.
-- Consider depth when spawning.
+  - items
+
+    - spawn actors with items in their inventories
+    - drop items on death
+    - drop corpses
+    - item identification (wait unti we have more item types, no real interest 
+      until then).
+
+  - client
+
+    - Targeting mode
+    - Go to game mode (select cell via target mode above and go there)
+
+  - Save / Load
 
 Internal
 ========
 
-- Add game modes (states) to client. Will be required to handle ui for items
-  and other things.
-  - Basics done. API will probably evolve as we add more modes.
 - Action validation
 - Data driven action definitions ?
 - Data driven component definitions ?
