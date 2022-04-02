@@ -10,8 +10,10 @@ class TestAttack(BaseFunctionalTestCase):
         return Action.attack(a=a, t=t)
 
     def test_attack(self):
-        attacker = self.spawn_actor(0, 0, 'player')  # str: 5
-        attacked = self.spawn_actor(0, 0, 'kobold')  # str: 2
+        attacker = self.spawn_actor(0, 0, 'player')
+        attacker.stats.strength = 5
+        attacked = self.spawn_actor(0, 0, 'kobold')
+        attacked.stats.strength = 2
 
         attack_action = self.attack_action(attacker, attacked)
         new_action = self.assert_action_accepted(attack, attack_action)
@@ -20,8 +22,10 @@ class TestAttack(BaseFunctionalTestCase):
         self.assertEqual({'dmg': 3}, new_action.data)
 
     def test_weaker_attacker_inflicts_at_least_1_dmg(self):
-        attacker = self.spawn_actor(0, 0, 'kobold')  # str: 2
-        attacked = self.spawn_actor(0, 0, 'player')  # str: 5
+        attacker = self.spawn_actor(0, 0, 'kobold')
+        attacker.stats.strength = 2
+        attacked = self.spawn_actor(0, 0, 'player')
+        attacked.stats.strength = 5
 
         attack_action = self.attack_action(attacker, attacked)
         new_action = self.assert_action_accepted(attack, attack_action)
