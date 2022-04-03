@@ -95,6 +95,19 @@ class _Rng(random.Random):
 
         return self.roll_dice(num, faces, mod)
 
+    def try_roll_dice_str(self, int_or_str):
+        """
+        Try rolling dice with the passed in argument, returning said argument
+        untouched if it is not a valid dice string.
+
+        This allows the caller not to bother checking if a value it needs is
+        a random dice_string or a flat value.
+        """
+        try:
+            return self.roll_dice_str(int_or_str)
+        except RngDiceError:
+            return int_or_str
+
     def roll_table(self, table):
         """
         Return a random object from the passed weighted table.

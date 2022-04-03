@@ -172,6 +172,12 @@ class TestRandomHelpers(unittest.TestCase):
         self.assertRaises(RngDiceError, Rng.roll_dice_str, ';DW$')
         self.assertRaises(RngDiceError, Rng.roll_dice_str, '8dWUT+lol')
 
+    @patch('barbarian.utils.rng._Rng.roll_dice', return_value=6)
+    def test_try_roll_dice_str(self, _):
+        self.assertEqual(6, Rng.try_roll_dice_str('2d4'))
+        self.assertEqual(2, Rng.try_roll_dice_str(2))
+        self.assertEqual('invalid', Rng.try_roll_dice_str('invalid'))
+
     def test_roll_table(self):
 
         table = [

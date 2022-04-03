@@ -2,7 +2,7 @@
 Entity stats management
 
 """
-from barbarian.utils.rng import Rng, RngDiceError
+from barbarian.utils.rng import Rng
 from barbarian.actions import Action, ActionType
 from barbarian.events import Event, EventType
 from barbarian.settings import NO_REGEN_HUNGER_STATES
@@ -14,10 +14,7 @@ def inflict_damage(action):
 
     assert target.health
 
-    try:
-        dmg = Rng.roll_dice_str(data['dmg'])
-    except RngDiceError:
-        dmg = data['dmg']
+    dmg = Rng.try_roll_dice_str(data['dmg'])
 
     if dmg < 0:
         raise ValueError(
@@ -51,10 +48,7 @@ def heal(action):
     if target.health.hp == target.health.max_hp:
         return action.reject(msg=f'{target.name} is already at max health')
 
-    try:
-        amount = Rng.roll_dice_str(data['amount'])
-    except RngDiceError:
-        amount = data['amount']
+    amount = Rng.try_roll_dice_str(data['amount'])
 
     pre_heal_hp = target.health.hp
     target.health.hp = min(target.health.hp + amount, target.health.max_hp)
