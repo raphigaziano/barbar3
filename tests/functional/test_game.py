@@ -6,6 +6,7 @@ from barbarian.utils.rng import Rng
 from barbarian.actions import Action, ActionType
 from barbarian.events import Event
 from barbarian.map import Map, TileType
+from barbarian.genmap.builders import SimpleMapBuilder
 from barbarian.settings import MAP_W, MAP_H
 
 from barbarian.game import Game, EndTurn
@@ -22,8 +23,9 @@ class TestGame(BaseGameTest):
     # This seems to generate a fastish map.
     seed = '4876877298345515653'
 
-    @patch('barbarian.genmap.common.BaseMapBuilder.build')
-    def test_game_start(self, _):
+    @patch('barbarian.world.get_map_builder', return_value=SimpleMapBuilder())
+    @patch('barbarian.map.Map.compute_bitmask_grid')
+    def test_game_start(self, _, __):
 
         game = Game()
         game.start_game(seed=self.seed)
@@ -39,7 +41,7 @@ class TestGame(BaseGameTest):
         self.assertEqual(1, game.world.current_depth)
         self.assertEqual(1, game.current_level.depth)
 
-        # Actors shortcuts points to the current level
+        # Actors shortcut points to the current level
         self.assertListEqual(game.actors, game.current_level.actors.all)
 
         # Player created and entered current level
@@ -58,9 +60,10 @@ class TestGame(BaseGameTest):
         self.assertEqual(inspect.GEN_SUSPENDED, loop_state)
         self.assertEqual(1, game.ticks) # Still processing first turn
 
-    @patch('barbarian.genmap.common.BaseMapBuilder.build')
+    @patch('barbarian.world.get_map_builder', return_value=SimpleMapBuilder())
+    @patch('barbarian.map.Map.compute_bitmask_grid')
     @patch.object(Rng, 'init_root')
-    def test_seed_is_passed_to_root_rng(self, mock_init_root_rng, _):
+    def test_seed_is_passed_to_root_rng(self, mock_init_root_rng, _, __):
         game = Game()
         game.start_game(self.seed)
 

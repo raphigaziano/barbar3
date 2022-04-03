@@ -6,10 +6,9 @@ import logging
 
 import tcod
 
-from barbarian.utils.rng import Rng
 from barbarian.utils.structures.grid import (
     EntityGrid, GridContainer, OutOfBoundGridError)
-from barbarian.genmap import builders
+from barbarian.genmap.common import get_map_builder
 from barbarian.spawn import spawn_level
 
 
@@ -56,13 +55,7 @@ class Level:
         level.
 
         """
-        builder = Rng.dungeon.choice([
-            builders.SimpleMapBuilder(debug=map_debug),
-            builders.BSPMapBuilder(debug=map_debug),
-            builders.BSPInteriorMapBuilder(debug=map_debug),
-            builders.CellularAutomataMapBuilder(debug=map_debug)
-        ])
-        # builder = builders.CellularAutomataMapBuilder(debug=map_debug)
+        builder = get_map_builder(map_debug)
         logger.debug('Selected map builer: %s', type(builder))
 
         self.map = builder.build_map(self.w, self.h, self.depth)
