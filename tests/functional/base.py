@@ -69,18 +69,20 @@ class BaseFunctionalTestCase(unittest.TestCase):
             # This is handled by the game during normal run.
             pass
 
-    def build_dummy_level(self):
+    def build_dummy_level(self, map_=None):
 
-        h = len(self.dummy_map)
-        w = len(self.dummy_map[0])
+        dummy_map = map_ or self.dummy_map
+
+        h = len(dummy_map)
+        w = len(dummy_map[0])
 
         level = Level(w, h)
         level.map = Map(w, h, [
             TileType.WALL if char == '#' else TileType.FLOOR
-            for row in self.dummy_map for char in row
+            for row in dummy_map for char in row
         ])
 
-        for y, row in enumerate(self.dummy_map):
+        for y, row in enumerate(dummy_map):
             for x, char in enumerate(row):
                 if char in ('.', '#'):
                     continue

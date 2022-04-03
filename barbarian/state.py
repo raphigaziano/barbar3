@@ -3,6 +3,7 @@ State management.
 
 """
 from barbarian.events import Event
+from barbarian.pathfinding import get_path_map
 
 
 class GameState:
@@ -52,20 +53,11 @@ class GameState:
                 Event.get_current_events(game.ticks, flush=True)],
         }
 
-        # DEBUGGING
-        m = game.current_level.map
-
-        from barbarian.utils.structures.dijkstra import DijkstraGrid
-        path_map = DijkstraGrid.new(
-            m.w, m.h,
-            (game.player.pos.x, game.player.pos.y),
-            (2, *game.current_level.exit_pos),
-            predicate=lambda x, y, _: not m.cell_blocks(x, y),
-            cost_function=lambda _, __, ___: 1
-        )
+        # DEBUGING
+        path_map = get_path_map(
+            game.current_level, (game.player.pos.x, game.player.pos.y))
         self._state['map']['pathmap'] = path_map.cells
 
-        # Still DEBUGING
         self._state['spawn_zones'] = list(
             z for z in game.current_level.spawn_zones)
 

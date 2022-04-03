@@ -2,10 +2,10 @@
 Ai routines.
 
 """
-from barbarian.utils.geometry import vector_to
 from barbarian.utils.rng import Rng
 from barbarian.actions import Action, ActionType
 from barbarian.systems.visibility import spot_player
+from barbarian.pathfinding import get_step_to_target
 
 
 def tmp_ai(actor, game):
@@ -13,9 +13,10 @@ def tmp_ai(actor, game):
     if actor.is_player:
         return Action(ActionType.REQUEST_INPUT)
 
-    if spot_player(actor, game.player):
-        dx, dy = vector_to(
-            actor.pos.x, actor.pos.y, game.player.pos.x, game.player.pos.y)
+    if spot_player(actor, player := game.player):
+        dx, dy = get_step_to_target(
+            (actor.pos.x, actor.pos.y), (player.pos.x, player.pos.y),
+            game.current_level)
         return Action.move(actor, d={'dir': (dx, dy)})
 
     # Can't spot the player, so move randomly
