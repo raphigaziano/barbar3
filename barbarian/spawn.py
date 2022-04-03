@@ -51,31 +51,51 @@ def _spawn(container, entity):
         container.add_e(entity)
 
 
-def spawn_zone(level, zone_tiles, spawn_table):
+def spawn_zone(level, zone_tiles, spawn_table, n_spawns):
     """
-    Spawn entities for a single spawn zone (room or voronoi region).
+    Spawn `n_spawns` entities for a single spawn zone (room or voronoi region).
 
     Zone tiles should be a list of cells from the desired spawn zone.
 
     """
     tiles = list(zone_tiles)
-    for _ in range(Rng.spawn.randint(0, MAX_SPAWNS)):
-        entity_name = Rng.spawn.roll_table(spawn_table)
-        for entity_cat in ('actors', 'items', 'props'):
-            entity_data = get_entity_data(entity_name, entity_cat)
-            if entity_data:
-                while tiles:
-                    x, y = Rng.spawn.choice(tiles)
-                    if level.is_blocked(x, y):
-                        tiles.remove((x, y))
-                        continue
-                    container = getattr(level, entity_cat)
-                    _spawn(container, spawn_entity(x, y, entity_data))
-                    break
+
+    def __spawn_entity(entity_data, n):
+        # Entities can be "grouped" without defining a subtable
+        # (simply spawn n of the same entity)
+        for _ in range(n):
+            while tiles:
+                x, y = Rng.spawn.choice(tiles)
+                if level.is_blocked(x, y):
+                    # Invalid cell; will be unavailable to later
+                    # choices for this zone.
+                    tiles.remove((x, y))
+                    continue
+                container = getattr(level, entity_cat)
+                _spawn(container, spawn_entity(x, y, entity_data))
                 break
+
+    for _ in range(n_spawns):
+        entity_spawn_data = Rng.spawn.roll_table(spawn_table)
+        # Group item: call spawn_zone recursively on the defined subtable
+        if subtable := entity_spawn_data.get('subtable', []):
+            sub_spawn_table = build_spawn_table(
+                level, subtable, adjust_weights=False)
+            n_sub_spawns = Rng.try_roll_dice_str(entity_spawn_data.get('n', 1))
+            spawn_zone(level, tiles, sub_spawn_table, n_sub_spawns)
+        # Regular entity
         else:
-            logger.warning(
-                'Could not load data for entity type %s', entity_name)
+            for entity_cat in ('actors', 'items', 'props'):
+                entity_data = get_entity_data(entity_spawn_data['name'], entity_cat)
+                if entity_data:
+                    __spawn_entity(
+                        entity_data,
+                        Rng.try_roll_dice_str(entity_spawn_data.get('n', 1))
+                    )
+                    break
+            else:
+                logger.warning(
+                    'Could not load data for entity type %s', entity_spawn_data['name'])
 
 
 def spawn_stairs(level, x, y, entity_name):
@@ -135,30 +155,33 @@ def spawn_level(level, spawn_zones):
 
     ### Active entities: actors, items, props ###
 
-    spawn_table = build_spawn_table(level)
+    spawn_table = build_spawn_table(level, get_spawn_data())
     for z in spawn_zones:
-        spawn_zone(level, z, spawn_table)
+        spawn_zone(level, z, spawn_table, Rng.randint(0, MAX_SPAWNS))
 
     for entity_name, n in _entity_counter.items():
         logger.debug(
             'Spawned entities for depth %d: %d %s', level.depth, n, entity_name)
 
 
-def build_spawn_table(level):
+def build_spawn_table(level, spawn_data, adjust_weights=True):
     """
-    Build the spawn table and return it.
+    Build the spawn table from the passed in `spawn_data` and return it.
 
-    Weights will be adjusted according to the current depth according to
-    the forumla (weight = entity.weight + (depth * entity.depth_mod))
+    If `adjust_weights` is True (default), item weights will be adjusted 
+    according to the current depth:
+    weight = entity.weight + (depth * entity.depth_mod)
 
     """
     def _adjust_entity_weight(entity):
+        if not adjust_weights:
+            return entity['weight']
         return max(
             0,
             entity['weight'] + (level.depth * entity.get('depth_mod', 0))
         )
 
-    sd = get_spawn_data()
-    st =  [(_adjust_entity_weight(e), e['name']) for e in sd]
+    st =  [(_adjust_entity_weight(e), e) for e in spawn_data]
+
     logger.debug('Built spawn_table:\n%s', pformat(st))
     return st

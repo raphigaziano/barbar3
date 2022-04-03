@@ -86,75 +86,72 @@ class TestSpawnEntity(BaseSpawnTest):
 
 class TestSpawnTable(unittest.TestCase):
 
-    SPAWN_DATA = [
-        {'name': 'entity_1', 'weight': 5},
-        {'name': 'entity_2', 'weight': 5, 'depth_mod': 0},
-        {'name': 'entity_3', 'weight': 5, 'depth_mod': 1},
-        {'name': 'entity_4', 'weight': 5, 'depth_mod': 2},
-        {'name': 'entity_5', 'weight': 5, 'depth_mod': -1},
-    ]
+    def test_spawn_table(self):
 
-    @patch('barbarian.spawn.get_spawn_data', return_value=SPAWN_DATA)
-    def test_spawn_table(self, _):
+        SPAWN_DATA = [
+            {'name': 'entity_1', 'weight': 5},
+            {'name': 'entity_2', 'weight': 5, 'depth_mod': 0},
+            {'name': 'entity_3', 'weight': 5, 'depth_mod': 1},
+            {'name': 'entity_4', 'weight': 5, 'depth_mod': 2},
+            {'name': 'entity_5', 'weight': 5, 'depth_mod': -1},
+        ]
 
         level = MagicMock()
         level.depth = 1
 
-        st = build_spawn_table(level)
-        self.assertEqual((5, 'entity_1'), st[0])
-        self.assertEqual((5, 'entity_2'), st[1])
-        self.assertEqual((6, 'entity_3'), st[2])
-        self.assertEqual((7, 'entity_4'), st[3])
-        self.assertEqual((4, 'entity_5'), st[4])
+        st = build_spawn_table(level, SPAWN_DATA)
+        self.assertEqual((5, 'entity_1'), (st[0][0], st[0][1]['name']))
+        self.assertEqual((5, 'entity_2'), (st[1][0], st[1][1]['name']))
+        self.assertEqual((6, 'entity_3'), (st[2][0], st[2][1]['name']))
+        self.assertEqual((7, 'entity_4'), (st[3][0], st[3][1]['name']))
+        self.assertEqual((4, 'entity_5'), (st[4][0], st[4][1]['name']))
 
         level.depth = 3
 
-        st = build_spawn_table(level)
-        self.assertEqual((5, 'entity_1'), st[0])
-        self.assertEqual((5, 'entity_2'), st[1])
-        self.assertEqual((8, 'entity_3'), st[2])
-        self.assertEqual((11, 'entity_4'), st[3])
-        self.assertEqual((2, 'entity_5'), st[4])
+        st = build_spawn_table(level, SPAWN_DATA)
+        self.assertEqual((5, 'entity_1'),  (st[0][0], st[0][1]['name']))
+        self.assertEqual((5, 'entity_2'),  (st[1][0], st[1][1]['name']))
+        self.assertEqual((8, 'entity_3'),  (st[2][0], st[2][1]['name']))
+        self.assertEqual((11, 'entity_4'), (st[3][0], st[3][1]['name']))
+        self.assertEqual((2, 'entity_5'),  (st[4][0], st[4][1]['name']))
 
         level.depth = 10
 
-        st = build_spawn_table(level)
-        self.assertEqual((5, 'entity_1'), st[0])
-        self.assertEqual((5, 'entity_2'), st[1])
-        self.assertEqual((15, 'entity_3'), st[2])
-        self.assertEqual((25, 'entity_4'), st[3])
-        self.assertEqual((0, 'entity_5'), st[4])
+        st = build_spawn_table(level, SPAWN_DATA)
+        self.assertEqual((5, 'entity_1'),  (st[0][0], st[0][1]['name']))
+        self.assertEqual((5, 'entity_2'),  (st[1][0], st[1][1]['name']))
+        self.assertEqual((15, 'entity_3'), (st[2][0], st[2][1]['name']))
+        self.assertEqual((25, 'entity_4'), (st[3][0], st[3][1]['name']))
+        self.assertEqual((0, 'entity_5'),  (st[4][0], st[4][1]['name']))
 
-    SPAWN_DATA = [
-        {'name': 'entity_1', 'weight': 1, 'depth_mod': 0.5},
-        {'name': 'entity_2', 'weight': 1, 'depth_mod': 1.5},
-    ]
+    def test_float_values_for_depth_mod(self):
 
-    @patch('barbarian.spawn.get_spawn_data', return_value=SPAWN_DATA)
-    def test_float_values_for_depth_mod(self, _):
+        SPAWN_DATA = [
+            {'name': 'entity_1', 'weight': 1, 'depth_mod': 0.5},
+            {'name': 'entity_2', 'weight': 1, 'depth_mod': 1.5},
+        ]
 
         level = MagicMock()
         level.depth = 1
 
-        st = build_spawn_table(level)
-        self.assertEqual((1.5, 'entity_1'), st[0])
-        self.assertEqual((2.5, 'entity_2'), st[1])
+        st = build_spawn_table(level, SPAWN_DATA)
+        self.assertEqual((1.5, 'entity_1'), (st[0][0], st[0][1]['name']))
+        self.assertEqual((2.5, 'entity_2'), (st[1][0], st[1][1]['name']))
 
         level.depth = 3
 
-        st = build_spawn_table(level)
-        self.assertEqual((2.5, 'entity_1'), st[0])
-        self.assertEqual((5.5, 'entity_2'), st[1])
+        st = build_spawn_table(level, SPAWN_DATA)
+        self.assertEqual((2.5, 'entity_1'), (st[0][0], st[0][1]['name']))
+        self.assertEqual((5.5, 'entity_2'), (st[1][0], st[1][1]['name']))
 
-    SPAWN_DATA = [
-        {'name': 'entity_1', 'weight': 1, 'depth_mod': -2},
-    ]
+    def test_ensure_no_negative_values(self):
 
-    @patch('barbarian.spawn.get_spawn_data', return_value=SPAWN_DATA)
-    def test_ensure_no_negative_values(self, _):
+        SPAWN_DATA = [
+            {'name': 'entity_1', 'weight': 1, 'depth_mod': -2},
+        ]
 
         level = MagicMock()
         level.depth = 1
 
-        st = build_spawn_table(level)
-        self.assertEqual((0, 'entity_1'), st[0])
+        st = build_spawn_table(level, SPAWN_DATA)
+        self.assertEqual((0, 'entity_1'), (st[0][0], st[0][1]['name']))

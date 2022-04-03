@@ -14,22 +14,25 @@ class TestSpawnZone(BaseFunctionalTestCase):
         super().setUp()
         Rng.add_rng('spawn')
 
-    @patch('barbarian.utils.rng._Rng.randint', return_value=MAX_SPAWNS)
-    def test_spawn_zone(self, _):
+    def test_spawn_zone(self):
 
         level = self.build_dummy_level(('...', '...', '...'))
         zone = tuple((x, y) for x, y, _ in level.map)
-        spawn_table = [(5, 'orc'), (3, 'kobold'), (3, 'player')]
 
-        # Ignore weights
-        roll_results = ['health_potion', 'trap', 'kobold', 'scroll_blink']
+        # Bypass actual table roll
+        roll_results = [
+            {'name': 'health_potion'},
+            {'name': 'trap'},
+            {'name': 'kobold'},
+            {'name': 'scroll_blink'},
+        ]
 
         with patch(
                 'barbarian.utils.rng._Rng.roll_table',
                 side_effect=roll_results
         ) as patched_roller:
 
-            spawn_zone(level, zone, spawn_table)
+            spawn_zone(level, zone, [], n_spawns=MAX_SPAWNS)
 
             self.assertEqual(MAX_SPAWNS, patched_roller.call_count)
 
@@ -43,38 +46,73 @@ class TestSpawnZone(BaseFunctionalTestCase):
             self.assertIn('potion', (i.typed.type for _, __, i in level.items))
             self.assertIn('scroll', (i.typed.type for _, __, i in level.items))
 
-    # Need to ensure we'll spawn at least one entity, otherwise
-    # nothing will be logged
-    @patch('barbarian.utils.rng._Rng.randint', return_value=1)
-    def test_invalid_entity_name(self, _):
+    def test_invalid_entity_name(self):
         with patch(
-            'barbarian.utils.rng._Rng.roll_table', return_value='WOOT'
+            'barbarian.utils.rng._Rng.roll_table', return_value={'name': 'WOOT'}
         ):
             with self.assertLogs('barbarian.spawn', 'WARNING'):
-                spawn_zone(None, [], [])
+                # Need to ensure we'll spawn at least one entity, otherwise
+                # nothing will be logged
+                spawn_zone(None, [], [], n_spawns=1)
 
     def test_no_spawn_on_occupied_cell(self):
 
         zone = ((0, 0),)
-        spawn_table = [(5, 'orc')]
+        spawn_table = [(5, {'name': 'orc'})]
 
         level = self.build_dummy_level()
         level.props.add_e(self.spawn_prop(0, 0, 'door'))
-        spawn_zone(level, zone, spawn_table)
+        spawn_zone(level, zone, spawn_table, n_spawns=MAX_SPAWNS)
         # Spawn cancelled
         self.assertEqual(0, len(level.actors))
 
         level = self.build_dummy_level()
         level.actors.add_e(self.spawn_actor(0, 0, 'rat'))
-        spawn_zone(level, zone, spawn_table)
+        spawn_zone(level, zone, spawn_table, n_spawns=MAX_SPAWNS)
         # Spawn cancelled, but blocking actor is still on the level
         self.assertEqual(1, len(level.actors))
 
         level = self.build_dummy_level()
         level.items.add_e(self.spawn_item(0, 0, 'health_potion'))
-        spawn_zone(level, zone, spawn_table)
+        spawn_zone(level, zone, spawn_table, n_spawns=MAX_SPAWNS)
         # Spawn ok: items don't block
         self.assertEqual(1, len(level.actors))
+
+    def test_n_spawns(self):
+
+        level = self.build_dummy_level(('...', '...', '...'))
+        zone = tuple((x, y) for x, y, _ in level.map)
+        spawn_table = [(5, {'name': 'orc', 'n': 3})]
+
+        spawn_zone(level, zone, spawn_table, n_spawns=1)
+        self.assertEqual(3, len(level.actors))
+
+    @patch('barbarian.utils.rng._Rng.roll_dice', return_value=4)
+    def test_n_spawns_dice_str(self, _):
+
+        level = self.build_dummy_level(('...', '...', '...'))
+        zone = tuple((x, y) for x, y, _ in level.map)
+        spawn_table = [(5, {'name': 'orc', 'n': '1d8'})]
+
+        spawn_zone(level, zone, spawn_table, n_spawns=1)
+        self.assertEqual(4, len(level.actors))
+
+    def test_spawn_pack(self):
+
+        level = self.build_dummy_level(('...', '...', '...'))
+        zone = tuple((x, y) for x, y, _ in level.map)
+        spawn_table = [
+            (5, {'name': 'rat_and_kobold_pack', 'n': 3, 'subtable': [
+                    {"name": 'rat', 'weight': 5},
+                    {"name": 'kobold', 'weight': 5},
+                ]
+            })
+        ]
+
+        spawn_zone(level, zone, spawn_table, n_spawns=1)
+        self.assertEqual(3, len(level.actors))
+        for actor in level.actors.all:
+            self.assertIn(actor.typed.type, ('rat', 'kobold'))
 
 # No tests for spawn_stairs. Funtion is very simple and mimics
 # so many other helpers, so no real point in explicetely testing it.

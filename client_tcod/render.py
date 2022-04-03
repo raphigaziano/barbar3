@@ -43,6 +43,7 @@ HUNGER_STATE_COLORS = {
 GFX_DATA = {
     'player': {'glyph': '@', 'fg_color': tcod.yellow},
     'orc': {'glyph': 'O', 'fg_color': tcod.green},
+    'orc_boss': {'glyph': 'O', 'fg_color': tcod.dark_green},
     'kobold': {'glyph': 'k', 'fg_color': tcod.red},
     'trap': {'fg_color': tcod.red},
     'trap_depleted': {'fg_color': tcod.grey},

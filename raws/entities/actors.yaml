@@ -30,3 +30,7 @@ orc:
     health:  { hp: 3 }
     stats:   { strength: 4 }
     visible: { glyph: o }
+orc_boss:
+    _parent: orc
+    typed:   { type: 'orc_boss' }
+    health:  { hp: 5 }
