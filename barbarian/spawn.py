@@ -11,7 +11,7 @@ from barbarian.entity import Entity
 from barbarian.utils.rng import Rng
 from barbarian.map import TileType
 
-from barbarian.settings import MAX_SPAWNS
+from barbarian.settings import MAX_SPAWNS, DISABLE_SPAWNING
 
 
 logger = logging.getLogger(__name__)
@@ -155,9 +155,10 @@ def spawn_level(level, spawn_zones):
 
     ### Active entities: actors, items, props ###
 
-    spawn_table = build_spawn_table(level, get_spawn_data())
-    for z in spawn_zones:
-        spawn_zone(level, z, spawn_table, Rng.randint(0, MAX_SPAWNS))
+    if not DISABLE_SPAWNING:
+        spawn_table = build_spawn_table(level, get_spawn_data())
+        for z in spawn_zones:
+            spawn_zone(level, z, spawn_table, Rng.randint(0, MAX_SPAWNS))
 
     for entity_name, n in _entity_counter.items():
         logger.debug(
