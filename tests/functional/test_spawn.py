@@ -17,8 +17,8 @@ class TestSpawnZone(BaseFunctionalTestCase):
     @patch('barbarian.utils.rng._Rng.randint', return_value=MAX_SPAWNS)
     def test_spawn_zone(self, _):
 
-        level = self.build_dummy_level()
-        zone = ((0, 0),)
+        level = self.build_dummy_level(('...', '...', '...'))
+        zone = tuple((x, y) for x, y, _ in level.map)
         spawn_table = [(5, 'orc'), (3, 'kobold'), (3, 'player')]
 
         # Ignore weights
@@ -53,6 +53,28 @@ class TestSpawnZone(BaseFunctionalTestCase):
             with self.assertLogs('barbarian.spawn', 'WARNING'):
                 spawn_zone(None, [], [])
 
+    def test_no_spawn_on_occupied_cell(self):
+
+        zone = ((0, 0),)
+        spawn_table = [(5, 'orc')]
+
+        level = self.build_dummy_level()
+        level.props.add_e(self.spawn_prop(0, 0, 'door'))
+        spawn_zone(level, zone, spawn_table)
+        # Spawn cancelled
+        self.assertEqual(0, len(level.actors))
+
+        level = self.build_dummy_level()
+        level.actors.add_e(self.spawn_actor(0, 0, 'rat'))
+        spawn_zone(level, zone, spawn_table)
+        # Spawn cancelled, but blocking actor is still on the level
+        self.assertEqual(1, len(level.actors))
+
+        level = self.build_dummy_level()
+        level.items.add_e(self.spawn_item(0, 0, 'health_potion'))
+        spawn_zone(level, zone, spawn_table)
+        # Spawn ok: items don't block
+        self.assertEqual(1, len(level.actors))
 
 # No tests for spawn_stairs. Funtion is very simple and mimics
 # so many other helpers, so no real point in explicetely testing it.

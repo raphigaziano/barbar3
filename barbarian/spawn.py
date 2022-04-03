@@ -58,14 +58,20 @@ def spawn_zone(level, zone_tiles, spawn_table):
     Zone tiles should be a list of cells from the desired spawn zone.
 
     """
+    tiles = list(zone_tiles)
     for _ in range(Rng.spawn.randint(0, MAX_SPAWNS)):
         entity_name = Rng.spawn.roll_table(spawn_table)
         for entity_cat in ('actors', 'items', 'props'):
             entity_data = get_entity_data(entity_name, entity_cat)
             if entity_data:
-                x, y = Rng.spawn.choice(zone_tiles)
-                container = getattr(level, entity_cat)
-                _spawn(container, spawn_entity(x, y, entity_data))
+                while tiles:
+                    x, y = Rng.spawn.choice(tiles)
+                    if level.is_blocked(x, y):
+                        tiles.remove((x, y))
+                        continue
+                    container = getattr(level, entity_cat)
+                    _spawn(container, spawn_entity(x, y, entity_data))
+                    break
                 break
         else:
             logger.warning(
