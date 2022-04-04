@@ -194,6 +194,7 @@ class MenuEventHandler(BaseUIModalEventHandler):
             if not (e.sym in VI_KEYS and
                     not e.mod & tcod.event.KMOD_LSHIFT):
                 self.mode.set_cursor(dir_)
+                return
 
         if e.sym == tcod.event.K_RETURN:
             self.mode.select_option()
