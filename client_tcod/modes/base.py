@@ -88,10 +88,9 @@ class BaseGameMode:
     event_handler_cls = BaseEventHandler
 
     def __init__(
-        self, 
+        self,
         on_entered=None, on_leaving=None,
         on_revealed=None, on_obscured=None,
-        *args, **kwargs
     ):
         self.client = None
         self.event_handler = self.event_handler_cls(self)

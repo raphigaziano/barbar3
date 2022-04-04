@@ -139,21 +139,23 @@ class ItemMenuMode(MenuMode):
                 charges, max_charges = 0, 0
             item_key = (item['name'], charges, max_charges)
             item_count = counter.get(item_key, (0, None))[0]
-            counter[item_key] = (item_count +1, item['id'])
+            counter[item_key] = (item_count +1, item)
 
         item_list = []
         for item_key, item_val in counter.items():
             item_name, charges, max_charges = item_key
-            count, item_id = item_val
+            count, item = item_val
             display_str = self.get_display_string(
-                count, item_name, charges, max_charges)
-            item_list.append((item_id, display_str))
+                count, item, charges, max_charges)
+            item_list.append((item['id'], display_str))
 
         # Sort by (name, count) ?
 
         return item_list
 
-    def get_display_string(self, count, item_name, charges, max_charges):
+    def get_display_string(self, count, item, charges, max_charges):
+
+        item_name = item['name']
 
         display_str = (
             f'({count}) {item_name}' if count > 1 else item_name)
@@ -164,3 +166,21 @@ class ItemMenuMode(MenuMode):
             display_str += f' (remaining charges: {charges}'
 
         return display_str
+
+
+class InventoryMenuMode(ItemMenuMode):
+
+    def __init__(self, title, inventory, *args, **kwargs):
+        self.inventory = inventory
+        super().__init__(title, self.inventory['items'], *args, **kwargs)
+
+    def get_display_string(self, count, item, charges, max_charges):
+        display_string = super().get_display_string(count, item, charges, max_charges)
+
+        if ((equipable := item.get('equipable', None)) and
+            (slot_item := self.inventory['slots'][equipable['inventory_slot']]) and
+            item['id'] == slot_item['id']
+        ):
+            display_string += ' (Equiped)'
+
+        return display_string

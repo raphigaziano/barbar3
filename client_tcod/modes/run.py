@@ -1,5 +1,7 @@
 from ..modes.base import BaseGameMode, GameOverMode
-from ..modes.ui import DbgMapMode, PromptDirectionMode, ItemMenuMode
+from ..modes.ui import (
+    DbgMapMode, PromptDirectionMode, ItemMenuMode, InventoryMenuMode,
+)
 from ..nw import Request
 from ..event_handlers import RunEventHandler
 
@@ -98,13 +100,10 @@ class RunMode(BaseGameMode):
             )
 
         self.push(
-            ItemMenuMode(
+            InventoryMenuMode(
                 'Inventory', self.client.gamestate.inventory,
                 on_leaving=use_on_close_cb)
         )
-
-    def select_items(self, title, items, select_callback):
-        self.push(ItemMenuMode(title, items, on_leaving=select_callback))
 
     def get_item(self):
         ppos = self.client.gamestate.player['pos']
@@ -114,22 +113,24 @@ class RunMode(BaseGameMode):
         if len(items) <= 1:
             return Request.action('get_item')
         else:
-            return self.select_items(
+            return self.push(ItemMenuMode(
                 'Get items:', items,
-                lambda menu: self._inventory_selection_callback('get_item', menu)
+                on_leaving=lambda menu:
+                    self._item_selection_callback('get_item', menu))
             )
 
     def drop_item(self):
-        items = self.client.gamestate.inventory
-        if len(items) == 0:
+        inventory = self.client.gamestate.inventory
+        if len(inventory['items']) == 0:
             self.log_msg("You don't have any item to drop")
         else:
-            return self.select_items(
-                'Drop items:', items,
-                lambda menu: self._inventory_selection_callback('drop_item', menu)
+            return self.push(InventoryMenuMode(
+                'Drop items:', inventory,
+                on_leaving=lambda menu:
+                    self._item_selection_callback('drop_item', menu))
             )
 
-    def _inventory_selection_callback(self, action_name, menu):
+    def _item_selection_callback(self, action_name, menu):
         return self.client.send_request(
             Request.action(action_name, {'item_id_list': [menu.selected]})
         )
@@ -150,7 +151,6 @@ class RunMode(BaseGameMode):
                 }:
                     self.__bloodstains = []
                     self.push(DbgMapMode())
-
                 case {
                     'type': 'actor_died',
                     'data': {'actor': {'actor': {'is_player': False}}},

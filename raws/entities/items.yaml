@@ -41,3 +41,25 @@ scroll_blink:
     usable:
         action_data: { type: blink }
     consumable: {}
+_base_weapon:
+    equipable: { inventory_slot: weapon }
+    usable:
+        action_data: { type: equip_item }
+    visible: { glyph: '/' }
+sword:
+    _parent: _base_weapon
+    typed: { type: sword }
+axe:
+    _parent: _base_weapon
+    typed: { type: axe }
+_base_armor:
+    equipable: { inventory_slot: armor }
+    usable:
+        action_data: { type: equip_item }
+    visible: { glyph: '[' }
+leather_armor:
+    _parent: _base_armor
+    typed: { type: leather_armor }
+chainmail:
+    _parent: _base_armor
+    typed: { type: chainmail }

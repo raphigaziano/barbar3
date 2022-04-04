@@ -11,4 +11,8 @@
 - {name: health_potion, weight: 7}
 - {name: scroll_teleport, weight: 2}
 - {name: scroll_blink, weight: 2}
+- {name: sword, weight: 3}
+- {name: axe, weight: 1}
+- {name: leather_armor, weight: 3}
+- {name: chainmail, weight: 1}
 - {name: trap, weight: 2, depth_mod: 0.5}

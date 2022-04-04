@@ -1,7 +1,11 @@
+from unittest.mock import patch
+
 from .base import BaseFunctionalTestCase
 from barbarian.actions import Action, ActionType
 
-from barbarian.systems.inventory import get_items, drop_items
+from barbarian.systems.inventory import (
+    get_items, drop_items, equip_item,
+)
 
 
 class TestInventory(BaseFunctionalTestCase):
@@ -11,6 +15,9 @@ class TestInventory(BaseFunctionalTestCase):
 
     def drop_action(self, a, d=None):
         return Action(ActionType.DROP_ITEM, a, data=d)
+
+    def equip_action(self, a, i):
+        return Action(ActionType.EQUIP_ITEM, a, i)
 
     def test_get_item_with_selection(self):
 
@@ -152,3 +159,124 @@ class TestInventory(BaseFunctionalTestCase):
 
         self.assertEqual(0, len(level.items))
         self.assertEqual(0, len(actor.inventory.items))
+
+    def test_equipped_items_are_unequipped_before_being_dropped(self):
+
+        def _mock_rm(actor, slot):
+            actor.inventory.slots[slot] = None
+            return True
+
+        with patch(
+            'barbarian.systems.inventory._unequip_item', wraps=_mock_rm
+        ) as mock_rm_item:
+
+            level = self.build_dummy_level()
+            actor = self.spawn_actor(0, 0, 'player')
+            item = self.spawn_item(0, 0, 'chainmail')
+            item.remove_component('pos')
+            actor.inventory.items.append(item)
+            actor.inventory.slots['armor'] = item
+
+            action = self.drop_action(actor)
+            self.assert_action_accepted(drop_items, action, level)
+            mock_rm_item.assert_called_with(actor, 'armor')
+            self.assertIsNone(actor.inventory.slots['armor'])
+
+    def test_no_drop_if_item_cannot_be_unequipped(self):
+
+        def _mock_rm(actor, slot):
+            return False
+
+        with patch(
+            'barbarian.systems.inventory._unequip_item', wraps=_mock_rm
+        ) as mock_rm_item:
+
+            level = self.build_dummy_level()
+            actor = self.spawn_actor(0, 0, 'player')
+            item = self.spawn_item(0, 0, 'chainmail')
+            item.remove_component('pos')
+            actor.inventory.items.append(item)
+            actor.inventory.slots['armor'] = item
+
+            action = self.drop_action(actor)
+            self.assert_action_rejected(drop_items, action, level)
+            mock_rm_item.assert_called_with(actor, 'armor')
+            self.assertEqual(item, actor.inventory.slots['armor'])
+
+    def test_equip_item(self):
+
+        actor = self.spawn_actor(0, 0, 'player')
+        item = self.spawn_item(0, 0, 'sword')
+        actor.inventory.items.append(item)
+
+        equip_action = self.equip_action(actor, item)
+        self.assert_action_accepted(equip_item, equip_action)
+
+        self.assertIn(item, actor.inventory.items)
+        self.assertEqual(item, actor.inventory.slots['weapon'])
+
+    @patch('barbarian.systems.inventory._unequip_item')
+    def test_equip_item_replace_already_equipped(self, mock_rm_item):
+
+        actor = self.spawn_actor(0, 0, 'player')
+        already_equipped = self.spawn_item(0, 0, 'sword')
+        actor.inventory.items.append(already_equipped)
+        actor.inventory.slots['weapon'] = already_equipped
+
+        self.assertEqual(already_equipped, actor.inventory.slots['weapon'])
+
+        replacing_item = self.spawn_item(0, 0, 'sword')
+        actor.inventory.items.append(replacing_item)
+
+        equip_action = self.equip_action(actor, replacing_item)
+        self.assert_action_accepted(equip_item, equip_action)
+
+        mock_rm_item.assert_called_with(actor, 'weapon')
+
+        self.assertIn(already_equipped, actor.inventory.items)
+        self.assertIn(replacing_item, actor.inventory.items)
+        self.assertEqual(replacing_item, actor.inventory.slots['weapon'])
+
+    def test_cannot_replace_unequipable_item(self):
+
+        def _mock_rm(actor, slot):
+            return False
+
+        with patch(
+            'barbarian.systems.inventory._unequip_item', wraps=_mock_rm
+        ) as mock_rm_item:
+
+            actor = self.spawn_actor(0, 0, 'player')
+            already_equipped = self.spawn_item(0, 0, 'sword')
+            actor.inventory.items.append(already_equipped)
+            actor.inventory.slots['weapon'] = already_equipped
+
+            replacing_item = self.spawn_item(0, 0, 'sword')
+            actor.inventory.items.append(replacing_item)
+
+            equip_action = self.equip_action(actor, replacing_item)
+            self.assert_action_rejected(equip_item, equip_action)
+
+            mock_rm_item.assert_called_with(actor, 'weapon')
+
+            self.assertIn(already_equipped, actor.inventory.items)
+            self.assertIn(replacing_item, actor.inventory.items)
+            self.assertEqual(already_equipped, actor.inventory.slots['weapon'])
+
+    def test_equip_item_not_in_inventory(self):
+
+        actor = self.spawn_actor(0, 0, 'player')
+        item = self.spawn_item(0, 0, 'sword')
+
+        equip_action = self.equip_action(actor, item)
+        self.assertRaises(AssertionError, equip_item, equip_action)
+
+    def test_equip_non_equipable_item(self):
+
+        actor = self.spawn_actor(0, 0, 'player')
+        item = self.spawn_item(0, 0, 'health_potion')
+        item.remove_component('equipable')
+        actor.inventory.items.append(item)
+
+        equip_action = self.equip_action(actor, item)
+        self.assertRaises(AssertionError, equip_item, equip_action)

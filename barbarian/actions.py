@@ -41,6 +41,7 @@ class ActionType(StringAutoEnum):
     GET_ITEM = auto()
     DROP_ITEM = auto()
     USE_ITEM = auto()
+    EQUIP_ITEM = auto()
     USE_PROP = auto()
     OPEN_DOOR = auto()
     CLOSE_DOOR = auto()

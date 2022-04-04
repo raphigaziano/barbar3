@@ -83,7 +83,35 @@ def drop_items(action, level):
 
     # Sorting is even less usefull here, but do it anyway to be consistent.
     for item in sorted(items, key=id):
+        if ((equipable := item.equipable) and
+            actor.inventory.slots[equipable.inventory_slot] is item and
+            not _unequip_item(actor, equipable.inventory_slot)
+        ):
+            return action.reject()
         processed.append(_drop_item(actor, item, level))
 
     droped_str = ', '.join(i.name for i in processed)
     action.accept(msg=f'Dropped: {droped_str}')
+
+# Equip / Uneqip do not support multi selection yet. We may or may not
+# change this later.
+
+def equip_item(action):
+    """ Wield / wear item. """
+    actor, item, _ = action.unpack()
+
+    assert (inv := actor.inventory) and item in inv.items
+    assert (equipable := item.equipable)
+
+    if inv.slots[equipable.inventory_slot] is not None:
+        if not _unequip_item(actor, equipable.inventory_slot):
+            return action.reject()
+    inv.slots[equipable.inventory_slot] = item
+
+    action.accept(msg=f'{actor.name} equipped {item.name}')
+
+
+def _unequip_item(actor, item_slot):
+    """ Clear item slot. """
+    actor.inventory.slots[item_slot] = None
+    return True
