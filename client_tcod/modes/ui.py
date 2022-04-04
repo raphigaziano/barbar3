@@ -82,10 +82,10 @@ class MenuMode(BaseGameMode):
 
     event_handler_cls = MenuEventHandler
 
-    def __init__(self, title, items, *args, **kwargs):
+    def __init__(self, title, options, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title = title
-        self.menu_items = items
+        self.menu_options = options
         self.cursor_idx = 0
         self._selected = None
 
@@ -95,10 +95,10 @@ class MenuMode(BaseGameMode):
             return self._selected[0]
         return None
 
-    def select_item(self, idx=None):
+    def select_option(self, idx=None):
         select_idx = idx or self.cursor_idx
         try:
-            self._selected = self.menu_items[select_idx]
+            self._selected = self.menu_options[select_idx]
             self.pop()
         except IndexError:
             pass
@@ -109,8 +109,8 @@ class MenuMode(BaseGameMode):
             return
         self.cursor_idx += dy
         if self.cursor_idx < 0:
-            self.cursor_idx = len(self.menu_items) - 1
-        elif self.cursor_idx == len(self.menu_items):
+            self.cursor_idx = len(self.menu_options) - 1
+        elif self.cursor_idx == len(self.menu_options):
             self.cursor_idx = 0
 
     def on_leaving(self):

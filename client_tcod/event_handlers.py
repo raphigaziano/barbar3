@@ -196,12 +196,12 @@ class MenuEventHandler(BaseUIModalEventHandler):
                 self.mode.set_cursor(dir_)
 
         if e.sym == tcod.event.K_RETURN:
-            self.mode.select_item()
+            self.mode.select_option()
 
         try:
             # Maj key is ignored, so sym should always be lowercase
             if chr(e.sym) in ascii_lowercase:
                 idx = e.sym - 97
-                self.mode.select_item(idx)
+                self.mode.select_option(idx)
         except ValueError:
             pass

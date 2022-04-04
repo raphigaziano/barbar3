@@ -471,13 +471,13 @@ class TcodRenderer:
 
         self.hud_console.clear(bg=TRANS_COLOR)
 
-        items = menu_mode.menu_items
+        menu_opts = menu_mode.menu_options
         cursor_idx = menu_mode.cursor_idx
 
-        if items:
+        if menu_opts:
             menu_width = max(
-                len(item_name) + 5 for _, item_name in items) + 6
-            menu_height = len(items) + 5
+                len(item_name) + 5 for _, item_name in menu_opts) + 6
+            menu_height = len(menu_opts) + 5
         else:
             menu_width, menu_height = 30, 8
         menu_x, menu_y = (C.SCREEN_W // 2) - (menu_width // 2), 15
@@ -492,7 +492,7 @@ class TcodRenderer:
         items_offset_x = menu_x + 2
         items_offset_y = menu_y + 3
 
-        for i, (_, item_name) in enumerate(menu_mode.menu_items):
+        for i, (_, item_name) in enumerate(menu_opts):
             item_str = f'({chr(65 + i)}) - {item_name}'
             fg = MENU_CURSOR_FG if (i == cursor_idx) else MENU_ITEM_FG
             bg = MENU_CURSOR_BG if (i == cursor_idx) else MENU_ITEM_BG
