@@ -123,26 +123,43 @@ class MenuMode(BaseGameMode):
 
 class ItemMenuMode(MenuMode):
 
+    STACKED_ITEM_TYPES = ('potion', 'scroll', 'food')
+
     def __init__(self, title, items, *args, **kwargs):
         items = self.stack_items(items)
         super().__init__(title, items, *args, **kwargs)
 
     def stack_items(self, flat_item_list):
 
-        counter = {}
-        for item in flat_item_list:
-            if 'consumable' in item:
-                charges, max_charges = (
-                    item['consumable']['charges'],
-                    item['consumable']['max_charges'])
+        # This works for now, but is already pretty hacky and risk
+        # becoming a beast.
+        # While I like handling stacking on the client side, moving
+        # the bookkeeping to the server is probably easier and more
+        # maintainable, unless we figure out a better way to keep it
+        # here.
+        # Will need to think about it, and too lazy to handle this 
+        # right now.
+
+        stacks_counter = {}
+        for i, item in enumerate(flat_item_list):
+            if item['type'] in self.STACKED_ITEM_TYPES:
+                if 'consumable' in item:
+                    charges, max_charges = (
+                        item['consumable']['charges'],
+                        item['consumable']['max_charges'])
+                else:
+                    charges, max_charges = 0, 0
             else:
-                charges, max_charges = 0, 0
+                # Non stackable item: use flat idx to ensure 'key' is
+                # different from any other
+                charges, max_charges = i, i
+
             item_key = (item['name'], charges, max_charges)
-            item_count = counter.get(item_key, (0, None))[0]
-            counter[item_key] = (item_count +1, item)
+            item_count = stacks_counter.get(item_key, (0, None))[0]
+            stacks_counter[item_key] = (item_count + 1, item)
 
         item_list = []
-        for item_key, item_val in counter.items():
+        for item_key, item_val in stacks_counter.items():
             item_name, charges, max_charges = item_key
             count, item = item_val
             display_str = self.get_display_string(count, item)
