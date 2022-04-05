@@ -8,7 +8,7 @@ import tcod
 
 from barbarian.utils.structures.grid import (
     EntityGrid, GridContainer, OutOfBoundGridError)
-from barbarian.genmap.common import get_map_builder
+from barbarian.genmap import get_map_builder
 from barbarian.spawn import spawn_level
 
 

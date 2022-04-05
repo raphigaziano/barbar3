@@ -66,15 +66,3 @@ class BaseMapBuilder:
 
     def build(self, dpeth):
         raise NotImplementedError()
-
-
-def get_map_builder(map_debug):
-    """ Return a randomly chosen map builder. """
-    from . import builders
-    # return builders.CellularAutomataMapBuilder(debug=map_debug)
-    return Rng.dungeon.choice([
-        builders.SimpleMapBuilder(debug=map_debug),
-        builders.BSPMapBuilder(debug=map_debug),
-        builders.BSPInteriorMapBuilder(debug=map_debug),
-        builders.CellularAutomataMapBuilder(debug=map_debug)
-    ])

@@ -31,7 +31,7 @@ class BaseFunctionalTestCase(unittest.TestCase):
         Event.clear_queue()
         Rng.init_root(self.rng_seed)
 
-    def build_dummy_game(self, running=True):
+    def build_dummy_game(self, level=None, spawn_player=True, running=True):
 
         game = Game()
 
@@ -40,16 +40,18 @@ class BaseFunctionalTestCase(unittest.TestCase):
 
         world = World(map_w, map_h)
 
-        level = self.build_dummy_level()
-        level.start_pos = (
-            1 if map_w > 1 else 0,
-            1 if map_h > 1 else 0
-        )
-        level.exit_pos = map_w - 1, map_h - 1
-        level.init_fov_map()
+        if not level:
+            level = self.build_dummy_level()
+            level.start_pos = (
+                1 if map_w > 1 else 0,
+                1 if map_h > 1 else 0
+            )
+            level.exit_pos = map_w - 1, map_h - 1
+            level.init_fov_map()
 
-        game.player = self.spawn_actor(*level.start_pos, 'player')
-        level.enter(game.player)
+        if spawn_player:
+            game.player = self.spawn_actor(*level.start_pos, 'player')
+            level.enter(game.player)
 
         world.insert_level(level)
         game.world = world

@@ -1,8 +1,11 @@
 from unittest.mock import MagicMock, patch
+import random
 
 from tests.functional.base import BaseFunctionalTestCase
 
 from barbarian.utils.rng import Rng
+from barbarian.genmap import _MAP_BUILDERS
+from barbarian.world import Level
 from barbarian.spawn import (
     spawn_entity, spawn_zone, spawn_door, spawn_level)
 from barbarian.settings import MAX_SPAWNS
@@ -208,3 +211,89 @@ class TestSpawnLevel(BaseFunctionalTestCase):
         self.assertEqual(48, door_spawner.call_count)
 
         self.assertEqual(len(level.map.rooms), zone_spawner.call_count)
+
+    MAP_W, MAP_H = 30, 30
+
+    def test_spawn_is_deterministic(self):
+
+        Rng.init_root()
+        Rng.add_rng('dungeon')
+        Rng.add_rng('sapwn')
+
+        # Save rng state
+        rng_state = Rng.spawn.getstate()
+
+        # Generate a few level and store them for reuse (we don't want
+        # to generate new maps for the second spawn run).
+
+        levels = []
+
+        for BuilderCls in _MAP_BUILDERS:
+
+            level = Level(self.MAP_W, self.MAP_H)
+            with patch(
+                'barbarian.world.get_map_builder',
+                return_value=BuilderCls(debug=False)
+            ):
+                level.build_map(False)
+                levels.append(level)
+
+        # Spawn entities for each leavel and store the results
+
+        no_perturb_entities = []
+
+        for level in levels:
+            level.populate()    # calls spawn_level
+            for e in level.props.all:
+                no_perturb_entities.append(e)
+            for e in level.items.all:
+                no_perturb_entities.append(e)
+            for e in level.actors.all:
+                no_perturb_entities.append(e)
+
+        # Copy levels, leaving entities alone
+
+        new_levels = []
+
+        for level in levels:
+            new_level = Level(self.MAP_W, self.MAP_H)
+            new_level.map = level.map
+            new_level.start_pos = level.start_pos
+            new_level.exit_pos = level.exit_pos
+            new_level.spawn_zones = level.spawn_zones
+
+            new_levels.append(new_level)
+
+        # Reset rng state
+        Rng.spawn.setstate(rng_state)
+
+        # Rerun the build and spawn code, spamming the other rngs along
+        # the way
+
+        perturb_entities = []
+
+        for i, level in enumerate(new_levels):
+
+            # Random mess \o/
+            Rng.randint(0, random.randint(2, 10))
+            Rng.dungeon.roll_dice_str(f'{i}D{i*2}+3')
+            random.randrange(Rng.roll_dice_str(f'2d{i+1}'))
+            Rng.dungeon.choice([random.random() for _ in range(i+1)])
+
+            level.populate()    # calls spawn_level
+            for e in level.props.all:
+                perturb_entities.append(e)
+            for e in level.items.all:
+                perturb_entities.append(e)
+            for e in level.actors.all:
+                perturb_entities.append(e)
+
+        # Compare results...
+
+        self.assertEqual(len(no_perturb_entities), len(perturb_entities))
+
+        for unperturbed, perturbed in zip(no_perturb_entities, perturb_entities):
+            # Force a dummy EntityId to avoid messing up the comparison
+            unperturbed._id = 1
+            perturbed._id = 1
+            self.assertDictEqual(unperturbed.serialize(), perturbed.serialize())
