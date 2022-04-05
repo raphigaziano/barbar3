@@ -6,6 +6,10 @@ from barbarian.utils.structures.dijkstra import DijkstraGrid
 from barbarian.utils.geometry import vector_to
 
 
+class PathBlockedError(Exception):
+    """ Raised if destination can't be reached. """
+
+
 def get_path_map(level, start_pos, *goals, predicate=None, cost_function=None):
     """
     Compute a dijtra path map centered on `start_pos`.
@@ -27,7 +31,6 @@ def get_path_map(level, start_pos, *goals, predicate=None, cost_function=None):
     )
     return path_map
 
-
 # Optimization ideas:
 # - Compute path map on a slice of the actual map, restrained by FOV
 #   range ?
@@ -46,6 +49,8 @@ def get_path_to_target(start_pos, target_pos, level):
         x, y, _ = min(
             path_map.get_neighbors(x, y),
             key=lambda pos_dist_tupple: pos_dist_tupple[2])
+        if path_map[x,y] == path_map.inf:
+            raise PathBlockedError()
         yield x, y
 
 
@@ -56,4 +61,4 @@ def get_step_to_target(start_pos, target_pos, level):
 
     """
     step_x, step_y = next(get_path_to_target(start_pos, target_pos, level))
-    return vector_to(*start_pos, step_x, step_y)
+    return step_x, step_y

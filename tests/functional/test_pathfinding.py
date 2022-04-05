@@ -1,7 +1,8 @@
 from unittest.mock import Mock
 from .base import BaseFunctionalTestCase
 
-from barbarian.pathfinding import get_path_to_target, get_step_to_target
+from barbarian.pathfinding import (
+    PathBlockedError, get_path_to_target, get_step_to_target)
 
 
 class TestPathfinding(BaseFunctionalTestCase):
@@ -129,3 +130,24 @@ class TestPathfinding(BaseFunctionalTestCase):
         ))
         dx, dy = get_step_to_target((0, 0), (2, 0), level)
         self.assertEqual((1, 1), (dx, dy))
+
+    def test_path_blocked(self):
+
+        level = self.build_dummy_level((
+            '#######',
+            '#.....#',
+            '#..@..#',
+            '#######',
+            '#...o.#',
+            '#.....#',
+            '#######',
+        ))
+
+        orc = level.actors[3,2]
+        player = level.actors[4,4]
+
+        path = get_path_to_target(
+            (orc.pos.x, orc.pos.y),
+            (player.pos.x, player.pos.y), level)
+        # Need to consume generator
+        self.assertRaises(PathBlockedError, next, path)

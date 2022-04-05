@@ -54,10 +54,14 @@ class DijkstraGrid(Grid):
             cx, cy = c_idx % self.w, c_idx // self.w
 
             for nx, ny in (
-                    (cx, cy - 1),   # N
-                    (cx + 1, cy),   # E
-                    (cx, cy + 1),   # S
-                    (cx - 1, cy),   # W
+                    (cx, cy - 1),       # N
+                    (cx + 1, cy),       # E
+                    (cx, cy + 1),       # S
+                    (cx - 1, cy),       # W
+                    # (cx - 1, cy - 1),   # NW
+                    # (cx + 1, cy - 1),   # NE
+                    # (cx - 1, cy + 1),   # SW
+                    # (cx + 1, cy - 1),   # SE
             ):
                 if not (0 <= nx < self.w and 0 <= ny < self.h):
                     continue
