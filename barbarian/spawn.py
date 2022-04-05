@@ -81,7 +81,7 @@ def spawn_zone(level, zone_tiles, spawn_table, n_spawns):
         if subtable := entity_spawn_data.get('subtable', []):
             sub_spawn_table = build_spawn_table(
                 level, subtable, adjust_weights=False)
-            n_sub_spawns = Rng.try_roll_dice_str(entity_spawn_data.get('n', 1))
+            n_sub_spawns = Rng.spawn.try_roll_dice_str(entity_spawn_data.get('n', 1))
             spawn_zone(level, tiles, sub_spawn_table, n_sub_spawns)
         # Regular entity
         else:
@@ -90,7 +90,7 @@ def spawn_zone(level, zone_tiles, spawn_table, n_spawns):
                 if entity_data:
                     __spawn_entity(
                         entity_data,
-                        Rng.try_roll_dice_str(entity_spawn_data.get('n', 1))
+                        Rng.spawn.try_roll_dice_str(entity_spawn_data.get('n', 1))
                     )
                     break
             else:
@@ -158,7 +158,7 @@ def spawn_level(level, spawn_zones):
     if not DISABLE_SPAWNING:
         spawn_table = build_spawn_table(level, get_spawn_data())
         for z in spawn_zones:
-            spawn_zone(level, z, spawn_table, Rng.randint(0, MAX_SPAWNS))
+            spawn_zone(level, z, spawn_table, Rng.spawn.randint(0, MAX_SPAWNS))
 
     for entity_name, n in _entity_counter.items():
         logger.debug(
