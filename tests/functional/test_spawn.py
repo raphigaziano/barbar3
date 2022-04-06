@@ -213,12 +213,15 @@ class TestSpawnLevel(BaseFunctionalTestCase):
         self.assertEqual(len(level.map.rooms), zone_spawner.call_count)
 
     MAP_W, MAP_H = 30, 30
+    seed = None     # Use this to debug potential test fails
 
     def test_spawn_is_deterministic(self):
 
-        Rng.init_root()
+        Rng.init_root(self.seed)
         Rng.add_rng('dungeon')
         Rng.add_rng('sapwn')
+
+        print('Rng seed:', Rng.root.initial_seed)
 
         # Save rng state
         rng_state = Rng.spawn.getstate()
@@ -244,12 +247,14 @@ class TestSpawnLevel(BaseFunctionalTestCase):
 
         for level in levels:
             level.populate()    # calls spawn_level
-            for e in level.props.all:
-                no_perturb_entities.append(e)
-            for e in level.items.all:
-                no_perturb_entities.append(e)
-            for e in level.actors.all:
-                no_perturb_entities.append(e)
+            for e_list in (
+                level.props.all, level.items.all, level.actors.all
+            ):
+                # Sort entities (no matter as long as we can reproduce it):
+                # items are stored in an unordered set, so we can't guarantee
+                # comparison will de done in the right order.
+                for e in sorted(e_list, key=lambda e: e._id):
+                    no_perturb_entities.append(e)
 
         # Copy levels, leaving entities alone
 
@@ -281,12 +286,14 @@ class TestSpawnLevel(BaseFunctionalTestCase):
             Rng.dungeon.choice([random.random() for _ in range(i+1)])
 
             level.populate()    # calls spawn_level
-            for e in level.props.all:
-                perturb_entities.append(e)
-            for e in level.items.all:
-                perturb_entities.append(e)
-            for e in level.actors.all:
-                perturb_entities.append(e)
+            for e_list in (
+                level.props.all, level.items.all, level.actors.all
+            ):
+                # Sort entities (no matter as long as we can reproduce it):
+                # items are stored in an unordered set, so we can't guarantee
+                # comparison will de done in the right order.
+                for e in sorted(e_list, key=lambda e: e._id):
+                    perturb_entities.append(e)
 
         # Compare results...
 
