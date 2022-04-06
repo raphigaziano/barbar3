@@ -60,6 +60,10 @@ class DebugEventsMixin:
             constants.MAP_DEBUG = not constants.MAP_DEBUG
             return Request.set('MAP_DEBUG', val=constants.MAP_DEBUG)
 
+        if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_i):
+            v = not constants.SHOW_DEBUG_INFO
+            return self.mode.setvar_g('SHOW_DEBUG_INFO', v)
+
         if (e.mod & tcod.event.KMOD_LALT and e.sym == tcod.event.K_x):
             v = not constants.SHOW_UNEXPLORED_CELLS
             return self.mode.setvar_g('SHOW_UNEXPLORED_CELLS', v)
@@ -76,16 +80,20 @@ class DebugEventsMixin:
             v = not constants.IGNORE_FOV
             return self.mode.setvar_g('IGNORE_FOV', v)
 
+        return False
+
 
 class RunEventHandler(DebugEventsMixin, BaseEventHandler):
     """ Main hander, used for for actual game commands """
 
     def ev_keydown(self, e):
 
-        if r := super().ev_keydown(e):
+        if (r := super().ev_keydown(e)):
             return r
 
-        if r := super().debug_events(e):
+        # Explicit check: None can be returned to the called, but not False
+        # (Used to indicate a no-op)
+        if (r := super().debug_events(e)) != False:
             return r
 
         if e.sym in MOVE_KEYS:
