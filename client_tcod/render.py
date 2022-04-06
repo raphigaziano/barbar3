@@ -337,16 +337,19 @@ class TcodRenderer:
     def render_hud(self, gamestate):
         self.hud_console.clear(bg=TRANS_COLOR)
 
-        self.render_debug_overlays(gamestate)
-
         mouse_state = tcod.event.get_mouse_state()
         self.context.convert_event(mouse_state)
+
+        self.render_debug_overlays(gamestate)
         self.render_tooltips(gamestate, mouse_state)
 
         # self.hud_console.print(
         #   0, 0, f'mean fps: {gamestate.clock.mean_fps:.2f}', tcod.yellow)
         self.hud_console.print(
-            0, 0, f'median fps: {gamestate.clock.median_fps:.2f}', tcod.yellow)
+            0, 0, f'median fps: {gamestate.clock.median_fps:.2f}',
+            fg=tcod.yellow, bg=tcod.black)
+        self.hud_console.print(
+            0, 1, f'mouse pos: {mouse_state.tile}', fg=tcod.yellow, bg=tcod.black)
 
         self.hud_console.blit(self.map_console, key_color=TRANS_COLOR)
 
