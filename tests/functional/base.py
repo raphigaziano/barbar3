@@ -94,6 +94,8 @@ class BaseFunctionalTestCase(unittest.TestCase):
                     level.actors.add_e(self.spawn_actor(x, y, 'orc'))
                 elif char == '+':
                     level.props.add_e(self.spawn_prop(x, y, 'door'))
+                elif char == '!':
+                    level.items.add_e(self.spawn_item(x, y, 'health_potion'))
                 else:
                     raise ValueError(f'Unknown char: {char}')
 

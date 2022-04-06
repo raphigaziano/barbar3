@@ -20,22 +20,24 @@ class TestPathfinding(BaseFunctionalTestCase):
         ))
 
         path = list(get_path_to_target((0, 0), (4, 3), level))
-        self.assertEqual(4, len(path))
-        self.assertListEqual([(1, 1), (2, 2), (3, 3), (4, 3)], path)
+        expected_path = [(1, 0), (2, 1), (3, 2), (4, 3)]
+        self.assertEqual(len(expected_path), len(path))
+        self.assertListEqual(expected_path, path)
 
         # Simple block
 
         level = self.build_dummy_level((
             '.....',
             '.....',
-            '..#..',
+            '...#.',
             '.....',
             '.....',
         ))
 
         path = list(get_path_to_target((0, 0), (4, 3), level))
-        self.assertEqual(4, len(path))
-        self.assertListEqual([(1, 1), (2, 1), (3, 2), (4, 3)], path)
+        expected_path = [(1, 1), (2, 2), (3, 3), (4, 3)]
+        self.assertEqual(len(expected_path), len(path))
+        self.assertListEqual(expected_path, path)
 
         # Corridor
 
@@ -48,79 +50,86 @@ class TestPathfinding(BaseFunctionalTestCase):
         ))
 
         path = list(get_path_to_target((0, 2), (4, 3), level))
-        self.assertEqual(5, len(path))
-        self.assertListEqual([(1, 1), (2, 1), (3, 1), (4, 2), (4, 3)], path)
+        expected_path = [(1, 2), (2, 1), (3, 1), (4, 2), (4, 3)]
+        self.assertEqual(len(expected_path), len(path))
+        self.assertListEqual(expected_path, path)
 
     def test_path_blocked_by_prop(self):
 
         level = self.build_dummy_level((
             '.....',
             '.....',
-            '.....',
+            '...+.',
             '.....',
             '.....',
         ))
-        door = self.spawn_prop(2, 2, 'door')
+        door = level.props[3, 2]
         door.physics.blocks = True
         level.props.add_e(door)
 
         path = list(get_path_to_target((0, 0), (4, 3), level))
-        self.assertEqual(4, len(path))
-        self.assertListEqual([(1, 1), (2, 1), (3, 2), (4, 3)], path)
+        expected_path = [(1, 1), (2, 2), (3, 3), (4, 3)]
+        self.assertEqual(len(expected_path), len(path))
+        self.assertListEqual(expected_path, path)
 
         door.physics.blocks = False
 
         path = list(get_path_to_target((0, 0), (4, 3), level))
-        self.assertEqual(4, len(path))
-        self.assertListEqual([(1, 1), (2, 2), (3, 3), (4, 3)], path)
+        expected_path = [(1, 0), (2, 1), (3, 2), (4, 3)]
+        self.assertEqual(len(expected_path), len(path))
+        self.assertListEqual(expected_path, path)
 
     def test_path_blocked_by_actor(self):
 
         level = self.build_dummy_level((
             '.....',
             '.....',
-            '.....',
+            '...o.',
             '.....',
             '.....',
         ))
-        rat = self.spawn_actor(2, 2, 'rat')
-        rat.physics.blocks = True
-        level.actors.add_e(rat)
+        orc = level.actors[3, 2]
+        orc.physics.blocks = True
+        level.actors.add_e(orc)
 
         path = list(get_path_to_target((0, 0), (4, 3), level))
-        self.assertEqual(4, len(path))
-        self.assertListEqual([(1, 1), (2, 1), (3, 2), (4, 3)], path)
+        expected_path = [(1, 1), (2, 2), (3, 3), (4, 3)]
+        self.assertEqual(len(expected_path), len(path))
+        self.assertListEqual(expected_path, path)
 
-        rat.physics.blocks = False
+        orc.physics.blocks = False
 
         path = list(get_path_to_target((0, 0), (4, 3), level))
-        self.assertEqual(4, len(path))
-        self.assertListEqual([(1, 1), (2, 2), (3, 3), (4, 3)], path)
+        expected_path = [(1, 0), (2, 1), (3, 2), (4, 3)]
+        self.assertEqual(len(expected_path), len(path))
+        self.assertListEqual(expected_path, path)
 
     def test_path_not_blocked_by_items(self):
 
         level = self.build_dummy_level((
             '.....',
             '.....',
-            '.....',
+            '...!.',
             '.....',
             '.....',
         ))
-        pot = self.spawn_item(2, 2, 'health_potion')
+        pot = list(level.items[3, 2])[0]
         pot.physics = Mock(blocks=True)
         level.items.add_e(pot)
 
         path = list(get_path_to_target((0, 0), (4, 3), level))
-        self.assertEqual(4, len(path))
-        # Same path as below: items are not checked, so the blocks
-        # attribute doesn't change anything.
-        self.assertListEqual([(1, 1), (2, 2), (3, 3), (4, 3)], path)
+        expected_path = [(1, 0), (2, 1), (3, 2), (4, 3)]
+        self.assertEqual(len(expected_path), len(path))
+        self.assertListEqual(expected_path, path)
 
         pot.physics.blocks = False
 
+        # Same path as above: items are not checked, so the blocks
+        # attribute doesn't change anything.
         path = list(get_path_to_target((0, 0), (4, 3), level))
-        self.assertEqual(4, len(path))
-        self.assertListEqual([(1, 1), (2, 2), (3, 3), (4, 3)], path)
+        expected_path = [(1, 0), (2, 1), (3, 2), (4, 3)]
+        self.assertEqual(len(expected_path), len(path))
+        self.assertListEqual(expected_path, path)
 
     def test_get_step(self):
 

@@ -58,10 +58,10 @@ class DijkstraGrid(Grid):
                     (cx + 1, cy),       # E
                     (cx, cy + 1),       # S
                     (cx - 1, cy),       # W
-                    # (cx - 1, cy - 1),   # NW
-                    # (cx + 1, cy - 1),   # NE
-                    # (cx - 1, cy + 1),   # SW
-                    # (cx + 1, cy - 1),   # SE
+                    (cx - 1, cy - 1),   # NW
+                    (cx + 1, cy - 1),   # NE
+                    (cx - 1, cy + 1),   # SW
+                    (cx + 1, cy + 1),   # SE
             ):
                 if not (0 <= nx < self.w and 0 <= ny < self.h):
                     continue
