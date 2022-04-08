@@ -103,7 +103,10 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
                 return Request.action('move', {'dir': MOVE_KEYS[e.sym]})
 
         if e.sym in (tcod.event.K_COMMA, tcod.event.K_KP_5):
-            return Request.action('idle')
+            if e.mod & tcod.event.KMOD_LSHIFT:
+                return self.mode.rest_r()
+            else:
+                return Request.action('idle')
 
         if e.sym in (tcod.event.K_SEMICOLON, tcod.event.K_g):
             return self.mode.get_item()

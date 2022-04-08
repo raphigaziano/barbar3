@@ -33,6 +33,8 @@ IGNORE_FOV = False
 SHOW_PATH_INFO = False
 SHOW_SPAWN_ZONES = False
 
+AUTO_REST_N_TURNS = 50
+
 class TileType(Enum):
     FLOOR = '.'
     WALL = '#'

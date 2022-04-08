@@ -4,6 +4,7 @@ from ..modes.ui import (
 )
 from ..nw import Request
 from ..event_handlers import RunEventHandler
+from ..constants import AUTO_REST_N_TURNS
 
 import tcod.event
 
@@ -83,6 +84,10 @@ class RunMode(BaseGameMode):
             )
 
         return [e for e in entity_list if predicate(e)]
+
+    def rest_r(self, n_turns=AUTO_REST_N_TURNS):
+        """ Rest for n turn """
+        self.push(AutoRunMode(action_name='idle', n_turns=n_turns))
 
     def move_r(self, data):
         """ Move repeatedly until an ennemy is spotted """
@@ -207,12 +212,19 @@ class AutoRunMode(RunMode):
     Re-run an action until interrupted, either by a game or ui event.
 
     """
-    def __init__(self, action_name="", action_data=None, **kwargs):
+    def __init__(self, action_name="", action_data=None, n_turns=None, **kwargs):
         super().__init__(**kwargs)
         self.action_name = action_name
         self.action_data = action_data or {}
+        self.n_turns = n_turns
 
     def update(self):
+
+        if self.n_turns:
+            self.n_turns -= 1
+            if self.n_turns <= 0:
+                self.pop()
+
         self.client.send_request(
             Request.action(self.action_name, self.action_data))
         request = super().update()
