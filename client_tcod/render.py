@@ -33,11 +33,9 @@ TileColors = {
 }
 
 HUNGER_STATE_COLORS = {
-    'full': tcod.green,
-    'satiated': tcod.yellow,
-    'hungry': tcod.amber,
-    'very hungry': tcod.orange,
-    'starving': tcod.red,
+    'full': tcod.light_green,
+    'very hungry': tcod.yellow,
+    'starving': tcod.orange,
 }
 
 GFX_DATA = {
@@ -59,6 +57,14 @@ FLOOR_BG = None
 FLOOR_BG_OOF = None
 
 BLOOD_COLOR = tcod.Color(63, 0, 0)
+
+PROGRESS_BAR_LABEL_COLOR = tcod.white
+
+HEALTH_BAR_BG_COLOR = tcod.black
+HEALTH_BAR_FG_COLOR = tcod.dark_red
+
+HUNGER_BAR_BG_COLOR = tcod.black
+HUNGER_BAR_FG_COLOR = tcod.darker_green
 
 TOOLTIP_FG = tcod.yellow
 TOOLTIP_BG = tcod.black
@@ -354,6 +360,18 @@ class TcodRenderer:
 
         self.hud_console.blit(self.map_console, key_color=TRANS_COLOR)
 
+    def _render_stat_bar(
+        self, console, x, y, val, max_val, label,
+        bar_length, label_fg, bar_fg, bar_bg
+    ):
+        bar_total_length = bar_length
+        bar_length = int(val / max_val * bar_total_length)
+
+        console.draw_rect(x, y, bar_total_length, 1, 0, bg=bar_bg)
+        console.draw_rect(x, y, bar_length, 1, 0, bg=bar_fg)
+        console.print_box(
+            x, y, bar_total_length, 1, label, fg=label_fg, alignment=tcod.CENTER)
+
     def render_stats(self, gamestate):
         self.stats_console.clear(fg=STATS_FG, bg=STATS_BG)
 
@@ -366,27 +384,32 @@ class TcodRenderer:
 
         cd, md = gamestate.current_depth, gamestate.max_depth
         self.stats_console.print(
-            1, 1, f'Current depth: {cd}/{md}', fg=STATS_FG, bg=STATS_BG)
+            2, 1, f'Current depth: {cd}/{md}', fg=STATS_FG, bg=STATS_BG)
 
         hp = gamestate.player['health']['hp']
         max_hp = gamestate.player['health']['max_hp']
+
+        health_bar_label = f'HP: {hp}/{max_hp}'
+        self._render_stat_bar(
+            self.stats_console, 2, 3, hp, max_hp, health_bar_label,
+            C.STATS_CONSOLE_W - 4,
+            PROGRESS_BAR_LABEL_COLOR, HEALTH_BAR_FG_COLOR, HEALTH_BAR_BG_COLOR)
+
+        hunger_clock = gamestate.player['hunger_clock']
+        hunger, max_hunger = (
+            hunger_clock['satiation'], hunger_clock['max_satiation'])
+        hunger_state = hunger_clock['state']
+        hunger_label = f'Hunger: {hunger_state}'
+        hunger_label_color = HUNGER_STATE_COLORS.get(
+            hunger_state, PROGRESS_BAR_LABEL_COLOR)
+        self._render_stat_bar(
+            self.stats_console, 2, 4, hunger, max_hunger, hunger_label,
+            C.STATS_CONSOLE_W - 4, hunger_label_color,
+            HUNGER_BAR_FG_COLOR, HUNGER_BAR_BG_COLOR)
+
         str_ = gamestate.player['stats']['strength']
         self.stats_console.print(
-            1, 3, f'HP: {hp}/{max_hp}', fg=STATS_FG, bg=STATS_BG)
-        self.stats_console.print(
-            1, 4, f'Strength: {str_}', fg=STATS_FG, bg=STATS_BG)
-
-        self.stats_console.print_box(
-            1, 6, C.STATS_CONSOLE_W, 1, 'Status',
-            fg=STATS_FG, bg=STATS_BG, alignment=tcod.CENTER)
-
-        hunger_label = 'Hunger: '
-        hunger_status = gamestate.player['hunger_clock']
-        hunger_color = HUNGER_STATE_COLORS.get(hunger_status, STATS_FG)
-        self.stats_console.print(1, 8, hunger_label, fg=STATS_FG, bg=STATS_BG)
-        self.stats_console.print(
-            1 + len(hunger_label), 8, hunger_status.capitalize(),
-            fg=hunger_color, bg=STATS_BG)
+            2, 6, f'Strength: {str_}', fg=STATS_FG, bg=STATS_BG)
 
         self.stats_console.blit(self.root_console, C.STATS_CONSOLE_X, C.STATS_CONSOLE_Y)
 

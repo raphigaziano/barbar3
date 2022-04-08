@@ -75,7 +75,11 @@ class HungerClock(Component):
         return self.state == 'starving'
 
     def serialize(self):
-        return self.state
+        return {
+            'state': self.state,
+            'satiation': self.satiation,
+            'max_satiation': MAX_HUNGER_SATIATION,
+        }
 
 
 class Stats(Component):
