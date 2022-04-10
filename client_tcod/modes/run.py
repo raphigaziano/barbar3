@@ -100,9 +100,7 @@ class RunMode(BaseGameMode):
     def show_inventory(self):
         def use_on_close_cb(menu):
             self.client.send_request(
-                Request.action(
-                    'use_item', data={'item_id': menu.selected})
-            )
+                Request.action('use_item', data={'item_id': menu.selected}))
 
         self.push(
             InventoryMenuMode(
@@ -166,6 +164,20 @@ class RunMode(BaseGameMode):
             on_leaving=lambda menu:
                 self._item_selection_callback('equip_item', menu))
         )
+
+    def eat(self):
+
+        def _item_filter(item):
+            return 'edible' in item
+
+        inventory = self.client.gamestate.inventory.copy()
+        inventory['items'] = filter(_item_filter, inventory['items'])
+        return self.push(InventoryMenuMode(
+            'Eat item:', inventory,
+            on_leaving=lambda menu:
+                self.client.send_request(
+                    Request.action('use_item', data={'item_id': menu.selected}))
+        ))
 
     def _item_selection_callback(self, action_name, menu):
         return self.client.send_request(

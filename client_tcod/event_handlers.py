@@ -119,6 +119,9 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
             else:
                 return self.mode.wield_item()
 
+        if e.sym == tcod.event.K_e:
+            return self.mode.eat()
+
         if (e.mod & tcod.event.KMOD_LCTRL and e.sym == tcod.event.K_o):
             return self.mode.open_door()
         if (e.mod & tcod.event.KMOD_LCTRL and e.sym == tcod.event.K_c):
