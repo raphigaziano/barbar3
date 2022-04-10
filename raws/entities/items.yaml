@@ -63,3 +63,7 @@ leather_armor:
 chainmail:
     _parent: _base_armor
     typed: { type: chainmail }
+shield:
+    _parent: _base_armor
+    typed: { type: shield }
+    equipable: { inventory_slot: shield }

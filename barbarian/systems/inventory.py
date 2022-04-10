@@ -85,7 +85,7 @@ def drop_items(action, level):
     for item in sorted(items, key=id):
         if ((equipable := item.equipable) and
             actor.inventory.slots[equipable.inventory_slot] is item and
-            not _unequip_item(actor, equipable.inventory_slot)
+            not _unequip_item(actor, item)
         ):
             return action.reject()
         processed.append(_drop_item(actor, item, level))
@@ -93,25 +93,46 @@ def drop_items(action, level):
     droped_str = ', '.join(i.name for i in processed)
     action.accept(msg=f'Dropped: {droped_str}')
 
-# Equip / Uneqip do not support multi selection yet. We may or may not
-# change this later.
 
-def equip_item(action):
-    """ Wield / wear item. """
-    actor, item, _ = action.unpack()
+def equip_items(action):
+    """
+    Wield / wear items.
 
-    assert (inv := actor.inventory) and item in inv.items
-    assert (equipable := item.equipable)
+    If an item slot is already pointing to another item, try and unequip
+    that item before equiping the one w're procssing.  Failing to do so
+    will cancel the whole action.
 
-    if inv.slots[equipable.inventory_slot] is not None:
-        if not _unequip_item(actor, equipable.inventory_slot):
-            return action.reject()
-    inv.slots[equipable.inventory_slot] = item
+    """
+    actor, item, data = action.unpack()
 
-    action.accept(msg=f'{actor.name} equipped {item.name}')
+    assert (inv := actor.inventory)
+
+    items = [item] if item is not None else _select_items(data, inv.items)
+
+    can_equip = []
+    for item in items:
+        assert item in inv.items
+        assert (equipable := item.equipable)
+        if (already_equiped := inv.slots[equipable.inventory_slot]) is not None:
+            if not _unequip_item(actor, already_equiped):
+                return action.reject(msg=f'Cannot unequip item: {item.name}')
+        can_equip.append(item)
+
+    for item in can_equip:
+        inv.slots[item.equipable.inventory_slot] = item
+
+    equiped_str = ', '.join(i.name for i in can_equip)
+    action.accept(msg=f'{actor.name} equipped; {equiped_str}')
 
 
-def _unequip_item(actor, item_slot):
-    """ Clear item slot. """
-    actor.inventory.slots[item_slot] = None
+def _unequip_item(actor, item):
+    """
+    Clear item slot and return True if the item could be unequippied,
+    False otherwise.
+
+    This is a stub for now, but logic for preeventing cursed item removal
+    should go here when we get there.
+
+    """
+    actor.inventory.slots[item.equipable.inventory_slot] = None
     return True

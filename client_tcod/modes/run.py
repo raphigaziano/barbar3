@@ -135,6 +135,38 @@ class RunMode(BaseGameMode):
                     self._item_selection_callback('drop_item', menu))
             )
 
+    def wield_item(self):
+
+        def _item_filter(item):
+            return (
+                'equipable' in item and
+                item['equipable']['inventory_slot'] == 'weapon')
+
+        inventory = self.client.gamestate.inventory.copy()
+        inventory['items'] = filter(_item_filter, inventory['items'])
+        return self.push(InventoryMenuMode(
+            'Wield items:', inventory,
+            on_leaving=lambda menu:
+                self._item_selection_callback('equip_item', menu))
+        )
+
+    wearable_slots = ('shield', 'armor', 'helmet', 'boots', 'gloves',)
+
+    def wear_item(self):
+
+        def _item_filter(item):
+            return (
+                'equipable' in item and
+                item['equipable']['inventory_slot'] in self.wearable_slots)
+
+        inventory = self.client.gamestate.inventory.copy()
+        inventory['items'] = filter(_item_filter, inventory['items'])
+        return self.push(InventoryMenuMode(
+            'Wear items:', inventory,
+            on_leaving=lambda menu:
+                self._item_selection_callback('equip_item', menu))
+        )
+
     def _item_selection_callback(self, action_name, menu):
         return self.client.send_request(
             Request.action(action_name, {'item_id_list': [menu.selected]})

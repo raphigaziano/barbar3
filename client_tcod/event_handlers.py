@@ -113,6 +113,12 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
         if e.sym == tcod.event.K_d:
             return self.mode.drop_item()
 
+        if e.sym == tcod.event.K_w:
+            if e.mod & tcod.event.KMOD_LSHIFT:
+                return self.mode.wear_item()
+            else:
+                return self.mode.wield_item()
+
         if (e.mod & tcod.event.KMOD_LCTRL and e.sym == tcod.event.K_o):
             return self.mode.open_door()
         if (e.mod & tcod.event.KMOD_LCTRL and e.sym == tcod.event.K_c):

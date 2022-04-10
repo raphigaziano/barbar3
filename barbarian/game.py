@@ -289,7 +289,7 @@ class Game:
                 new_action = systems.items.use_item(action)
 
             case ActionType.EQUIP_ITEM:
-                systems.inventory.equip_item(action)
+                systems.inventory.equip_items(action)
 
             case ActionType.OPEN_DOOR | ActionType.CLOSE_DOOR:
                 systems.props.open_or_close_door(action, self.current_level)
