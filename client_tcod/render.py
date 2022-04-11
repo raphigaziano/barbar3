@@ -3,6 +3,7 @@ TCOD initialization & Rendering routines.
 
 """
 import os
+import textwrap
 
 from . import constants as C
 
@@ -79,10 +80,10 @@ STATS_BG = tcod.black
 STATS_FRAME_FG = tcod.white
 STATS_FRAME_BG = tcod.black
 
-PROMPT_FRAME_FG = tcod.white
-PROMPT_FRAME_BG = tcod.black
-PROMPT_FG = tcod.yellow
-PROMPT_BG = tcod.black
+MODAL_FRAME_FG = tcod.white
+MODAL_FRAME_BG = tcod.black
+MODAL_FG = tcod.yellow
+MODAL_BG = tcod.black
 
 MENU_FRAME_FG = tcod.white
 MENU_FRAME_BG = tcod.black
@@ -476,20 +477,31 @@ class TcodRenderer:
 
         self.context.present(self.root_console)
 
-    def render_prompt(self, prompt):
+    def render_modal(self, modal_title, modal_text):
 
         self.hud_console.clear(bg=TRANS_COLOR)
 
-        prompt_x, prompt_y = (C.SCREEN_W // 2) - (len(prompt) // 2), 20
-        prompt_height = self.hud_console.get_height_rect(
-            prompt_x, prompt_y, 30, 30, prompt)
+        lines = textwrap.dedent(modal_text).splitlines()
+        wrapped = []
+        for l in lines:
+            wrapped.extend(textwrap.wrap(l, C.MAX_MODAL_WIDTH))
+            # textwrap.wrap will ignore empty lines. add them back in.
+            if not l:
+                wrapped.append(l)
+        modal_width, modal_height = max(map(len, wrapped)) + 2, len(wrapped) + 2
+
+        modal_x, modal_y = (
+            (C.SCREEN_W // 2) - (modal_width // 2),
+            (C.MAP_VIEWPORT_H // 2) - (modal_height // 2)
+        )
 
         self.hud_console.draw_frame(
-            prompt_x-2, prompt_y-2, len(prompt) + 4, 5,
-            fg=PROMPT_FRAME_FG, bg=PROMPT_FRAME_BG)
+            modal_x-2, modal_y-2, modal_width + 4, modal_height + 2,
+            title=f' {modal_title} ' if modal_title else None,
+            fg=MODAL_FRAME_FG, bg=MODAL_FRAME_BG)
         self.hud_console.print_box(
-            prompt_x, prompt_y, len(prompt), prompt_height, prompt,
-            PROMPT_FG, PROMPT_BG)
+            modal_x, modal_y, modal_width, modal_height, '\n'.join(wrapped),
+            MODAL_FG, MODAL_BG)
 
         self.hud_console.blit(self.root_console, key_color=TRANS_COLOR)
         self.context.present(self.root_console)

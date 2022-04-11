@@ -1,6 +1,9 @@
+import os
+
 from ..modes.base import BaseGameMode, GameOverMode
 from ..event_handlers import (
     DbgMapEventHandler,
+    BaseUIModalEventHandler,
     PromptConfirmEventHandler,
     PromptDirectionEventHandler,
     MenuEventHandler,
@@ -43,25 +46,38 @@ class DbgMapMode(BaseGameMode):
             self.pop()
 
 
-class BasePromptMode(BaseGameMode):
+class BaseModalMode(BaseGameMode):
 
-    prompt = ''
+    title = ""
+    txt = ""
 
-    def __init__(self, prompt='', *args, **kwargs):
+    def __init__(self, title="", txt='', *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.prompt = prompt or self.prompt
+        self.title = title or self.title
+        self.txt = txt or self.txt
 
     def render(self, gamestate, renderer):
-        renderer.render_prompt(self.prompt)
+        renderer.render_modal(self.title, self.txt)
 
 
-class PromptConfirmMode(BasePromptMode):
+class HelpModalMode(BaseModalMode):
+
+    event_handler_cls = BaseUIModalEventHandler
+    title = "Help"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        with open(os.path.join(constants.ASSETS_PATH, 'help_screen.txt')) as f:
+            self.txt = f.read()
+
+
+class PromptConfirmMode(BaseModalMode):
 
     event_handler_cls = PromptConfirmEventHandler
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.prompt = f'{self.prompt} [Yn]'
+        self.txt = f'{self.txt} [Yn]'
         self.confirmed = False
 
     def confirm(self):
@@ -72,10 +88,10 @@ class PromptConfirmMode(BasePromptMode):
             super().on_leaving()
 
 
-class PromptDirectionMode(BasePromptMode):
+class PromptDirectionMode(BaseModalMode):
 
     event_handler_cls = PromptDirectionEventHandler
-    prompt = 'Chose a direction (esc to cancel): '
+    txt = 'Chose a direction (esc to cancel): '
 
 
 class MenuMode(BaseGameMode):

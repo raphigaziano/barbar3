@@ -1,0 +1,42 @@
+Movement
+--------
+
+Numpad, arrow keys, or VI Keys:     Move
+
+Shift-<move key>:                   Move until blocked
+
+Ctrl-x:                             Autoexplore
+
+; or Numpad 5:                      Rest for 1 turn
+
+Shift-: or Shift-5:                 Rest for 100 turns
+
+Ctrl-o:                             Manually open door
+
+Ctrl-c:                             Manually close door
+
+>:                                  Use stairs down
+
+<:                                  Use stairs up
+
+
+Item & Inventory
+----------------
+
+i:                                  Show inventory
+
+g or ,:                             Get items
+
+d:                                  Drop items
+
+w:                                  Wield item
+
+W:                                  Wear item
+
+e:                                  Eat item
+
+
+Misc
+----
+
+?:                                  Show this help screen

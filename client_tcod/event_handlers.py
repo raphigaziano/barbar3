@@ -31,7 +31,8 @@ class BaseEventHandler(tcod.event.EventDispatch[None]):
         from .modes.ui import PromptConfirmMode
         if confirm:
             confirm = PromptConfirmMode(
-                prompt='Are you sure you want to quit?',
+                title='Quit',
+                txt='Are you sure you want to quit?',
                 on_leaving=lambda _: self.mode.pop()
             )
             self.mode.push(confirm)
@@ -87,6 +88,7 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
     """ Main hander, used for for actual game commands """
 
     def ev_keydown(self, e):
+        from .modes.ui import HelpModalMode
 
         if (r := super().ev_keydown(e)):
             return r
@@ -96,19 +98,22 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
         if (r := super().debug_events(e)) != False:
             return r
 
+        if (e.mod & tcod.event.KMOD_SHIFT and e.sym == tcod.event.K_COMMA):
+            return self.mode.push(HelpModalMode())
+
         if e.sym in MOVE_KEYS:
             if e.mod & tcod.event.KMOD_LSHIFT:
                 return self.mode.move_r({'dir': MOVE_KEYS[e.sym]})
             else:
                 return Request.action('move', {'dir': MOVE_KEYS[e.sym]})
 
-        if e.sym in (tcod.event.K_COMMA, tcod.event.K_KP_5):
+        if e.sym in (tcod.event.K_SEMICOLON, tcod.event.K_KP_5):
             if e.mod & tcod.event.KMOD_LSHIFT:
                 return self.mode.rest_r()
             else:
                 return Request.action('idle')
 
-        if e.sym in (tcod.event.K_SEMICOLON, tcod.event.K_g):
+        if e.sym in (tcod.event.K_COMMA, tcod.event.K_g):
             return self.mode.get_item()
         if e.sym == tcod.event.K_d:
             return self.mode.drop_item()

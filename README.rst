@@ -29,23 +29,11 @@ Start client:
     # activate venv
     $ python bin/simple_client_tcp.py
 
-Game commands:
-==============
+Base Game commands:
+===================
 
-- Arrow keys, numpad or vi keys to move around.
-- `,` or Keypad 5: skip turn
-- `<`: use stairs (up)
-- `>`: use stairs (down)
-
-- `I`: Show inventory
-- `G`: Get item
-- `D`: Drop item
-
-- `Ctrl - o`: Manually open door
-- `Ctrl - c`: Manually close door
-
-- `Shift - <movment key (see above)>`: move until blocked or hostile gets in view
-- `Ctrl - x`: autoexplore
+rrow keys, numpad or vi keys to move around. Bump into monsters to attack, 
+or into doors to open them. Press ? for more commands.
 
 Escape to quit.
 
