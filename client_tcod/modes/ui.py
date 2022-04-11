@@ -21,9 +21,16 @@ class DbgMapMode(BaseGameMode):
 
         self.mapgen_index = 0
         self.mapgen_timer = 0.0
+        self.running = True
+
+    def set_map_index(self, delta):
+        self.mapgen_index = min(
+            max(0, self.mapgen_index + delta),
+            len(self.client.gamestate.map_snapshots) - 1
+        )
 
     def process_response(self, response):
-        for ge in self.client.gamestate.last_events:
+        for ge in response.gs.last_events:
             # reset index if we spam regen level
             match ge:
                 case {
@@ -32,18 +39,33 @@ class DbgMapMode(BaseGameMode):
                 }:
                     self.mapgen_index = 0
 
-    def render(self, gamestate, renderer):
-        snapshots = gamestate.map_snapshots
-        if constants.MAP_DEBUG and self.mapgen_index < len(snapshots):
-            mapgen_step = snapshots[self.mapgen_index]
-            renderer.render_map_debug(mapgen_step)
+    def update(self):
+
+        snapshots = self.client.gamestate.map_snapshots
+
+        if (
+            constants.MAP_DEBUG and
+            self.running and
+            self.mapgen_index < len(snapshots)
+        ):
             self.mapgen_timer += 1
             # FIXME incr by actual passed time 
             if self.mapgen_timer >= constants.MAP_DEBUG_DELAY:
                 self.mapgen_timer = 0.0
                 self.mapgen_index += 1
-        else:
+
+        if self.mapgen_index == len(snapshots):
             self.pop()
+
+        return super().update()
+
+    def render(self, gamestate, renderer):
+        snapshots = gamestate.map_snapshots
+        try:
+            mapgen_step = snapshots[self.mapgen_index]
+            renderer.render_map_debug(mapgen_step)
+        except IndexError:
+            pass
 
 
 class BaseModalMode(BaseGameMode):
