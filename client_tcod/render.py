@@ -427,33 +427,25 @@ class TcodRenderer:
         log_border = 2
         log_w, log_h = C.LOG_CONSOLE_W - log_border, C.LOG_CONSOLE_H - log_border
 
-        # Handling multiline messages.
-        # This works, except that when a multiline string reached the top,
-        # it messes up the indexing for following messages.
-        # For exemple, is m is 4 lines, then the log won't budge until 4
-        # new messages appear, and those will then all be displayed at
-        # once.
-        # Not sure how to fix it, but since we'll probably need to change
-        # this to handle log coloring at some point, *and* we're not even
-        # sure we'll have to handle multiline logging anyway, I'd rather
-        # just leave it out for now.
-        #
-        # start_msg_index = len(gamelog)
-        # total_lines = 0
-        # for (t, m) in reversed(gamelog):
-        #     s = f'[{t}] - {m}'
-        #     numlines = self.log_console.get_height_rect(0, 0, log_w, log_h, s)
-        #     total_lines += numlines
-        #     start_msg_index -= abs(min(1, abs(total_lines-log_h)))
-        #     if total_lines > log_h:
-        #         break
-        # msgs = gamelog[start_msg_index:]
-        # ...
+        def _wrap_lines(gamelog, max_width, max_height):
+            wrapped_lines = []
+            start_msg_index = len(gamelog)
+            total_lines = 0
+            for (t, m) in reversed(gamelog):
+                s = f'[{t}] - {m}'
+                for l in reversed(s.splitlines()):
+                    wrapped = textwrap.wrap(l, max_width)
+                    for l in reversed(wrapped):
+                        wrapped_lines.insert(0, l)
+                        total_lines += 1
+                        start_msg_index -= 1
+                        if total_lines >= max_height:
+                            return wrapped_lines
+            return wrapped_lines
 
-        msgs = gamelog[-log_h:]
+        msgs = _wrap_lines(gamelog, log_w, log_h)
         offsety = 1
-        for i, (t, m) in enumerate(msgs):
-            msg = f'[{t}] - {m}'
+        for i, msg in enumerate(msgs):
             y = i
             # print_box or print_rect ?
             offsety += self.log_console.print_box(
