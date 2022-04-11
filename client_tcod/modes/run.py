@@ -1,6 +1,7 @@
 from ..modes.base import BaseGameMode, GameOverMode
 from ..modes.ui import (
     DbgMapMode, PromptDirectionMode, ItemMenuMode, InventoryMenuMode,
+    BaseModalMode,
 )
 from ..nw import Request
 from ..event_handlers import RunEventHandler
@@ -183,6 +184,15 @@ class RunMode(BaseGameMode):
         return self.client.send_request(
             Request.action(action_name, {'item_id_list': [menu.selected]})
         )
+
+    def show_message_log(self):
+
+        if self.__gamelog:
+            log_str = '\n'.join('%d - %s' % l for l in self.__gamelog)
+        else:
+            log_str = "No message logged."
+
+        self.push(BaseModalMode(title="Messages", txt=log_str, start_maxed=True))
 
     def process_response(self, r):
         if r.status == 'OK':

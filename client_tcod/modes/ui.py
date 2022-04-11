@@ -3,7 +3,7 @@ import os
 from ..modes.base import BaseGameMode, GameOverMode
 from ..event_handlers import (
     DbgMapEventHandler,
-    BaseUIModalEventHandler,
+    PagedModalEventHandler,
     PromptConfirmEventHandler,
     PromptDirectionEventHandler,
     MenuEventHandler,
@@ -48,21 +48,32 @@ class DbgMapMode(BaseGameMode):
 
 class BaseModalMode(BaseGameMode):
 
+    event_handler_cls = PagedModalEventHandler
     title = ""
     txt = ""
 
-    def __init__(self, title="", txt='', *args, **kwargs):
+    def __init__(self, title="", txt='', start_maxed=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title = title or self.title
         self.txt = txt or self.txt
+        self.offset = self.max_offset if start_maxed else 0
+
+    @property
+    def max_offset(self):
+        nlines = len(self.txt.splitlines())
+        return nlines - constants.MAX_MODAL_HEIGHT
+
+    def set_offset(self, delta):
+        self.offset = max(0, self.offset + delta)
+        if self.offset > self.max_offset:
+            self.offset = self.max_offset
 
     def render(self, gamestate, renderer):
-        renderer.render_modal(self.title, self.txt)
+        renderer.render_modal(self.title, self.txt, self.offset)
 
 
 class HelpModalMode(BaseModalMode):
 
-    event_handler_cls = BaseUIModalEventHandler
     title = "Help"
 
     def __init__(self, *args, **kwargs):

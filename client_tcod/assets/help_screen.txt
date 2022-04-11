@@ -9,7 +9,7 @@ Ctrl-x:                             Autoexplore
 
 ; or Numpad 5:                      Rest for 1 turn
 
-Shift-: or Shift-5:                 Rest for 100 turns
+Shift-; or Shift-5:                 Rest for 100 turns
 
 Ctrl-o:                             Manually open door
 

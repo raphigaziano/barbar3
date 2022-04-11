@@ -101,6 +101,9 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
         if (e.mod & tcod.event.KMOD_SHIFT and e.sym == tcod.event.K_COMMA):
             return self.mode.push(HelpModalMode())
 
+        if (e.mod & tcod.event.KMOD_SHIFT and e.sym == tcod.event.K_m):
+            return self.mode.show_message_log()
+
         if e.sym in MOVE_KEYS:
             if e.mod & tcod.event.KMOD_LSHIFT:
                 return self.mode.move_r({'dir': MOVE_KEYS[e.sym]})
@@ -181,6 +184,33 @@ class BaseUIModalEventHandler(BaseEventHandler):
 
         if e.sym == tcod.event.K_ESCAPE:
             self.mode.pop()
+
+
+class PagedModalEventHandler(BaseUIModalEventHandler):
+
+    def ev_keydown(self, e):
+
+        super().ev_keydown(e)
+
+        if e.sym in (tcod.event.K_DOWN, tcod.event.K_KP_2, tcod.event.K_j):
+            if e.mod & tcod.event.KMOD_SHIFT:
+                self.mode.set_offset(10)
+            else:
+                self.mode.set_offset(1)
+        if e.sym in (tcod.event.K_UP, tcod.event.K_KP_8, tcod.event.K_k):
+            if e.mod & tcod.event.KMOD_SHIFT:
+                self.mode.set_offset(-10)
+            else:
+                self.mode.set_offset(-1)
+
+        if e.sym in (tcod.event.K_PAGEDOWN,):
+            self.mode.set_offset(10)
+        if e.sym in (tcod.event.K_PAGEUP,):
+            self.mode.set_offset(-10)
+        if e.sym in (tcod.event.K_END,):
+            self.mode.offset = self.mode.max_offset
+        if e.sym in (tcod.event.K_HOME,):
+            self.mode.offset = 0
 
 
 class PromptConfirmEventHandler(BaseUIModalEventHandler):

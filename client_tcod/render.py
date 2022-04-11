@@ -427,23 +427,9 @@ class TcodRenderer:
         log_border = 2
         log_w, log_h = C.LOG_CONSOLE_W - log_border, C.LOG_CONSOLE_H - log_border
 
-        def _wrap_lines(gamelog, max_width, max_height):
-            wrapped_lines = []
-            start_msg_index = len(gamelog)
-            total_lines = 0
-            for (t, m) in reversed(gamelog):
-                s = f'[{t}] - {m}'
-                for l in reversed(s.splitlines()):
-                    wrapped = textwrap.wrap(l, max_width)
-                    for l in reversed(wrapped):
-                        wrapped_lines.insert(0, l)
-                        total_lines += 1
-                        start_msg_index -= 1
-                        if total_lines >= max_height:
-                            return wrapped_lines
-            return wrapped_lines
+        msgs = self._wrap_lines(
+            [f'[{t}] - {m}' for (t, m) in gamelog], log_w, log_h)
 
-        msgs = _wrap_lines(gamelog, log_w, log_h)
         offsety = 1
         for i, msg in enumerate(msgs):
             y = i
@@ -469,19 +455,23 @@ class TcodRenderer:
 
         self.context.present(self.root_console)
 
-    def render_modal(self, modal_title, modal_text):
+    def render_modal(self, modal_title, modal_text, offset=9):
 
         self.hud_console.clear(bg=TRANS_COLOR)
 
         lines = textwrap.dedent(modal_text).splitlines()
-        wrapped = []
-        for l in lines:
-            wrapped.extend(textwrap.wrap(l, C.MAX_MODAL_WIDTH))
-            # textwrap.wrap will ignore empty lines. add them back in.
-            if not l:
-                wrapped.append(l)
-        modal_width, modal_height = max(map(len, wrapped)) + 2, len(wrapped) + 2
+        if len(lines) > (C.MAX_MODAL_HEIGHT - 2):
+            start_idx = offset
+            end_idx = min(C.MAX_MODAL_HEIGHT + offset, len(lines))
+        else:
+            start_idx, end_idx = 0, len(lines)
+        wrapped = self._wrap_lines(
+            lines[start_idx:end_idx], C.MAX_MODAL_WIDTH-2, C.MAX_MODAL_HEIGHT-2)
 
+        modal_width, modal_height = (
+            min(C.MAX_MODAL_WIDTH, max(map(len, lines))) + 2,
+            min(C.MAX_MODAL_HEIGHT, len(wrapped) + 2)
+        )
         modal_x, modal_y = (
             (C.SCREEN_W // 2) - (modal_width // 2),
             (C.MAP_VIEWPORT_H // 2) - (modal_height // 2)
@@ -520,15 +510,15 @@ class TcodRenderer:
             menu_x, menu_y, menu_width, 1, f' {menu_mode.title} ',
             MENU_FRAME_FG, MENU_FRAME_BG, alignment=tcod.CENTER)
 
-        items_offset_x = menu_x + 2
-        items_offset_y = menu_y + 3
+        opts_offset_x = menu_x + 2
+        opts_offset_y = menu_y + 3
 
         for i, (_, item_name) in enumerate(menu_opts):
             item_str = f'({chr(65 + i)}) - {item_name}'
             fg = MENU_CURSOR_FG if (i == cursor_idx) else MENU_ITEM_FG
             bg = MENU_CURSOR_BG if (i == cursor_idx) else MENU_ITEM_BG
             self.hud_console.print(
-                items_offset_x, items_offset_y + i, item_str, fg=fg, bg=bg)
+                opts_offset_x, opts_offset_y + i, item_str, fg=fg, bg=bg)
 
         self.hud_console.blit(self.root_console, key_color=TRANS_COLOR)
         self.context.present(self.root_console)
@@ -547,3 +537,20 @@ class TcodRenderer:
 
         self.hud_console.blit(self.root_console, bg_alpha=0.03)
         self.context.present(self.root_console)
+
+    def _wrap_lines(self, lines, max_width, max_height):
+
+        wrapped_lines = []
+        total_lines = 0
+        for s in reversed(lines):
+            if not s:
+                wrapped = [s]
+            else:
+                for l in reversed(s.splitlines()):
+                    wrapped = textwrap.wrap(l, max_width)
+            for l in reversed(wrapped):
+                wrapped_lines.insert(0, l)
+                total_lines += 1
+                if total_lines >= max_height:
+                    return wrapped_lines
+        return wrapped_lines
