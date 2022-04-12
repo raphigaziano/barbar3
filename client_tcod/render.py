@@ -235,13 +235,17 @@ class TcodRenderer:
                 ex, ey = e['pos']
                 vis_idx = c_to_idx(ex, ey, map_w)
                 if not C.IGNORE_FOV and not visible[vis_idx]:
-                    continue
+                    if (e['type'] not in C.IGNORE_FOV_ENTITY_TYPES or
+                        not explored[vis_idx]
+                    ):
+                        continue
                 self.render_entity(layer_console, e)
 
             layer_console.blit(self.map_console, bg_alpha=0.0)
 
         map_w = gamestate.map['width']
         visible = gamestate.visible_cells
+        explored = gamestate.explored_cells
 
         _render_entity_list(self.props_console, gamestate.props)
         _render_entity_list(self.items_console, gamestate.items)

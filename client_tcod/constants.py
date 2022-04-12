@@ -36,6 +36,10 @@ IGNORE_FOV = False
 SHOW_PATH_INFO = False
 SHOW_SPAWN_ZONES = False
 
+IGNORE_FOV_ENTITY_TYPES = (
+    'stairs',
+)
+
 AUTO_REST_N_TURNS = 50
 
 class TileType(Enum):
