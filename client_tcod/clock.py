@@ -88,3 +88,8 @@ class Clock:
         if not self.time_samples or self.time_samples[-1] == 0:
             return 0
         return 1 / self.time_samples[-1]
+
+    @property
+    def last_frame_time_ms(self) -> float:
+        """Time taken (in milliseconds) by the last frame."""
+        return self.time_samples[-1] * 1000

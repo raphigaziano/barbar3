@@ -5,6 +5,7 @@ TCOD initialization & Rendering routines.
 import os
 import textwrap
 
+from .particles import Particle
 from . import constants as C
 
 import tcod
@@ -133,12 +134,13 @@ class TcodRenderer:
 
     def __init__(self):
         self.context = None
+        self.particles = []
 
     def init_tcod(self):
         tilesheet_path = os.path.join(
             C.ASSETS_PATH, 'fonts', TILESHEET_NAME)
         ts = tcod.tileset.load_tilesheet(
-            tilesheet_path, 
+            tilesheet_path,
             TILESHEET_CELL_W, TILESHEET_CELL_H, TILESHEET_CHARMAP)
 
         self.context = tcod.context.new(
@@ -259,9 +261,7 @@ class TcodRenderer:
             bloodstains,
             show_whole_map=C.SHOW_UNEXPLORED_CELLS)
 
-
         self.render_entities(gamestate)
-        self.render_hud(gamestate)
 
         self.map_console.blit(self.root_console)
 
@@ -351,6 +351,7 @@ class TcodRenderer:
         mouse_state = tcod.event.get_mouse_state()
         self.context.convert_event(mouse_state)
 
+        self.render_particles(gamestate)
         self.render_debug_overlays(gamestate)
         self.render_tooltips(gamestate, mouse_state)
 
@@ -363,7 +364,7 @@ class TcodRenderer:
             self.hud_console.print(
                 0, 1, f'mouse pos: {mouse_state.tile}', fg=tcod.yellow, bg=tcod.black)
 
-        self.hud_console.blit(self.map_console, key_color=TRANS_COLOR)
+        self.hud_console.blit(self.root_console, key_color=TRANS_COLOR)
 
     def _render_stat_bar(
         self, console, x, y, val, max_val, label,
@@ -445,7 +446,14 @@ class TcodRenderer:
 
         self.log_console.blit(self.root_console, C.LOG_CONSOLE_X, C.LOG_CONSOLE_Y)
 
+    def render_particles(self, gamestate):
+        for p in self.particles:
+            self.hud_console.print(p.x, p.y, p.glyph, p.fg, p.bg)
+
+        self.cull_particles(gamestate)
+
     def render_ui(self, gamestate, gamelog):
+        self.render_hud(gamestate)
         self.render_stats(gamestate)
         self.render_log(gamelog)
 
@@ -564,3 +572,13 @@ class TcodRenderer:
                 if total_lines >= max_height:
                     return wrapped_lines
         return wrapped_lines
+
+    def emit_particle(self, x, y, **kwargs):
+        self.particles.append(Particle(x, y, **kwargs))
+
+    def cull_particles(self, gamestate):
+        clock = gamestate.clock
+        for p in self.particles:
+            p.lifetime -= clock.last_frame_time_ms
+
+        self.particles = list(filter(lambda p: p.lifetime > 0, self.particles))

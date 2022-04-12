@@ -212,11 +212,15 @@ class RunMode(BaseGameMode):
                     self.push(DbgMapMode())
                 case {
                     'type': 'action_accepted',
-                    'data': {'type': 'inflict_dmg',
-                             'target': {'actor': {'is_player': True}}},
+                    'data': {'type': 'inflict_dmg'},
                 }:
-                    player = ge['data']['target']
-                    if player['health']['badly_wounded']:
+                    target = ge['data']['target']
+                    self.client.renderer.emit_particle(
+                        *target['pos'], glyph='*', fg=(255, 0, 0)
+                    )
+                    if (target['actor']['is_player'] and
+                        target['health']['badly_wounded']
+                    ):
                         self.client.renderer.flash_color(255, 0, 0)
                 case {
                     'type': 'actor_died',
