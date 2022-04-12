@@ -29,8 +29,27 @@ class Health(Component):
         self.max_hp = self.hp
 
     @property
+    def wounded(self):
+        return self.hp <= self.max_hp / 4 * 3
+
+    @property
+    def badly_wounded(self):
+        return self.hp <= self.max_hp / 2
+
+    @property
+    def near_death(self):
+        return self.hp <= self.max_hp / 4
+
+    @property
     def is_dead(self):
         return self.hp <= 0
+
+    def serialize(self):
+        data = super().serialize()
+        data['wounded'] = self.wounded
+        data['badly_wounded'] = self.badly_wounded
+        data['near_death'] = self.near_death
+        return data
 
 
 class Regen(Component):

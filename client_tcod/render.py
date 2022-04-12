@@ -538,6 +538,12 @@ class TcodRenderer:
         self.hud_console.blit(self.root_console, bg_alpha=0.03)
         self.context.present(self.root_console)
 
+    def flash_color(self, r, g, b):
+        c = tcod.Color(r, g, b)
+        self.hud_console.clear(bg=c)
+        self.hud_console.blit(self.root_console, bg_alpha=0.3)
+        self.context.present(self.root_console)
+
     def _wrap_lines(self, lines, max_width, max_height):
 
         wrapped_lines = []

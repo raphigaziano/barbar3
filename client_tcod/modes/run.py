@@ -211,6 +211,14 @@ class RunMode(BaseGameMode):
                     self.__bloodstains = []
                     self.push(DbgMapMode())
                 case {
+                    'type': 'action_accepted',
+                    'data': {'type': 'inflict_dmg',
+                             'target': {'actor': {'is_player': True}}},
+                }:
+                    player = ge['data']['target']
+                    if player['health']['badly_wounded']:
+                        self.client.renderer.flash_color(255, 0, 0)
+                case {
                     'type': 'actor_died',
                     'data': {'actor': {'actor': {'is_player': False}}},
                 }:
