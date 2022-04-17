@@ -5,6 +5,7 @@ TCOD initialization & Rendering routines.
 import os
 import textwrap
 
+from .utils import c_to_idx, idx_to_c
 from .particles import Particle
 from . import constants as C
 
@@ -59,6 +60,9 @@ FLOOR_BG = None
 FLOOR_BG_OOF = None
 
 BLOOD_COLOR = tcod.Color(63, 0, 0)
+
+PATH_TO_CURSOR_BG_COLOR = tcod.darker_cyan
+PATH_TO_CURSOR_FG_COLOR = tcod.light_cyan
 
 PROGRESS_BAR_LABEL_COLOR = tcod.white
 
@@ -120,15 +124,6 @@ CP437_GLYPHS = {
 CP437_FALLBACK_GLYPH = 35
 
 
-def idx_to_c(idx, width):
-    """ Convert array index to cartesian coordinates. """
-    return idx % width, idx // width
-
-def c_to_idx(x, y, width):
-    """ Convert cartesian coordinates to internal array index. """
-    return x + (y * width)
-
-
 class TcodRenderer:
     """ Handle all rendering, deferring to the tcod API """
 
@@ -162,6 +157,7 @@ class TcodRenderer:
         self.root_console = self.context.new_console(magnification=1.0)
 
         self.map_console = tcod.Console(C.MAP_VIEWPORT_W, C.MAP_VIEWPORT_H)
+        self.map_hud_console = tcod.Console(C.MAP_VIEWPORT_W, C.MAP_VIEWPORT_H)
 
         self.props_console = tcod.Console(C.MAP_VIEWPORT_W, C.MAP_VIEWPORT_W)
         self.items_console = tcod.Console(C.MAP_VIEWPORT_W, C.MAP_VIEWPORT_W)
@@ -261,14 +257,20 @@ class TcodRenderer:
             bloodstains,
             show_whole_map=C.SHOW_UNEXPLORED_CELLS)
 
+        self.map_hud_console.clear(bg=TRANS_COLOR)
+        self.render_path(gamestate)
+        self.map_hud_console.blit(self.map_console, key_color=TRANS_COLOR)
         self.render_entities(gamestate)
 
         self.map_console.blit(self.root_console)
 
-    def render_tooltips(self, gamestate, mouse_state):
+    def render_tooltips(self, gamestate):
 
+        mx, my = gamestate.cursor_pos
         map_w = gamestate.map['width']
-        mx, my = mouse_state.tile.x, mouse_state.tile.y
+
+        if mx is None or my is None:
+            return
 
         if mx < 0 or mx >= C.MAP_VIEWPORT_W or my < 0 or my >= C.MAP_VIEWPORT_H:
             return
@@ -314,6 +316,20 @@ class TcodRenderer:
                 self.hud_console.print(
                     arrow_pos_x, arrow_pos_y, '<-', TOOLTIP_FG, TOOLTIP_BG)
 
+    def render_path(self, gamestate):
+
+        path = gamestate.path_from_cursor
+        map_w = gamestate.map['width']
+        pathmap = gamestate.map['pathmap']
+
+        for i, (cx, cy) in enumerate(path):
+            if i == 0:
+                self.map_hud_console.print(
+                    cx, cy, 'x', fg=PATH_TO_CURSOR_FG_COLOR, bg=PATH_TO_CURSOR_BG_COLOR)
+            else:
+                self.map_hud_console.print(
+                    cx, cy, ' ', bg=PATH_TO_CURSOR_BG_COLOR)
+
     _path_colors = [tcod.yellow, tcod.orange, tcod.red, tcod.purple, tcod.blue]
     _zone_colors = []
 
@@ -348,12 +364,9 @@ class TcodRenderer:
     def render_hud(self, gamestate):
         self.hud_console.clear(bg=TRANS_COLOR)
 
-        mouse_state = tcod.event.get_mouse_state()
-        self.context.convert_event(mouse_state)
-
         self.render_particles(gamestate)
         self.render_debug_overlays(gamestate)
-        self.render_tooltips(gamestate, mouse_state)
+        self.render_tooltips(gamestate)
 
         if C.SHOW_DEBUG_INFO:
             # self.hud_console.print(
@@ -361,8 +374,9 @@ class TcodRenderer:
             self.hud_console.print(
                 0, 0, f'median fps: {gamestate.clock.median_fps:.2f}',
                 fg=tcod.yellow, bg=tcod.black)
+            cx, cy = gamestate.cursor_pos
             self.hud_console.print(
-                0, 1, f'mouse pos: {mouse_state.tile}', fg=tcod.yellow, bg=tcod.black)
+                0, 1, f'mouse pos: {cx}-{cy}', fg=tcod.yellow, bg=tcod.black)
 
         self.hud_console.blit(self.root_console, key_color=TRANS_COLOR)
 

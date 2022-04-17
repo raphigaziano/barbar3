@@ -1,16 +1,17 @@
 from ..modes.base import BaseGameMode, GameOverMode
 from ..modes.ui import (
     DbgMapMode, PromptDirectionMode, ItemMenuMode, InventoryMenuMode,
-    BaseModalMode,
+    BaseModalMode, CursorMixin
 )
 from ..nw import Request
-from ..event_handlers import RunEventHandler
+from ..event_handlers import (
+    RunEventHandler, MoveToEventHandler, TargetingEventHandler)
 from ..constants import AUTO_REST_N_TURNS
 
 import tcod.event
 
 
-class RunMode(BaseGameMode):
+class RunMode(CursorMixin, BaseGameMode):
     """
     Main game mode.
 
@@ -18,7 +19,6 @@ class RunMode(BaseGameMode):
     with the game (exploring, logging messages, etc...
 
     """
-
     event_handler_cls = RunEventHandler
 
     __gamelog = []
@@ -206,6 +206,15 @@ class RunMode(BaseGameMode):
             match ge:
                 case {
                     'type': 'action_accepted',
+                    'data': {
+                        'type': 'move',
+                        'actor': {'name': 'player'},
+                    },
+                }:
+                    if self.path_from_cursor:
+                        self.recompute_path = True
+                case {
+                    'type': 'action_accepted',
                     'data': {'type': 'change_level'},
                 }:
                     self.__bloodstains = []
@@ -270,7 +279,10 @@ class RunMode(BaseGameMode):
             print(r)
 
     def render(self, gamestate, renderer):
-        renderer.render_all(gamestate, self.__gamelog, self.__bloodstains)
+        renderer.render_all(
+            gamestate,
+            self.__gamelog,
+            self.__bloodstains)
 
 
 class AutoRunMode(RunMode):
@@ -291,11 +303,14 @@ class AutoRunMode(RunMode):
             if self.n_turns <= 0:
                 self.pop()
 
-        self.client.send_request(
-            Request.action(self.action_name, self.action_data))
+        self.send_action_request()
         request = super().update()
         if request:
             self.pop()
+
+    def send_action_request(self):
+        self.client.send_request(
+            Request.action(self.action_name, self.action_data))
 
     def process_game_events(self, game_events):
         for ge in game_events:
@@ -325,3 +340,24 @@ class AutoRunMode(RunMode):
                     self.pop()
 
         super().process_game_events(game_events)
+
+
+class MoveToMode(AutoRunMode):
+
+    event_handler_cls = MoveToEventHandler
+
+    def __init__(self, path, *args, **kwargs):
+        super().__init__('move', *args, **kwargs)
+        self.path = path
+        if path:
+            self.cursor_x, self.cursor_y = path[0]
+            self.recompute_path = True
+
+    def send_action_request(self):
+        if self.path:
+            ppx, ppy = self.client.gamestate.player['pos']
+            dx, dy = self.path.pop()
+            self.action_data = {'dir': (dx - ppx, dy - ppy)}
+            return super().send_action_request()
+        else:
+            self.pop()

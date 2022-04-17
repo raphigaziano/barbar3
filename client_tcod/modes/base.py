@@ -159,10 +159,13 @@ class BaseGameMode:
         return self.event_handler.handle(self.client.context)
 
     def process_response(self, r):
-        pass    # No-op
+        pass        # No-op
 
     def render(self, gamestate, renderer):
-        pass    # No-op
+        pass        # No-op
+
+    def update_gamestate(self, gs):
+        pass        # No-op
 
 
 class InitMode(BaseGameMode):

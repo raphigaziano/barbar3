@@ -59,6 +59,7 @@ class BarbarClient:
 
     def render(self):
         """ Let the current mode handle rendering. """
+        self.current_mode.update_gamestate(self.gamestate)
         self.gamestate.clock = self.clock
         self.current_mode.render(self.gamestate, self.renderer)
 

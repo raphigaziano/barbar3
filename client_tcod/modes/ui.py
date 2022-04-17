@@ -7,7 +7,9 @@ from ..event_handlers import (
     PromptConfirmEventHandler,
     PromptDirectionEventHandler,
     MenuEventHandler,
+    TargetingEventHandler,
 )
+from ..utils import c_to_idx, closest_open_cell, path_to
 from .. import constants
 
 
@@ -66,6 +68,88 @@ class DbgMapMode(BaseGameMode):
             renderer.render_map_debug(mapgen_step)
         except IndexError:
             pass
+
+
+class CursorMixin:
+
+    def __init__(self, cx=None, cy=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cursor_x, self.cursor_y = cx, cy
+        self.recompute_path = False
+        self.path_from_cursor = []
+
+    def set_cursor_pos(self, x, y):
+        if (x, y) != (self.cursor_x, self.cursor_y):
+            if (constants.MAP_VIEWPORT_X <= x < constants.MAP_VIEWPORT_W and
+                constants.MAP_VIEWPORT_Y <= y < constants.MAP_VIEWPORT_H
+            ):
+                self.cursor_x, self.cursor_y = x, y
+                self.recompute_path = True
+            else:
+                self.cursor_x, self.cursor_y = None, None
+                self.clear_path()
+
+    def move_cursor(self, dx, dy):
+        x, y = max(0, self.cursor_x + dx), max(0, self.cursor_y + dy)
+        self.set_cursor_pos(x, y)
+
+    def compute_path(self):
+
+        self.clear_path()
+
+        if None not in (self.cursor_x, self.cursor_y):
+            gs = self.client.gamestate
+            map_w, map_h = gs.map['width'], gs.map['height']
+            pathmap = gs.map['pathmap']
+            explored = gs.explored_cells
+
+            cx, cy = closest_open_cell(
+                self.cursor_x, self.cursor_y, map_w, map_h, pathmap,
+                cost_modifier=lambda i, d: (d * 0.2 if explored[i] else d)
+            )
+            px, py = gs.player['pos']
+            path = list(path_to(cx, cy, px, py, map_w, pathmap))
+            while path and not explored[c_to_idx(*path[0], map_w)]:
+                path.pop(0)
+            self.path_from_cursor = path
+
+        return self.path_from_cursor
+
+    def clear_path(self):
+        self.path_from_cursor.clear()
+
+    def update(self):
+        if self.recompute_path:
+            self.compute_path()
+            self.recompute_path = False
+
+        return super().update()
+
+    def update_gamestate(self, gs):
+        super().update_gamestate(gs)
+        gs.cursor_pos = (self.cursor_x, self.cursor_y)
+        gs.path_from_cursor = self.path_from_cursor
+
+
+class TargetMode(CursorMixin, BaseGameMode):
+
+    event_handler_cls = TargetingEventHandler
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.confirmed = False
+
+    def confirm(self):
+        self.confirmed = True
+
+    def on_leaving(self):
+        if self.confirmed:
+            super().on_leaving()
+
+    def render(self, gamestate, renderer):
+        # FIXME: This cause rendering bugs (log and bloodstains disapear).
+        # Waiting for a cleanup commit to handle this.
+        renderer.render_all(gamestate, [], [])
 
 
 class BaseModalMode(BaseGameMode):

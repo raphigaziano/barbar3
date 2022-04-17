@@ -55,7 +55,11 @@ class GameState:
 
         # DEBUGING
         path_map = get_path_map(
-            game.current_level, (game.player.pos.x, game.player.pos.y))
+            game.current_level,
+            (game.player.pos.x, game.player.pos.y),
+            predicate=lambda x, y, _:
+                not game.current_level.map.cell_blocks(x, y)
+        )
         self._state['map']['pathmap'] = path_map.cells
 
         self._state['spawn_zones'] = list(

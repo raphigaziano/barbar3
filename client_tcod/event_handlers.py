@@ -6,7 +6,10 @@ from string import ascii_lowercase
 
 from .nw import Request
 from . import constants
-from .constants import VI_KEYS, MOVE_KEYS
+from .utils import c_to_idx
+from .constants import (
+    VI_KEYS, MOVE_KEYS,
+    MAP_VIEWPORT_X, MAP_VIEWPORT_Y, MAP_VIEWPORT_W, MAP_VIEWPORT_H)
 
 import tcod.event
 
@@ -41,9 +44,51 @@ class BaseEventHandler(tcod.event.EventDispatch[None]):
 
     def handle(self, ctxt):
         """ Process UI events. """
+        # TODO: yield to allow several request sends ?
         for e in tcod.event.get():
-            ctxt.convert_event(e)
-            return self.dispatch(e)
+            r = self.dispatch(e)
+            if r:
+                return r
+
+
+class CursorPositionMixin:
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.last_mouse_pos = None
+
+    def get_mouse_state(self, ctxt):
+        ms = tcod.event.get_mouse_state()
+        ctxt.convert_event(ms)
+        return ms
+
+    def handle(self, ctxt):
+
+        ms = self.get_mouse_state(ctxt)
+
+        if self.last_mouse_pos is None:
+            # Cursor not intialized yet
+            if ms.tile == (0, 0):
+                return super().handle(ctxt)
+            self.last_mouse_pos = ms.tile
+
+        if self.last_mouse_pos != ms.tile:
+            self.mode.set_cursor_pos(ms.tile.x, ms.tile.y)
+            self.last_mouse_pos = ms.tile
+
+        return super().handle(ctxt)
+
+    def cursor_cmds(self, e):
+
+        if e.sym in MOVE_KEYS:
+            dx, dy = MOVE_KEYS[e.sym]
+            if e.mod & tcod.event.KMOD_SHIFT:
+                dx, dy = dx * 5, dy * 5
+            self.mode.move_cursor(dx, dy)
+
+    def ev_mousebuttondown(self, e):
+        from .modes.run import MoveToMode
+        self.mode.replace_with(MoveToMode(path=self.mode.compute_path()))
 
 
 class DebugEventsMixin:
@@ -84,11 +129,12 @@ class DebugEventsMixin:
         return False
 
 
-class RunEventHandler(DebugEventsMixin, BaseEventHandler):
+class RunEventHandler(
+        DebugEventsMixin, CursorPositionMixin, BaseEventHandler):
     """ Main hander, used for for actual game commands """
 
     def ev_keydown(self, e):
-        from .modes.ui import HelpModalMode
+        from .modes.ui import HelpModalMode, TargetMode
 
         if (r := super().ev_keydown(e)):
             return r
@@ -142,14 +188,43 @@ class RunEventHandler(DebugEventsMixin, BaseEventHandler):
                 use_key = 'up'
             return Request.action('use_prop', {'use_key': use_key})
 
-        if (e.mod & tcod.event.KMOD_CTRL and e.sym == tcod.event.K_x):
+        if e.sym == tcod.event.K_x:
+            from .modes.run import MoveToMode
+            px, py = self.mode.client.gamestate.player['pos']
+            self.mode.clear_path()
+            return self.mode.push(
+                TargetMode(
+                    px, py, on_leaving=lambda m:
+                        self.mode.push(MoveToMode(path=m.path_from_cursor))
+            ))
+
+        if e.sym == tcod.event.K_o:
             return self.mode.autoxplore()
 
         if e.sym == tcod.event.K_i:
             self.mode.show_inventory()
 
-    # def ev_mousemotion(self, ev):
-    #     print(ev)
+    def ev_mousebuttondown(self, e):
+        from .modes.run import MoveToMode
+        self.mode.push(MoveToMode(path=self.mode.compute_path()))
+
+
+class TargetingEventHandler(CursorPositionMixin, BaseEventHandler):
+
+    def ev_keydown(self, e):
+
+        if e.sym == tcod.event.K_ESCAPE:
+            self.mode.pop()
+
+        super().cursor_cmds(e)
+
+        if e.sym in (tcod.event.K_RETURN, tcod.event.K_KP_ENTER):
+            self.mode.confirm()
+            self.mode.pop()
+
+
+class MoveToEventHandler(CursorPositionMixin, BaseEventHandler):
+    pass
 
 
 class DbgMapEventHandler(DebugEventsMixin, BaseEventHandler):
