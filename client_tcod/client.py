@@ -34,6 +34,10 @@ class BarbarClient:
 
         self.gamestate = None
         self.clock = Clock()
+        self.gamelog = []
+        self.bloodstains = []
+        self.cursor_x, self.cursor_y = None, None
+        self.path_from_cursor = []
 
         self.con = None
         self.response = None
@@ -59,9 +63,13 @@ class BarbarClient:
 
     def render(self):
         """ Let the current mode handle rendering. """
-        self.current_mode.update_gamestate(self.gamestate)
-        self.gamestate.clock = self.clock
-        self.current_mode.render(self.gamestate, self.renderer)
+        gs = self.gamestate
+        gs.clock = self.clock
+        gs.gamelog = self.gamelog
+        gs.bloodstains = self.bloodstains
+        gs.cursor_pos = (self.cursor_x, self.cursor_y)
+        gs.path_from_cursor = self.path_from_cursor
+        self.current_mode.render(gs, self.renderer)
 
     def send_request(self, r):
         """

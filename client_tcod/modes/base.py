@@ -164,9 +164,6 @@ class BaseGameMode:
     def render(self, gamestate, renderer):
         pass        # No-op
 
-    def update_gamestate(self, gs):
-        pass        # No-op
-
 
 class InitMode(BaseGameMode):
     """

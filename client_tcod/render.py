@@ -249,12 +249,12 @@ class TcodRenderer:
         _render_entity_list(self.items_console, gamestate.items)
         _render_entity_list(self.actors_console, gamestate.actors)
 
-    def render_viewport(self, gamestate, bloodstains):
+    def render_viewport(self, gamestate):
         self.render_map(
             gamestate.map,
             gamestate.explored_cells,
             gamestate.visible_cells,
-            bloodstains,
+            gamestate.bloodstains,
             show_whole_map=C.SHOW_UNEXPLORED_CELLS)
 
         self.map_hud_console.clear(bg=TRANS_COLOR)
@@ -466,18 +466,18 @@ class TcodRenderer:
 
         self.cull_particles(gamestate)
 
-    def render_ui(self, gamestate, gamelog):
+    def render_ui(self, gamestate):
         self.render_hud(gamestate)
         self.render_stats(gamestate)
-        self.render_log(gamelog)
+        self.render_log(gamestate.gamelog)
 
-    def render_all(self, gamestate, gamelog, bloodstains):
+    def render_all(self, gamestate):
         """ Main rendering method """
 
         self.root_console.clear()
 
-        self.render_viewport(gamestate, bloodstains)
-        self.render_ui(gamestate, gamelog)
+        self.render_viewport(gamestate)
+        self.render_ui(gamestate)
 
         self.context.present(self.root_console)
 

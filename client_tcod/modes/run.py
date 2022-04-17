@@ -1,7 +1,8 @@
 from ..modes.base import BaseGameMode, GameOverMode
+from ..modes.mixins import CursorMixin, GameLogMixin, BloodstainsMixin
 from ..modes.ui import (
     DbgMapMode, PromptDirectionMode, ItemMenuMode, InventoryMenuMode,
-    BaseModalMode, CursorMixin
+    BaseModalMode
 )
 from ..nw import Request
 from ..event_handlers import (
@@ -11,7 +12,7 @@ from ..constants import AUTO_REST_N_TURNS
 import tcod.event
 
 
-class RunMode(CursorMixin, BaseGameMode):
+class RunMode(CursorMixin, GameLogMixin, BloodstainsMixin, BaseGameMode):
     """
     Main game mode.
 
@@ -20,9 +21,6 @@ class RunMode(CursorMixin, BaseGameMode):
 
     """
     event_handler_cls = RunEventHandler
-
-    __gamelog = []
-    __bloodstains = []
 
     def open_door(self):
         surrounding_doors = [
@@ -187,8 +185,8 @@ class RunMode(CursorMixin, BaseGameMode):
 
     def show_message_log(self):
 
-        if self.__gamelog:
-            log_str = '\n'.join('%d - %s' % l for l in self.__gamelog)
+        if self.gamelog:
+            log_str = '\n'.join('%d - %s' % l for l in self.gamelog)
         else:
             log_str = "No message logged."
 
@@ -217,7 +215,7 @@ class RunMode(CursorMixin, BaseGameMode):
                     'type': 'action_accepted',
                     'data': {'type': 'change_level'},
                 }:
-                    self.__bloodstains = []
+                    self.bloodstains.clear()
                     self.push(DbgMapMode())
                 case {
                     'type': 'action_accepted',
@@ -235,7 +233,7 @@ class RunMode(CursorMixin, BaseGameMode):
                     'type': 'actor_died',
                     'data': {'actor': {'actor': {'is_player': False}}},
                 }:
-                    self.__bloodstains.append(ge['data']['actor']['pos'])
+                    self.bloodstains.append(ge['data']['actor']['pos'])
                 case {
                     'type': 'actor_died',
                     'data': {'actor': {'actor': {'is_player': True}}},
@@ -244,45 +242,8 @@ class RunMode(CursorMixin, BaseGameMode):
 
             self.log_event(ge)
 
-    def log_msg(self, m):
-        self.__gamelog.append((self.client.gamestate.tick, m))
-
-    # FIXME: Hacky, and relies too much on knowing the internal
-    # event structure (ie, we need an event type enum or mapping
-    # on the client).
-    def log_event(self, e):
-        # Action failed, not initiated by the player
-        if e['type'] == 'action_rejected':
-            actor, target = e['data']['actor'], e['data']['target']
-            if actor and 'actor' in actor and not actor['actor']['is_player']:
-                return
-            if target and 'actor' in target and not target['actor']['is_player']:
-                return
-        if (
-            e['type'] == 'food_state_updated' and
-            e['data']['state'] in ('full', 'satiated') and
-            e['data']['previous_state'] in ('full',)
-        ):
-            return
-        if e['msg']:
-            self.log_msg(e['msg'])
-        # else:
-        #     print(f'cant process event: {e}')
-
-    def log_error(self, r):
-        errcode, msg = r.err_code, getattr(r, 'msg', None)
-        if msg:
-            m = f'%c%c%c%c[REQUEST ERROR: {errcode} - {msg}]%c'
-            self.log_msg(
-                m % (tcod.COLCTRL_FORE_RGB, 255, 1, 1, tcod.COLCTRL_STOP))
-        else:
-            print(r)
-
     def render(self, gamestate, renderer):
-        renderer.render_all(
-            gamestate,
-            self.__gamelog,
-            self.__bloodstains)
+        renderer.render_all(gamestate)
 
 
 class AutoRunMode(RunMode):
@@ -347,11 +308,11 @@ class MoveToMode(AutoRunMode):
     event_handler_cls = MoveToEventHandler
 
     def __init__(self, path, *args, **kwargs):
-        super().__init__('move', *args, **kwargs)
-        self.path = path
+        self.path = path.copy()
         if path:
-            self.cursor_x, self.cursor_y = path[0]
-            self.recompute_path = True
+            kwargs['cx'], kwargs['cy'] = path[0]
+        super().__init__('move', *args, **kwargs)
+        self.recompute_path = True
 
     def send_action_request(self):
         if self.path:
