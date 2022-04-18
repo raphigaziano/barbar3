@@ -57,7 +57,7 @@ class CursorMixin:
         if None not in (self.cursor_x, self.cursor_y):
             gs = self.client.gamestate
             map_w, map_h = gs.map['width'], gs.map['height']
-            pathmap = gs.map['pathmap']
+            pathmap = gs.distance_map
             explored = gs.explored_cells
 
             cx, cy = closest_open_cell(

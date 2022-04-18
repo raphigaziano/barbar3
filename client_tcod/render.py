@@ -320,7 +320,7 @@ class TcodRenderer:
 
         path = gamestate.path_from_cursor
         map_w = gamestate.map['width']
-        pathmap = gamestate.map['pathmap']
+        pathmap = gamestate.distance_map
 
         for i, (cx, cy) in enumerate(path):
             if i == 0:
@@ -335,7 +335,7 @@ class TcodRenderer:
 
     def render_debug_overlays(self, gamestate):
         if C.SHOW_PATH_INFO:
-            for idx, cval in enumerate(gamestate.map['pathmap']):
+            for idx, cval in enumerate(gamestate.distance_map):
                 x, y = idx_to_c(idx, gamestate.map['width'])
                 if cval == 0:
                     color = tcod.red

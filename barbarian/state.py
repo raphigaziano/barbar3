@@ -43,6 +43,7 @@ class GameState:
             'explored_cells': [
                 (x, y) in game.current_level.explored
                 for x, y, _ in game.current_level.map],
+            'distance_map': game.current_level.distance_map.cells,
             'actors': [e.serialize() for e in game.actors],
             'items': [e.serialize() for e in game.current_level.items.all],
             'props': [e.serialize() for e in game.current_level.props.all],
@@ -52,7 +53,6 @@ class GameState:
                 Event.get_current_events(game.ticks, flush=True)],
         }
 
-        self._state['map']['pathmap'] = game.current_level.distance_map.cells
         # DEBUGING
         self._state['spawn_zones'] = list(
             z for z in game.current_level.spawn_zones)
