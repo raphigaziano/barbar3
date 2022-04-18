@@ -3,7 +3,6 @@ State management.
 
 """
 from barbarian.events import Event
-from barbarian.pathfinding import get_path_map
 
 
 class GameState:
@@ -53,15 +52,8 @@ class GameState:
                 Event.get_current_events(game.ticks, flush=True)],
         }
 
+        self._state['map']['pathmap'] = game.current_level.distance_map.cells
         # DEBUGING
-        path_map = get_path_map(
-            game.current_level,
-            (game.player.pos.x, game.player.pos.y),
-            predicate=lambda x, y, _:
-                not game.current_level.map.cell_blocks(x, y)
-        )
-        self._state['map']['pathmap'] = path_map.cells
-
         self._state['spawn_zones'] = list(
             z for z in game.current_level.spawn_zones)
 

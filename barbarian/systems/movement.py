@@ -47,6 +47,8 @@ def move_actor(action, level):
         if actor.fov:
             actor.fov.compute(
                 level, destx, desty, update_level=actor.is_player)
+        if actor.is_player:
+            level.compute_distance_map(actor.pos.x, actor.pos.y)
         if (prop := level.props[destx, desty]) and (
             prop.trigger and
             prop.trigger.activation_mode == PropActivationMode.ACTOR_ON_TILE

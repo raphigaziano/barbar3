@@ -130,6 +130,8 @@ class TestLevel(unittest.TestCase):
 
         for is_player in (True, False):
             l = Level(10, 10)
+            l.map = Mock()
+            l.map.cell_blocks.return_value = True
 
             actor = self._get_entity_mock()
             actor.pos.x = 5
@@ -137,9 +139,14 @@ class TestLevel(unittest.TestCase):
             actor.fov = Mock()
             actor.is_player = is_player
 
+            self.assertIsNone(l.distance_map)
             l.enter(actor)
 
             self.assertEqual(actor, l.actors[5, 5])
             actor.fov.reset.assert_called_once()
             actor.fov.compute.assert_called_once_with(
                 l, 5, 5, update_level=is_player)
+            if is_player:
+                self.assertIsNotNone(l.distance_map)
+            else:
+                self.assertIsNone(l.distance_map)

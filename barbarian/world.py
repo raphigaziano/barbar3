@@ -6,6 +6,7 @@ import logging
 
 import tcod
 
+from barbarian.pathfinding import get_path_map
 from barbarian.utils.structures.grid import (
     EntityGrid, GridContainer, OutOfBoundGridError)
 from barbarian.genmap import get_map_builder
@@ -33,6 +34,7 @@ class Level:
         self.map = None
         self.fov_map = None
         self.explored = set()
+        self.distance_map = None
 
         self.start_pos = None, None
         self.exit_pos = None, None
@@ -90,9 +92,11 @@ class Level:
             #     not any(e.physics.blocks for e in self.props[x,y])
             # )
 
-    def get_map_cell(self, x, y):
-        """ Shortcut to access map cells direcly. """
-        return self.map.get_cell(x, y)
+    def compute_distance_map(self, from_x, from_y):
+        self.distance_map = get_path_map(
+            self, (from_x, from_y),
+            predicate=lambda x, y, _: not self.map.cell_blocks(x, y)
+        )
 
     def is_blocked(self, x, y):
         """
@@ -144,6 +148,8 @@ class Level:
             actor.fov.reset()
             actor.fov.compute(
                 self, actor.pos.x, actor.pos.y, update_level=actor.is_player)
+        if actor.is_player:
+            self.compute_distance_map(actor.pos.x, actor.pos.y)
 
 
 class World:

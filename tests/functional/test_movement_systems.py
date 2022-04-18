@@ -145,6 +145,18 @@ class TestMoveActor(BaseFunctionalTestCase):
         mock_fov_compute.assert_called_once_with(
             level, actor.pos.x, actor.pos.y, update_level=True)
 
+    @patch('barbarian.world.Level.compute_distance_map')
+    def test_distance_map_recompute_on_player_move(self, mock_dist_compute):
+
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(4, 2, 'player')
+        level.actors.add_e(actor)
+
+        move_action = self.move_action(actor, 1, 1)
+        move_actor(move_action, level)
+
+        mock_dist_compute.assert_called_once_with(actor.pos.x, actor.pos.y)
+
     def test_attack_actor_on_dest_cell(self):
 
         for actor in self.actor_list(4, 2, 'player', 'orc'):
