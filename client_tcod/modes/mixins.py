@@ -52,8 +52,6 @@ class CursorMixin:
 
     def compute_path(self):
 
-        self.clear_path()
-
         if None not in (self.cursor_x, self.cursor_y):
             gs = self.client.gamestate
             map_w, map_h = gs.map['width'], gs.map['height']
