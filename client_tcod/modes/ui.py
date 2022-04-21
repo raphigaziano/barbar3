@@ -1,4 +1,5 @@
 import os
+from itertools import cycle
 
 from ..modes.mixins import CursorMixin
 from ..modes.base import BaseGameMode, GameOverMode
@@ -75,8 +76,21 @@ class TargetMode(CursorMixin, BaseGameMode):
     event_handler_cls = TargetingEventHandler
 
     def __init__(self, *args, **kwargs):
+        if entity_list := kwargs.pop('entity_list', []):
+            self.entity_list = cycle(entity_list)
+        else:
+            self.entity_list = None
         super().__init__(*args, **kwargs)
         self.confirmed = False
+
+    def target_next_entity(self):
+        if self.entity_list:
+            self.targeted_entity = next(self.entity_list)
+            self.set_cursor_pos(*self.targeted_entity['pos'])
+
+    def on_entered(self):
+        self.target_next_entity()
+        return super().on_entered()
 
     def confirm(self):
         self.confirmed = True
@@ -84,6 +98,8 @@ class TargetMode(CursorMixin, BaseGameMode):
     def on_leaving(self):
         if self.confirmed:
             super().on_leaving()
+        else:
+            self.clear_path()
 
     def render(self, gamestate, renderer):
         renderer.render_all(gamestate)

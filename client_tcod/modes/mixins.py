@@ -35,6 +35,14 @@ class CursorMixin:
     def path_from_cursor(self, v):
         self.client.path_from_cursor = v
 
+    @property
+    def targeted_entity(self):
+        return self.client.targeted_entity
+
+    @targeted_entity.setter
+    def targeted_entity(self, v):
+        self.client.targeted_entity = v
+
     def set_cursor_pos(self, x, y):
         if (x, y) != (self.cursor_x, self.cursor_y):
             if (constants.MAP_VIEWPORT_X <= x < constants.MAP_VIEWPORT_W and
@@ -45,6 +53,8 @@ class CursorMixin:
             else:
                 self.cursor_x, self.cursor_y = None, None
                 self.clear_path()
+        if self.targeted_entity and [x, y] != self.targeted_entity['pos']:
+            self.targeted_entity = None
 
     def move_cursor(self, dx, dy):
         x, y = max(0, self.cursor_x + dx), max(0, self.cursor_y + dy)
@@ -71,20 +81,58 @@ class CursorMixin:
         return self.path_from_cursor
 
     def clear_path(self):
+        self.cursor_x, self.cursor_y = None, None
+        self.targeted_entity = None
         self.path_from_cursor.clear()
 
-    def update(self):
+    def on_entered(self):
         # We can't set a starting position in the constructor because client
-        # if not set yet, so we wait until the first update call to do so.
+        # is not set yet.
         if (self._start_x, self._start_y) != (None, None):
             self.cursor_x, self.cursor_y = self._start_x, self._start_y
-            self._start_x, self._start_y = None, None
+        return super().on_entered()
 
+    def update(self):
         if self.recompute_path:
             self.compute_path()
             self.recompute_path = False
 
         return super().update()
+
+    def process_game_events(self, game_events):
+        for ge in game_events:
+            match ge:
+                case {
+                    'type': 'action_accepted',
+                    'data': { 'type': 'move', },
+                }:
+                    actor = ge['data']['actor']
+                    if actor['actor']['is_player'] and self.path_from_cursor:
+                        self.recompute_path = True
+                    elif (
+                        self.targeted_entity and
+                        self.targeted_entity['id'] == actor['id']
+                    ):
+                        actor_pos = actor['pos']
+                        mw = self.client.gamestate.map['width']
+                        visible_cells = self.client.gamestate.visible_cells
+                        if visible_cells[c_to_idx(*actor_pos, mw)]:
+                            self.targeted_entity = actor
+                            self.set_cursor_pos(*actor_pos)
+                        else:
+                            self.clear_path()
+                case {
+                    'type': 'actor_died',
+                    'data': {'actor': {'actor': {'is_player': False}}},
+                }:
+                    actor = ge['data']['actor']
+                    if (
+                        self.targeted_entity and
+                        self.targeted_entity['id'] == actor['id']
+                    ):
+                        self.clear_path()
+
+        return super().process_game_events(game_events)
 
 
 class GameLogMixin:

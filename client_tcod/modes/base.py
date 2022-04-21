@@ -62,6 +62,7 @@ class ModeManager():
             # - self.current_mode.on_obscured()
         new_mode.client = self.client
         self._modes.append(new_mode)
+        new_mode.on_entered()
         logger.debug("Mode %s pushed on the stack", self.current_mode)
         logger.debug("Current Mode Stack: %s", self._modes)
 
@@ -159,6 +160,10 @@ class BaseGameMode:
         return self.event_handler.handle(self.client.context)
 
     def process_response(self, r):
+        if r.status == 'OK' and r.gs:
+            self.process_game_events(r.gs.last_events)
+
+    def process_game_events(self, game_events):
         pass        # No-op
 
     def render(self, gamestate, renderer):

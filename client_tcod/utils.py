@@ -76,3 +76,17 @@ def path_to(from_x, from_y, to_x, to_y, map_w, pathmap):
                 break
         else:
             cx, cy = vector_to(cx, cy, to_x, to_y)
+
+
+def closest_entities(
+        entity_list, map_width, cell_mask, distance_map, exclude_player=True
+):
+    l = []
+    for e in entity_list:
+        if exclude_player and e['actor']['is_player']:
+            continue
+        map_idx = c_to_idx(*e['pos'], map_width)
+        if cell_mask[map_idx]:
+            l.append((distance_map[map_idx], e))
+    return [e for _, e in sorted(l, key=lambda t: t[0])]
+

@@ -193,24 +193,16 @@ class RunMode(CursorMixin, GameLogMixin, BloodstainsMixin, BaseGameMode):
         self.push(BaseModalMode(title="Messages", txt=log_str, start_maxed=True))
 
     def process_response(self, r):
-        if r.status == 'OK':
-            if r.gs:
-                self.process_game_events(r.gs.last_events)
+        super().process_response(r)
         if r.status == 'error':
             self.log_error(r)
 
     def process_game_events(self, game_events):
+
+        super().process_game_events(game_events)
+
         for ge in game_events:
             match ge:
-                case {
-                    'type': 'action_accepted',
-                    'data': {
-                        'type': 'move',
-                        'actor': {'name': 'player'},
-                    },
-                }:
-                    if self.path_from_cursor:
-                        self.recompute_path = True
                 case {
                     'type': 'action_accepted',
                     'data': {'type': 'change_level'},

@@ -7,6 +7,7 @@ from .nw import Request
 from .modes.base import ModeManager, InitMode
 from .modes.run import RunMode
 from .render import TcodRenderer
+from .utils import closest_entities
 from .clock import Clock
 
 
@@ -38,6 +39,8 @@ class BarbarClient:
         self.bloodstains = []
         self.cursor_x, self.cursor_y = None, None
         self.path_from_cursor = []
+        self.targeted_entity = None
+        self.closest_actors = []
 
         self.con = None
         self.response = None
@@ -91,6 +94,11 @@ class BarbarClient:
         if status == 'OK':
             if self.response.gs:
                 self.gamestate = self.response.gs
+                self.closest_actors = closest_entities(
+                    self.gamestate.actors,
+                    self.gamestate.map['width'],
+                    self.gamestate.visible_cells,
+                    self.gamestate.distance_map)
 
         self.current_mode.process_response(self.response)
 

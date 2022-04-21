@@ -135,6 +135,11 @@ class RunEventHandler(
 
     def ev_keydown(self, e):
         from .modes.ui import HelpModalMode, TargetMode
+        from .modes.run import MoveToMode
+
+        if e.sym == tcod.event.K_ESCAPE:
+            if self.mode.path_from_cursor:
+                return self.mode.clear_path()
 
         if (r := super().ev_keydown(e)):
             return r
@@ -189,7 +194,6 @@ class RunEventHandler(
             return Request.action('use_prop', {'use_key': use_key})
 
         if e.sym == tcod.event.K_x:
-            from .modes.run import MoveToMode
             px, py = self.mode.client.gamestate.player['pos']
             self.mode.clear_path()
             return self.mode.push(
@@ -197,6 +201,17 @@ class RunEventHandler(
                     px, py, on_leaving=lambda m:
                         self.mode.push(MoveToMode(path=m.path_from_cursor))
             ))
+        if e.sym in (tcod.event.K_RETURN, tcod.event.K_KP_ENTER):
+            if self.mode.path_from_cursor:
+                return self.mode.push(MoveToMode(path=self.mode.path_from_cursor))
+        if e.sym == tcod.event.K_TAB:
+            if self.mode.client.closest_actors:
+                return self.mode.push(
+                    TargetMode(
+                        entity_list=self.mode.client.closest_actors,
+                        on_leaving=lambda m:
+                            self.mode.push(MoveToMode(path=m.path_from_cursor))
+                ))
 
         if e.sym == tcod.event.K_o:
             return self.mode.autoxplore()
@@ -221,6 +236,9 @@ class TargetingEventHandler(CursorPositionMixin, BaseEventHandler):
         if e.sym in (tcod.event.K_RETURN, tcod.event.K_KP_ENTER):
             self.mode.confirm()
             self.mode.pop()
+
+        if e.sym == tcod.event.K_TAB:
+            self.mode.target_next_entity()
 
 
 class MoveToEventHandler(CursorPositionMixin, BaseEventHandler):
