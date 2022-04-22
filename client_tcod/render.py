@@ -85,6 +85,11 @@ STATS_BG = tcod.black
 STATS_FRAME_FG = tcod.white
 STATS_FRAME_BG = tcod.black
 
+INFO_FG = tcod.yellow
+INFO_BG = tcod.black
+INFO_FRAME_FG = tcod.white
+INFO_FRAME_BG = tcod.darkest_blue
+
 MODAL_FRAME_FG = tcod.white
 MODAL_FRAME_BG = tcod.black
 MODAL_FG = tcod.yellow
@@ -163,9 +168,10 @@ class TcodRenderer:
         self.items_console = tcod.Console(C.MAP_VIEWPORT_W, C.MAP_VIEWPORT_W)
         self.actors_console = tcod.Console(C.MAP_VIEWPORT_W, C.MAP_VIEWPORT_W)
 
-        self.hud_console = tcod.Console(C.MAP_VIEWPORT_W, C.MAP_VIEWPORT_H)
+        self.hud_console = tcod.Console(C.SCREEN_W, C.SCREEN_H)
 
         self.stats_console = tcod.Console(C.STATS_CONSOLE_W, C.STATS_CONSOLE_H)
+        self.info_console = tcod.Console(C.INFO_CONSOLE_W, C.INFO_CONSOLE_H)
         self.log_console = tcod.Console(C.LOG_CONSOLE_W, C.LOG_CONSOLE_H)
 
     def render_map(self, m, explored, visible, bloodstains, show_whole_map=False):
@@ -214,13 +220,16 @@ class TcodRenderer:
 
         return GFX_DATA.get(e['type'], {})
 
-    def render_entity(self, layer_console, e):
+    def get_entity_glyph_and_colors(self, e):
         _gfxdata = self._get_gfx_data(e)
-        gfxd = {
+        return {
             'glyph': _gfxdata.get('glyph', e['visible']['glyph']),
             'fg_c': _gfxdata.get('fg_color', tcod.white),
             'bg_c': _gfxdata.get('bg_color')
         }
+
+    def render_entity(self, layer_console, e):
+        gfxd = self.get_entity_glyph_and_colors(e)
         x, y = e['pos']
         layer_console.print(x, y, gfxd['glyph'], gfxd['fg_c'], gfxd['bg_c'])
 
@@ -460,6 +469,36 @@ class TcodRenderer:
 
         self.log_console.blit(self.root_console, C.LOG_CONSOLE_X, C.LOG_CONSOLE_Y)
 
+    def render_info_panel(self, gamestate):
+        self.info_console.clear()
+
+        offset = 2
+        for i, actor in enumerate(gamestate.closest_actors):
+
+            if gamestate.targeted_entity == actor:
+                self.info_console.draw_frame(
+                    1, offset+i-1, C.INFO_CONSOLE_W - 2, 4,
+                    fg=INFO_FRAME_FG, bg=INFO_FRAME_BG)
+
+            gfxd = self.get_entity_glyph_and_colors(actor)
+            self.info_console.print(2, offset+i, gfxd['glyph'], gfxd['fg_c'], gfxd['bg_c'])
+            self.info_console.print(4, offset+i, actor['name'])
+
+            hp = actor['health']['hp']
+            max_hp = actor['health']['max_hp']
+
+            # health_bar_label = f'HP: {hp}/{max_hp}'
+            health_bar_label = ""
+            self._render_stat_bar(
+                self.info_console, 4, offset+i+1, hp, max_hp, health_bar_label,
+                C.INFO_CONSOLE_W - 8,
+                PROGRESS_BAR_LABEL_COLOR, HEALTH_BAR_FG_COLOR, HEALTH_BAR_BG_COLOR)
+
+            offset += 2
+
+        self.info_console.blit(
+            self.root_console, C.INFO_CONSOLE_X, C.INFO_CONSOLE_Y)
+
     def render_particles(self, gamestate):
         for p in self.particles:
             self.hud_console.print(p.x, p.y, p.glyph, p.fg, p.bg)
@@ -470,6 +509,7 @@ class TcodRenderer:
         self.render_hud(gamestate)
         self.render_stats(gamestate)
         self.render_log(gamestate.gamelog)
+        self.render_info_panel(gamestate)
 
     def render_all(self, gamestate):
         """ Main rendering method """

@@ -72,6 +72,8 @@ class BarbarClient:
         gs.bloodstains = self.bloodstains
         gs.cursor_pos = (self.cursor_x, self.cursor_y)
         gs.path_from_cursor = self.path_from_cursor
+        gs.closest_actors = self.closest_actors
+        gs.targeted_entity = self.targeted_entity
         self.current_mode.render(gs, self.renderer)
 
     def send_request(self, r):
