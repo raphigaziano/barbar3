@@ -5,7 +5,7 @@ Numpad, arrow keys, or VI Keys:     Move
 
 Shift-<move key>:                   Move until blocked
 
-Ctrl-x:                             Autoexplore
+o:                                  Autoexplore
 
 ; or Numpad 5:                      Rest for 1 turn
 
@@ -19,6 +19,12 @@ Ctrl-c:                             Manually close door
 
 <:                                  Use stairs up
 
+Targetting
+----------
+
+x:                                  Look / Move to target
+
+TAB:                                Target nearest ennemies
 
 Item & Inventory
 ----------------
