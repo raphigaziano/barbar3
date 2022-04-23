@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import tcod
 
 from ..utils import c_to_idx, closest_open_cell, path_to
@@ -169,6 +171,8 @@ class CursorMixin:
 
 class GameLogMixin:
 
+    __logged_events = []
+
     @property
     def gamelog(self):
         return self.client.gamelog
@@ -179,21 +183,51 @@ class GameLogMixin:
     # FIXME: Hacky, and relies too much on knowing the internal
     # event structure (ie, we need an event type enum or mapping
     # on the client).
-    def log_event(self, e):
+    def ignore_event(self, e):
         # Action failed, not initiated by the player
         if e['type'] == 'action_rejected':
             actor, target = e['data']['actor'], e['data']['target']
             if actor and 'actor' in actor and not actor['actor']['is_player']:
-                return
+                return True
             if target and 'actor' in target and not target['actor']['is_player']:
-                return
+                return True
         if (
             e['type'] == 'food_state_updated' and
             e['data']['state'] in ('full', 'satiated') and
             e['data']['previous_state'] in ('full',)
         ):
+            return True
+        return False
+
+    def _strip_event(self, e):
+        # Return a copy of the passed event with a bunch of fields removed
+        # for looser comparison
+        event_copy = deepcopy(e)
+        del event_copy['msg']
+        if event_copy['data'].get('actor', None):
+            event_copy['data']['actor'] = event_copy['data']['actor']['id']
+        if event_copy['data'].get('target', None):
+            event_copy['data']['target'] = event_copy['data']['target']['id']
+
+        return event_copy
+
+    def log_event(self, e):
+        if self.ignore_event(e):
             return
+
         if e['msg']:
+            previous_event_count = 1
+            if self.__logged_events:
+                previous_event_count, previous_event = self.__logged_events[-1]
+                e1, e2 = self._strip_event(e), self._strip_event(previous_event)
+                if e1 == e2:
+                    previous_event_count += 1
+                    self.__logged_events.pop()
+                    self.gamelog.pop()
+                    e['msg'] = f"{e['msg']} (x{previous_event_count})"
+                else:
+                    previous_event_count = 1
+            self.__logged_events.append((previous_event_count, e))
             self.log_msg(e['msg'])
         # else:
         #     print(f'cant process event: {e}')
