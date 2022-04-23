@@ -51,30 +51,41 @@ class BaseEventHandler(tcod.event.EventDispatch[None]):
                 return r
 
 
-class CursorPositionMixin:
+class MousePositionMixin:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.last_mouse_pos = None
+        self.mouse_moved = False
 
     def get_mouse_state(self, ctxt):
+
+        self.mouse_moved = False
+
         ms = tcod.event.get_mouse_state()
         ctxt.convert_event(ms)
+
+        # Cursor not intialized yet
+        if self.last_mouse_pos is None and ms.tile == (0, 0):
+            return None
+
+        if self.last_mouse_pos != ms.tile:
+            # Don't register a move in the first frame:
+            # Cursor is initialized, but the user hasn't actually moved 
+            # his mouse
+            self.mouse_moved = bool(self.last_mouse_pos)
+            self.last_mouse_pos = ms.tile
+
         return ms
+
+
+class CursorPositionMixin(MousePositionMixin):
 
     def handle(self, ctxt):
 
         ms = self.get_mouse_state(ctxt)
-
-        if self.last_mouse_pos is None:
-            # Cursor not intialized yet
-            if ms.tile == (0, 0):
-                return super().handle(ctxt)
-            self.last_mouse_pos = ms.tile
-
-        if self.last_mouse_pos != ms.tile:
+        if ms and self.mouse_moved:
             self.mode.set_cursor_pos(ms.tile.x, ms.tile.y)
-            self.last_mouse_pos = ms.tile
 
         return super().handle(ctxt)
 

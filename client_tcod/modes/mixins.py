@@ -43,18 +43,50 @@ class CursorMixin:
     def targeted_entity(self, v):
         self.client.targeted_entity = v
 
+    def _in_bounds(self, x, y, rect_x, rect_y, rect_w, rect_h):
+        return (
+            rect_x <= x < (rect_x + rect_w) and
+            rect_y <= y < (rect_y + rect_h)
+        )
+
     def set_cursor_pos(self, x, y):
         if (x, y) != (self.cursor_x, self.cursor_y):
-            if (constants.MAP_VIEWPORT_X <= x < constants.MAP_VIEWPORT_W and
-                constants.MAP_VIEWPORT_Y <= y < constants.MAP_VIEWPORT_H
+            if self._in_bounds(
+                    x, y,
+                    constants.MAP_VIEWPORT_X, constants.MAP_VIEWPORT_Y,
+                    constants.MAP_VIEWPORT_W, constants.MAP_VIEWPORT_H
             ):
                 self.cursor_x, self.cursor_y = x, y
                 self.recompute_path = True
             else:
-                self.cursor_x, self.cursor_y = None, None
                 self.clear_path()
+            self.update_target(x, y)
+
+    def update_target(self, x, y):
+
         if self.targeted_entity and [x, y] != self.targeted_entity['pos']:
             self.targeted_entity = None
+
+        if self._in_bounds(
+                x, y,
+                constants.MAP_VIEWPORT_X, constants.MAP_VIEWPORT_Y,
+                constants.MAP_VIEWPORT_W, constants.MAP_VIEWPORT_H
+        ):
+            for e in self.client.closest_actors:
+                if [x, y] == e['pos']:
+                    self.targeted_entity = e
+                    break
+        elif self._in_bounds(
+                x, y,
+                constants.INFO_CONSOLE_X, constants.INFO_CONSOLE_Y,
+                constants.INFO_CONSOLE_W, constants.INFO_CONSOLE_H
+        ):
+            list_entry_height = constants.ACTOR_LIST_ENTRY_HEIGHT
+            actor_idx = max(0, ((y + list_entry_height - 1) //
+                                list_entry_height) - 1)
+            if actor_idx < len(self.client.closest_actors):
+                self.targeted_entity = self.client.closest_actors[actor_idx]
+                self.set_cursor_pos(*self.targeted_entity['pos'])
 
     def move_cursor(self, dx, dy):
         x, y = max(0, self.cursor_x + dx), max(0, self.cursor_y + dy)

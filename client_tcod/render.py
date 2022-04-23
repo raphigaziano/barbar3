@@ -472,17 +472,19 @@ class TcodRenderer:
     def render_info_panel(self, gamestate):
         self.info_console.clear()
 
-        offset = 2
+        start_offset = C.ACTOR_LIST_OFFSET
         for i, actor in enumerate(gamestate.closest_actors):
+
+            y = start_offset + (i * C.ACTOR_LIST_ENTRY_HEIGHT)
 
             if gamestate.targeted_entity == actor:
                 self.info_console.draw_frame(
-                    1, offset+i-1, C.INFO_CONSOLE_W - 2, 4,
+                    1, y-1, C.INFO_CONSOLE_W - 2, C.ACTOR_LIST_ENTRY_HEIGHT,
                     fg=INFO_FRAME_FG, bg=INFO_FRAME_BG)
 
             gfxd = self.get_entity_glyph_and_colors(actor)
-            self.info_console.print(2, offset+i, gfxd['glyph'], gfxd['fg_c'], gfxd['bg_c'])
-            self.info_console.print(4, offset+i, actor['name'])
+            self.info_console.print(2, y, gfxd['glyph'], gfxd['fg_c'], gfxd['bg_c'])
+            self.info_console.print(4, y, actor['name'])
 
             hp = actor['health']['hp']
             max_hp = actor['health']['max_hp']
@@ -490,11 +492,9 @@ class TcodRenderer:
             # health_bar_label = f'HP: {hp}/{max_hp}'
             health_bar_label = ""
             self._render_stat_bar(
-                self.info_console, 4, offset+i+1, hp, max_hp, health_bar_label,
+                self.info_console, 4, y+1, hp, max_hp, health_bar_label,
                 C.INFO_CONSOLE_W - 8,
                 PROGRESS_BAR_LABEL_COLOR, HEALTH_BAR_FG_COLOR, HEALTH_BAR_BG_COLOR)
-
-            offset += 2
 
         self.info_console.blit(
             self.root_console, C.INFO_CONSOLE_X, C.INFO_CONSOLE_Y)
