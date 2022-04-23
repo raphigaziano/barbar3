@@ -456,7 +456,7 @@ class TcodRenderer:
         log_w, log_h = C.LOG_CONSOLE_W - log_border, C.LOG_CONSOLE_H - log_border
 
         msgs = self._wrap_lines(
-            [f'[{t}] - {m}' for (t, m) in gamelog], log_w, log_h)
+            [f'[{m.tick}] - {m.msg}' for m in gamelog], log_w, log_h)
 
         offsety = 1
         for i, msg in enumerate(msgs):

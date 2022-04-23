@@ -169,16 +169,41 @@ class CursorMixin:
         return super().process_game_events(game_events)
 
 
-class GameLogMixin:
+class LogMessage:
 
-    __logged_events = []
+    def __init__(self, msg, tick, data=None):
+        self._msg = msg
+        self.tick = tick
+        self.data = data or {}
+        self.count = 1
+
+    @property
+    def msg(self):
+        if self.count == 1:
+            return self._msg
+        return f'{self._msg} (x{self.count})'
+
+    def __eq__(self, other):
+        return self._strip_dict(self.data) == self._strip_dict(other.data)
+
+    def _strip_dict(self, d):
+        dict_copy = deepcopy(d)
+        if dict_copy.get('actor', None):
+            dict_copy['actor'] = dict_copy['actor']['id']
+        if dict_copy.get('target', None):
+            dict_copy['target'] = dict_copy['target']['id']
+
+        return dict_copy
+
+
+class GameLogMixin:
 
     @property
     def gamelog(self):
         return self.client.gamelog
 
     def log_msg(self, m):
-        self.gamelog.append((self.client.gamestate.tick, m))
+        self.gamelog.append(LogMessage(m, self.client.gamestate.tick))
 
     # FIXME: Hacky, and relies too much on knowing the internal
     # event structure (ie, we need an event type enum or mapping
@@ -199,36 +224,17 @@ class GameLogMixin:
             return True
         return False
 
-    def _strip_event(self, e):
-        # Return a copy of the passed event with a bunch of fields removed
-        # for looser comparison
-        event_copy = deepcopy(e)
-        del event_copy['msg']
-        if event_copy['data'].get('actor', None):
-            event_copy['data']['actor'] = event_copy['data']['actor']['id']
-        if event_copy['data'].get('target', None):
-            event_copy['data']['target'] = event_copy['data']['target']['id']
-
-        return event_copy
-
     def log_event(self, e):
         if self.ignore_event(e):
             return
 
         if e['msg']:
-            previous_event_count = 1
-            if self.__logged_events:
-                previous_event_count, previous_event = self.__logged_events[-1]
-                e1, e2 = self._strip_event(e), self._strip_event(previous_event)
-                if e1 == e2:
-                    previous_event_count += 1
-                    self.__logged_events.pop()
-                    self.gamelog.pop()
-                    e['msg'] = f"{e['msg']} (x{previous_event_count})"
-                else:
-                    previous_event_count = 1
-            self.__logged_events.append((previous_event_count, e))
-            self.log_msg(e['msg'])
+            msg = LogMessage(e['msg'], self.client.gamestate.tick, e['data'])
+            if self.gamelog and (prev_msg := self.gamelog[-1]) == msg:
+                prev_msg.count += 1
+                prev_msg.tick = msg.tick
+                return
+            self.gamelog.append(msg)
         # else:
         #     print(f'cant process event: {e}')
 

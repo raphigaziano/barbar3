@@ -186,7 +186,8 @@ class RunMode(CursorMixin, GameLogMixin, BloodstainsMixin, BaseGameMode):
     def show_message_log(self):
 
         if self.gamelog:
-            log_str = '\n'.join('%d - %s' % l for l in self.gamelog)
+            log_str = '\n'.join(
+                '%d - %s' % (m.tick, m.msg) for m in self.gamelog)
         else:
             log_str = "No message logged."
 
