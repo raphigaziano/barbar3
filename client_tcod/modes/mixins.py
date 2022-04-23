@@ -1,7 +1,5 @@
 from copy import deepcopy
 
-import tcod
-
 from ..utils import c_to_idx, closest_open_cell, path_to
 from .. import constants
 
@@ -202,8 +200,13 @@ class GameLogMixin:
     def gamelog(self):
         return self.client.gamelog
 
-    def log_msg(self, m):
-        self.gamelog.append(LogMessage(m, self.client.gamestate.tick))
+    def log_msg(self, m, mdata=None):
+        msg = LogMessage(m, self.client.gamestate.tick, mdata)
+        if self.gamelog and (prev_msg := self.gamelog[-1]) == msg:
+            prev_msg.count += 1
+            prev_msg.tick = msg.tick
+            return
+        self.gamelog.append(msg)
 
     # FIXME: Hacky, and relies too much on knowing the internal
     # event structure (ie, we need an event type enum or mapping
@@ -229,21 +232,15 @@ class GameLogMixin:
             return
 
         if e['msg']:
-            msg = LogMessage(e['msg'], self.client.gamestate.tick, e['data'])
-            if self.gamelog and (prev_msg := self.gamelog[-1]) == msg:
-                prev_msg.count += 1
-                prev_msg.tick = msg.tick
-                return
-            self.gamelog.append(msg)
+            self.log_msg(e['msg'], e['data'])
         # else:
         #     print(f'cant process event: {e}')
 
     def log_error(self, r):
         errcode, msg = r.err_code, getattr(r, 'msg', None)
         if msg:
-            m = f'%c%c%c%c[REQUEST ERROR: {errcode} - {msg}]%c'
-            self.log_msg(
-                m % (tcod.COLCTRL_FORE_RGB, 255, 1, 1, tcod.COLCTRL_STOP))
+            m = f'[REQUEST ERROR: {errcode} - {msg}]'
+            self.log_msg(m, {'type': 'error'})
         else:
             print(r)
 
