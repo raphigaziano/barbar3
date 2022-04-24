@@ -182,16 +182,7 @@ class LogMessage:
         return f'{self._msg} (x{self.count})'
 
     def __eq__(self, other):
-        return self._strip_dict(self.data) == self._strip_dict(other.data)
-
-    def _strip_dict(self, d):
-        dict_copy = deepcopy(d)
-        if dict_copy.get('actor', None):
-            dict_copy['actor'] = dict_copy['actor']['id']
-        if dict_copy.get('target', None):
-            dict_copy['target'] = dict_copy['target']['id']
-
-        return dict_copy
+        return self._msg == other._msg
 
 
 class GameLogMixin:
