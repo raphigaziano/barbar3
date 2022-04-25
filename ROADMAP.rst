@@ -9,10 +9,12 @@ Features
     - item identification (wait unti we have more item types, no real interest 
       until then).
 
-  - client
+  - Targeted actions
 
-    - Targeting mode
-    - Go to game mode (select cell via target mode above and go there)
+    Classics like magic missile and fireball spells should do the trick.
+    This will require getting started on a spell data model, and possibly
+    allow the game lib to request additional data before processing an action,
+    which in turn involves refactoring the gameloop...
 
   - Save / Load
 
