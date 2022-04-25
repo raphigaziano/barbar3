@@ -193,6 +193,9 @@ class RunMode(CursorMixin, GameLogMixin, BloodstainsMixin, BaseGameMode):
 
         for ge in game_events:
             match ge:
+                case {'type': 'game_started'}:
+                    self.gamelog.clear()
+                    self.log_msg("You go kill stuff. Press '?' for help.")
                 case {
                     'type': 'action_accepted',
                     'data': {'type': 'change_level'},

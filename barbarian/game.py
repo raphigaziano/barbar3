@@ -98,8 +98,8 @@ class Game:
 
         self.world = World(MAP_W, MAP_H)
         self.init_level()
-        self.state.update(self)
 
+        Event.emit(EventType.GAME_STARTED)
         self.start_gameloop()
 
     @staticmethod

@@ -4,7 +4,7 @@ import inspect
 from .base import BaseFunctionalTestCase
 from barbarian.utils.rng import Rng
 from barbarian.actions import Action, ActionType
-from barbarian.events import Event
+from barbarian.events import Event, EventType
 from barbarian.map import Map, TileType
 from barbarian.genmap.builders import SimpleMapBuilder
 from barbarian.settings import MAP_W, MAP_H
@@ -20,15 +20,12 @@ class BaseGameTest(BaseFunctionalTestCase):
 
 class TestGame(BaseGameTest):
 
-    # This seems to generate a fastish map.
-    seed = '4876877298345515653'
-
     @patch('barbarian.world.get_map_builder', return_value=SimpleMapBuilder())
     @patch('barbarian.map.Map.compute_bitmask_grid')
     def test_game_start(self, _, __):
 
         game = Game()
-        game.start_game(seed=self.seed)
+        game.start_game()
 
         # World was intialized
         self.assertIsNotNone(game.world)
@@ -65,9 +62,18 @@ class TestGame(BaseGameTest):
     @patch.object(Rng, 'init_root')
     def test_seed_is_passed_to_root_rng(self, mock_init_root_rng, _, __):
         game = Game()
-        game.start_game(self.seed)
+        game.start_game(123)
 
-        mock_init_root_rng.assert_called_with(self.seed)
+        mock_init_root_rng.assert_called_with(123)
+
+    @patch('barbarian.world.get_map_builder', return_value=SimpleMapBuilder())
+    @patch('barbarian.map.Map.compute_bitmask_grid')
+    @patch('barbarian.events.Event.emit')
+    def test_start_event_is_emitted(self, mocked_emit, _, __):
+        game = Game()
+        game.start_game(123)
+
+        mocked_emit.assert_any_call(EventType.GAME_STARTED)
 
     def test_init_rngs(self):
 

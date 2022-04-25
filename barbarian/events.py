@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class EventType(StringAutoEnum):
 
+    GAME_STARTED = auto()
     ACTION_ACCEPTED = auto()
     ACTION_REJECTED = auto()
     ACTOR_SPOTTED = auto()
