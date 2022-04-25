@@ -84,7 +84,7 @@ def distance_from(from_x, from_y, to_x, to_y):
 
 
 def vector_to(from_x, from_y, target_x, target_y, normalize=True):
-    """ 
+    """
     Return a vector pointing to position (target_x, target_y).
 
     If param `normalize` is True, then the vector will be reduced to
