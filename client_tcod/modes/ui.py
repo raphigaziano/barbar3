@@ -115,12 +115,19 @@ class BaseModalMode(BaseGameMode):
         super().__init__(*args, **kwargs)
         self.title = title or self.title
         self.txt = txt or self.txt
-        self.offset = self.max_offset if start_maxed else 0
+        self.start_maxed = start_maxed
+        self.offset = None  # Set on mode enter
+
+    @property
+    def nlines(self):
+        return len(self.txt.splitlines())
 
     @property
     def max_offset(self):
-        nlines = len(self.txt.splitlines())
-        return nlines - constants.MAX_MODAL_HEIGHT
+        return self.nlines - constants.MAX_MODAL_HEIGHT
+
+    def on_entered(self):
+        self.offset = self.max_offset if self.start_maxed else 0
 
     def set_offset(self, delta):
         self.offset = max(0, self.offset + delta)
@@ -139,6 +146,18 @@ class HelpModalMode(BaseModalMode):
         super().__init__(*args, **kwargs)
         with open(os.path.join(constants.ASSETS_PATH, 'help_screen.txt')) as f:
             self.txt = f.read()
+
+
+class LogModalMode(BaseModalMode):
+
+    title = "Messages"
+
+    def render(self, gamestate, renderer):
+        renderer.render_log_modal(self.title, self.client.gamelog, self.offset)
+
+    @property
+    def nlines(self):
+        return len(self.client.gamelog)
 
 
 class PromptConfirmMode(BaseModalMode):

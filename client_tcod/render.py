@@ -80,6 +80,8 @@ LOG_BG = tcod.black
 LOG_FRAME_FG = tcod.white
 LOG_FRAME_BG = tcod.black
 
+DEFAULT_LOG_MSG_COLOR = tcod.lightest_grey
+
 STATS_FG = tcod.yellow
 STATS_BG = tcod.black
 STATS_FRAME_FG = tcod.white
@@ -442,6 +444,37 @@ class TcodRenderer:
 
         self.stats_console.blit(self.root_console, C.STATS_CONSOLE_X, C.STATS_CONSOLE_Y)
 
+    def get_log_msg_color(self, msg):
+        if msg.data:
+            match msg.data:
+                case {'type': 'error'}:
+                    return tcod.red
+                case {'type': 'ui_warning'}:
+                    if msg.data['warn_level'] == 1:
+                      return tcod.yellow
+                    if msg.data['warn_level'] == 2:
+                      return tcod.red
+                case {'type': 'inflict_dmg',
+                      'target': {'actor': {'is_player': True}}
+                }:
+                    return tcod.orange
+                case {'type': 'inflict_dmg',
+                      'target': {'actor': {'is_player': False}}
+                }:
+                    return tcod.lighter_blue
+                case {'type': 'heal',
+                      'target': {'actor': {'is_player': True}}
+                }:
+                    return tcod.light_green
+
+        return DEFAULT_LOG_MSG_COLOR
+
+    def print_log_msgs(self, console, msgs, offset_x, offset_y):
+        for i, (msg_line, msg_col) in enumerate(msgs):
+            # print_box or print_rect ?
+            console.print(
+                offset_x, offset_y+i, msg_line, fg=msg_col, bg=LOG_BG)
+
     def render_log(self, gamelog):
         self.log_console.clear(fg=LOG_FG, bg=LOG_BG)
 
@@ -455,17 +488,9 @@ class TcodRenderer:
         log_border = 2
         log_w, log_h = C.LOG_CONSOLE_W - log_border, C.LOG_CONSOLE_H - log_border
 
-        msgs = self._wrap_lines(
-            [f'[{m.tick}] - {m.msg}' for m in gamelog], log_w, log_h)
+        msgs = self._wrap_log(gamelog, log_w, log_h)
 
-        offsety = 1
-        for i, msg in enumerate(msgs):
-            y = i
-            # print_box or print_rect ?
-            offsety += self.log_console.print_box(
-                1, y+offsety, log_w, C.LOG_CONSOLE_H-offsety, msg,
-                fg=LOG_FG, bg=LOG_BG
-            ) - 1
+        self.print_log_msgs(self.log_console, msgs, 1, 1)
 
         self.log_console.blit(self.root_console, C.LOG_CONSOLE_X, C.LOG_CONSOLE_Y)
 
@@ -521,35 +546,57 @@ class TcodRenderer:
 
         self.context.present(self.root_console)
 
-    def render_modal(self, modal_title, modal_text, offset=9):
+    def _wrap_modal(self, lines, line_wrapper, offset=0):
 
-        self.hud_console.clear(bg=TRANS_COLOR)
-
-        lines = textwrap.dedent(modal_text).splitlines()
         if len(lines) > (C.MAX_MODAL_HEIGHT - 2):
             start_idx = offset
-            end_idx = min(C.MAX_MODAL_HEIGHT + offset, len(lines))
+            end_idx = min(C.MAX_MODAL_HEIGHT + offset - 2, len(lines))
         else:
             start_idx, end_idx = 0, len(lines)
-        wrapped = self._wrap_lines(
+        return line_wrapper(
             lines[start_idx:end_idx], C.MAX_MODAL_WIDTH-2, C.MAX_MODAL_HEIGHT-2)
 
+    def _get_modal_dimensions(self, n_lines, all_lines):
         modal_width, modal_height = (
-            min(C.MAX_MODAL_WIDTH, max(map(len, lines))) + 2,
-            min(C.MAX_MODAL_HEIGHT, len(wrapped) + 2)
+            min(C.MAX_MODAL_WIDTH, max(map(len, all_lines))) + 2,
+            min(C.MAX_MODAL_HEIGHT, n_lines + 2)
         )
         modal_x, modal_y = (
             (C.SCREEN_W // 2) - (modal_width // 2),
             (C.MAP_VIEWPORT_H // 2) - (modal_height // 2)
         )
 
+        return modal_x, modal_y, modal_width, modal_height
+
+    def render_modal(self, modal_title, modal_text, offset):
+        self.hud_console.clear(bg=TRANS_COLOR)
+
+        lines = textwrap.dedent(modal_text).splitlines()
+        wrapped = self._wrap_modal(lines, self._wrap_lines, offset)
+        mx, my, mw, mh = self._get_modal_dimensions(len(wrapped), lines)
+
         self.hud_console.draw_frame(
-            modal_x-2, modal_y-2, modal_width + 4, modal_height + 2,
+            mx-2, my-2, mw + 4, mh + 2,
             title=f' {modal_title} ' if modal_title else None,
             fg=MODAL_FRAME_FG, bg=MODAL_FRAME_BG)
         self.hud_console.print_box(
-            modal_x, modal_y, modal_width, modal_height, '\n'.join(wrapped),
-            MODAL_FG, MODAL_BG)
+            mx, my, mw, mh, '\n'.join(wrapped), MODAL_FG, MODAL_BG)
+
+        self.hud_console.blit(self.root_console, key_color=TRANS_COLOR)
+        self.context.present(self.root_console)
+
+    def render_log_modal(self, modal_title, gamelog, offset=0):
+
+        self.hud_console.clear(bg=TRANS_COLOR)
+
+        wrapped = self._wrap_modal(gamelog, self._wrap_log, offset)
+        mx, my, mw, mh = self._get_modal_dimensions(len(wrapped), gamelog)
+
+        self.hud_console.draw_frame(
+            mx-2, my-2, mw + 4, mh + 2,
+            title=f' {modal_title} ' if modal_title else None,
+            fg=MODAL_FRAME_FG, bg=MODAL_FRAME_BG)
+        self.print_log_msgs(self.hud_console, wrapped, mx, my)
 
         self.hud_console.blit(self.root_console, key_color=TRANS_COLOR)
         self.context.present(self.root_console)
@@ -609,6 +656,21 @@ class TcodRenderer:
         self.hud_console.clear(bg=c)
         self.hud_console.blit(self.root_console, bg_alpha=0.3)
         self.context.present(self.root_console)
+
+    def _wrap_log(self, gamelog, max_width, max_height):
+
+        wrapped_lines = []
+        total_lines = 0
+        for msg in reversed(gamelog):
+            s = msg.msg
+            c = self.get_log_msg_color(msg)
+            wrapped = textwrap.wrap(s, max_width)
+            for l in reversed(wrapped):
+                wrapped_lines.insert(0, (l, c))
+                total_lines += 1
+                if total_lines >= max_height:
+                    return wrapped_lines
+        return wrapped_lines
 
     def _wrap_lines(self, lines, max_width, max_height):
 

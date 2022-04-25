@@ -2,7 +2,6 @@ from ..modes.base import BaseGameMode, GameOverMode
 from ..modes.mixins import CursorMixin, GameLogMixin, BloodstainsMixin
 from ..modes.ui import (
     DbgMapMode, PromptDirectionMode, ItemMenuMode, InventoryMenuMode,
-    BaseModalMode
 )
 from ..nw import Request
 from ..event_handlers import (
@@ -183,16 +182,6 @@ class RunMode(CursorMixin, GameLogMixin, BloodstainsMixin, BaseGameMode):
             Request.action(action_name, {'item_id_list': [menu.selected]})
         )
 
-    def show_message_log(self):
-
-        if self.gamelog:
-            log_str = '\n'.join(
-                '%d - %s' % (m.tick, m.msg) for m in self.gamelog)
-        else:
-            log_str = "No message logged."
-
-        self.push(BaseModalMode(title="Messages", txt=log_str, start_maxed=True))
-
     def process_response(self, r):
         super().process_response(r)
         if r.status == 'error':
@@ -219,9 +208,17 @@ class RunMode(CursorMixin, GameLogMixin, BloodstainsMixin, BaseGameMode):
                         *target['pos'], glyph='*', fg=(255, 0, 0)
                     )
                     if (target['actor']['is_player'] and
-                        target['health']['badly_wounded']
+                        target['health']['wounded']
                     ):
-                        self.client.renderer.flash_color(255, 0, 0)
+                        badly_wounded = target['health']['badly_wounded']
+                        warn_level = 2 if badly_wounded else 1
+                        self.log_msg(
+                            f"Low hp: " +
+                            f"{target['health']['hp']}/{target['health']['max_hp']}",
+                            mdata={'type': 'ui_warning', 'warn_level': warn_level}
+                        )
+                        if badly_wounded:
+                            self.client.renderer.flash_color(255, 0, 0)
                 case {
                     'type': 'actor_died',
                     'data': {'actor': {'actor': {'is_player': False}}},
@@ -290,7 +287,9 @@ class AutoRunMode(RunMode):
                         'spotter': {'name': 'player'},
                     },
                 }:
-                    self.log_msg('Something dangerous is in view')
+                    self.log_msg(
+                        'Something dangerous is in view',
+                        mdata={'type': 'ui_warning', 'warn_level': 1})
                     self.pop()
 
         super().process_game_events(game_events)

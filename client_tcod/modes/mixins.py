@@ -177,12 +177,16 @@ class LogMessage:
 
     @property
     def msg(self):
+        msg_str = f'[{self.tick}] - {self._msg}'
         if self.count == 1:
-            return self._msg
-        return f'{self._msg} (x{self.count})'
+            return msg_str
+        return f'{msg_str} (x{self.count})'
 
     def __eq__(self, other):
         return self._msg == other._msg
+
+    def __len__(self):
+        return len(self.msg)
 
 
 class GameLogMixin:
@@ -234,6 +238,14 @@ class GameLogMixin:
             self.log_msg(m, {'type': 'error'})
         else:
             print(r)
+
+    def show_message_log(self):
+        from ..modes.ui import BaseModalMode, LogModalMode
+        if self.gamelog:
+            self.push(LogModalMode(start_maxed=True))
+        else:
+            log_str = "No message logged."
+            self.push(BaseModalMode(title="Messages", txt="No message logged."))
 
 
 class BloodstainsMixin:
