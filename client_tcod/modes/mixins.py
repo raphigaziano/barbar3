@@ -253,3 +253,17 @@ class BloodstainsMixin:
     @property
     def bloodstains(self):
         return self.client.bloodstains
+
+
+class ConfirmMixin:
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.confirmed = False
+
+    def confirm(self):
+        self.confirmed = True
+
+    def on_leaving(self):
+        if self.confirmed:
+            super().on_leaving()

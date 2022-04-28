@@ -1,7 +1,7 @@
 import os
 from itertools import cycle
 
-from ..modes.mixins import CursorMixin
+from ..modes.mixins import CursorMixin, ConfirmMixin
 from ..modes.base import BaseGameMode, GameOverMode
 from ..event_handlers import (
     DbgMapEventHandler,
@@ -160,27 +160,23 @@ class LogModalMode(BaseModalMode):
         return len(self.client.gamelog)
 
 
-class PromptConfirmMode(BaseModalMode):
+class PromptConfirmMode(ConfirmMixin, BaseModalMode):
 
     event_handler_cls = PromptConfirmEventHandler
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.txt = f'{self.txt} [Yn]'
-        self.confirmed = False
-
-    def confirm(self):
-        self.confirmed = True
-
-    def on_leaving(self):
-        if self.confirmed:
-            super().on_leaving()
 
 
-class PromptDirectionMode(BaseModalMode):
+class PromptDirectionMode(ConfirmMixin, BaseModalMode):
 
     event_handler_cls = PromptDirectionEventHandler
     txt = 'Chose a direction (esc to cancel): '
+
+    def confirm(self, dir_):
+        super().confirm()
+        self.set_callback_kwargs('on_leaving', {'dir': dir_})
 
 
 class MenuMode(BaseGameMode):

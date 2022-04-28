@@ -349,8 +349,7 @@ class PromptDirectionEventHandler(BaseUIModalEventHandler):
         if (dir_ := MOVE_KEYS.get(e.sym, None)):
             if dir_ == (0, 0):
                 return
-            dx, dy = dir_
-            self.mode.set_callback_kwargs('on_leaving', {'dx': dx, 'dy': dy})
+            self.mode.confirm(dir_)
             self.mode.pop()
 
 

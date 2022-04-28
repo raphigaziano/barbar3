@@ -125,9 +125,9 @@ class RunMode(CursorMixin, GameLogMixin, BloodstainsMixin, BaseGameMode):
         if r.status == 'prompt_input':
             if r.data['input_type'] == 'dir':
                 self.push(PromptDirectionMode(
-                    on_leaving=lambda _, dx, dy:
+                    on_leaving=lambda _, dir:
                         self.client.send_request(
-                            Request.prompt_response({'dir': (dx, dy)}))
+                            Request.prompt_response({'dir': dir}))
                 ))
         elif r.status == 'error':
             self.log_error(r)
