@@ -11,9 +11,6 @@ from barbarian.pathfinding import PathBlockedError, get_step_to_target
 
 def tmp_ai(actor, game):
     """ Temporary, *very dumb* ai. """
-    if actor.is_player:
-        return Action(ActionType.REQUEST_INPUT)
-
     level = game.current_level
 
     if spot_player(actor, player := game.player):

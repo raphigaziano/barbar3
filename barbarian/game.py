@@ -195,8 +195,6 @@ class Game:
         action = self._process_action(action)
         # Player action or prompt: wait for input
         while action.type == ActionType.REQUEST_INPUT:
-            self.state.update(self)
-            Event.clear_queue()
             action = yield action
             # Run the action chain, which might return a new prompt request
             action = self._process_action(action)
@@ -248,6 +246,10 @@ class Game:
             if not actor.health.is_dead:
                 logger.warning('actor %s does not belong to the current level', actor)
             return
+        if actor.is_player:
+            self.state.update(self)
+            Event.clear_queue()
+            return Action(ActionType.REQUEST_INPUT)
         return systems.ai.tmp_ai(actor, self)
 
     def dispatch_action(self, action):
