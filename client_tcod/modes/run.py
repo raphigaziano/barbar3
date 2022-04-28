@@ -21,68 +21,6 @@ class RunMode(CursorMixin, GameLogMixin, BloodstainsMixin, BaseGameMode):
     """
     event_handler_cls = RunEventHandler
 
-    def open_door(self):
-        surrounding_doors = [
-            d for d in self.get_surrounding_entities(
-                self.client.gamestate.props, 'door')
-            if not d['openable']['open']
-        ]
-        if not self._open_or_close_door(surrounding_doors):
-            self.log_msg('There are no closed doors around you.')
-
-    def close_door(self):
-        surrounding_doors = [
-            d for d in self.get_surrounding_entities(
-                self.client.gamestate.props, 'door')
-            if d['openable']['open']
-        ]
-        if not self._open_or_close_door(surrounding_doors):
-            self.log_msg('There are no opened doors around you.')
-
-    def _open_or_close_door(self, surrounding_doors):
-
-        def use_prop(px, py):
-            self.client.send_request(
-                Request.action('use_prop', {'propx': px, 'propy': py}))
-
-        def use_prop_cb(_, dx, dy):
-            """
-            Prompt will return a direction, use it to get the actual door
-            position.
-
-            """
-            px, py = self.client.gamestate.player['pos']
-            use_prop(px + dx, py + dy)
-
-        if not surrounding_doors:
-            return False
-
-        if len(surrounding_doors) == 1:
-            # Only one door around, no need to chose
-            target_door = surrounding_doors[0]
-            tdx, tdy = target_door['pos']
-            use_prop(tdx, tdy)
-        else:
-            # Prompt user for direction
-            self.push(PromptDirectionMode(on_leaving=use_prop_cb))
-
-        return True
-
-    def get_surrounding_entities(self, entity_list, entity_type=""):
-        px, py = self.client.gamestate.player['pos']
-        surrounding_cells = (
-            # Cardinal only for now
-            [px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]
-        )
-
-        def predicate(e):
-            return (
-                e['pos'] in surrounding_cells and
-                (not entity_type or entity_type == e['type'])
-            )
-
-        return [e for e in entity_list if predicate(e)]
-
     def rest_r(self, n_turns=AUTO_REST_N_TURNS):
         """ Rest for n turn """
         self.push(AutoRunMode(action_name='idle', n_turns=n_turns))
@@ -184,7 +122,14 @@ class RunMode(CursorMixin, GameLogMixin, BloodstainsMixin, BaseGameMode):
 
     def process_response(self, r):
         super().process_response(r)
-        if r.status == 'error':
+        if r.status == 'prompt_input':
+            if r.data['input_type'] == 'dir':
+                self.push(PromptDirectionMode(
+                    on_leaving=lambda _, dx, dy:
+                        self.client.send_request(
+                            Request.prompt_response({'dir': (dx, dy)}))
+                ))
+        elif r.status == 'error':
             self.log_error(r)
 
     def process_game_events(self, game_events):

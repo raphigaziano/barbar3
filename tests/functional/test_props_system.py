@@ -172,8 +172,10 @@ class TestTrigger(BaseFunctionalTestCase):
 
 class OpenCloseDoorTest(BaseFunctionalTestCase):
 
-    def get_door_entity(self, opened=False):
-        d = self.spawn_prop(0, 0, 'door')
+    dummy_map = ('...', '...', '...')
+
+    def get_door_entity(self, x=0, y=0, opened=False):
+        d = self.spawn_prop(x, y, 'door')
         if opened:
             d.physics.blocks = False
             d.physics.blocks_sight = False
@@ -181,11 +183,13 @@ class OpenCloseDoorTest(BaseFunctionalTestCase):
             d.openable.open = True
         return d
 
-    def open_door(self, a, d):
-        return Action(ActionType.OPEN_DOOR, actor=a, target=d)
+    def open_door(self, a, t=None, d=None):
+        return Action(
+            ActionType.OPEN_DOOR, actor=a, target=t, data=d or {})
 
-    def close_door(self, a, d):
-        return Action(ActionType.CLOSE_DOOR, actor=a, target=d)
+    def close_door(self, a, t=None, d=None):
+        return Action(
+            ActionType.CLOSE_DOOR, actor=a, target=t, data=d or {})
 
     def assert_opened(self, door):
         self.assertTrue(door.openable.open)
@@ -224,6 +228,132 @@ class OpenCloseDoorTest(BaseFunctionalTestCase):
             self.assert_action_accepted(
                 open_or_close_door, action, level)
             self.assert_closed(door)
+
+    def test_open_close_surrounding_door_with_explicit_direction(self):
+
+        # Spawn door all around actor
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                if (dx, dy) == (0, 0):
+                    continue
+
+                level = self.build_dummy_level()
+                actor = self.spawn_actor(1, 1, 'kobold')
+                level.enter(actor)
+                door = self.get_door_entity(1 + dx, 1 + dy)
+                level.props.add_e(door)
+
+                # Open door
+                initial_open_action = self.open_door(
+                    actor, d={'dx': dx, 'dy': dy})
+                new_open_action = open_or_close_door(initial_open_action, level)
+                self.assertEqual(new_open_action.type, ActionType.OPEN_DOOR)
+                self.assertEqual(new_open_action.target, door)
+
+                self.assert_action_accepted(
+                    open_or_close_door, new_open_action, level)
+
+                 # Close door
+                initial_close_action = self.close_door(
+                    actor, d={'dx': dx, 'dy': dy})
+                new_close_action = open_or_close_door(initial_close_action, level)
+                self.assertEqual(new_close_action.type, ActionType.CLOSE_DOOR)
+                self.assertEqual(new_close_action.target, door)
+
+                self.assert_action_accepted(
+                    open_or_close_door, new_close_action, level)
+
+    def test_open_close_surrounding_door_no_explicit_dir(self):
+
+        # Spawn door all around actor
+        for x in (0, 1, 2):
+            for y in (0, 1, 2):
+                if (x, y) == (1, 1):
+                    continue
+
+                level = self.build_dummy_level()
+                actor = self.spawn_actor(1, 1, 'kobold')
+                level.enter(actor)
+                door = self.get_door_entity(x, y)
+                level.props.add_e(door)
+
+                # Open door
+                initial_open_action = self.open_door(actor)
+                new_open_action = open_or_close_door(initial_open_action, level)
+                self.assertEqual(new_open_action.type, ActionType.OPEN_DOOR)
+                self.assertEqual(new_open_action.target, door)
+
+                self.assert_action_accepted(
+                    open_or_close_door, new_open_action, level)
+
+                 # Close door
+                initial_close_action = self.close_door(actor)
+                new_close_action = open_or_close_door(initial_close_action, level)
+                self.assertEqual(new_close_action.type, ActionType.CLOSE_DOOR)
+                self.assertEqual(new_close_action.target, door)
+
+                self.assert_action_accepted(
+                    open_or_close_door, new_close_action, level)
+
+    def test_open_close_surrounding_door_no_surrounding_door(self):
+
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(1, 1, 'kobold')
+        level.enter(actor)
+
+        # Open door
+        initial_open_action = self.open_door(actor)
+        self.assert_action_rejected(
+            open_or_close_door, initial_open_action, level)
+
+         # Close door
+        initial_close_action = self.close_door(actor)
+        self.assert_action_rejected(
+            open_or_close_door, initial_close_action, level)
+
+    def test_prompt_to_chose_target_door(self):
+
+        # Doors on only two opposite sides
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(1, 1, 'kobold')
+        level.enter(actor)
+        door = self.get_door_entity(0, 1)
+        level.props.add_e(door)
+        door = self.get_door_entity(2, 1)
+        level.props.add_e(door)
+
+        # Open door
+        initial_open_action = self.open_door(actor)
+        new_open_action = open_or_close_door(initial_open_action, level)
+        self.assertEqual(new_open_action.type, ActionType.REQUEST_INPUT)
+        self.assertEqual(new_open_action.data, {'input_type': 'dir'})
+
+         # Close door
+        initial_close_action = self.close_door(actor)
+        new_close_action = open_or_close_door(initial_close_action, level)
+        self.assertEqual(new_open_action.type, ActionType.REQUEST_INPUT)
+        self.assertEqual(new_open_action.data, {'input_type': 'dir'})
+
+        # Doors on every surrounding cell
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(1, 1, 'kobold')
+        level.enter(actor)
+        for x in (0, 1, 2):
+            for y in (0, 1, 2):
+                door = self.get_door_entity(x, y)
+                level.props.add_e(door)
+
+        # Open door
+        initial_open_action = self.open_door(actor)
+        new_open_action = open_or_close_door(initial_open_action, level)
+        self.assertEqual(new_open_action.type, ActionType.REQUEST_INPUT)
+        self.assertEqual(new_open_action.data, {'input_type': 'dir'})
+
+         # Close door
+        initial_close_action = self.close_door(actor)
+        new_close_action = open_or_close_door(initial_close_action, level)
+        self.assertEqual(new_open_action.type, ActionType.REQUEST_INPUT)
+        self.assertEqual(new_open_action.data, {'input_type': 'dir'})
 
     def test_open_already_opened(self):
 
@@ -276,7 +406,7 @@ class OpenCloseDoorTest(BaseFunctionalTestCase):
         door = self.get_door_entity(opened=False)
 
         for action in (
-                self.open_door(actor, door), 
+                self.open_door(actor, door),
                 self.close_door(actor, door)
         ):
             mock_fov_compute.reset_mock()
@@ -294,7 +424,7 @@ class OpenCloseDoorTest(BaseFunctionalTestCase):
         door = self.get_door_entity(opened=False)
 
         for action in (
-                self.open_door(actor, door), 
+                self.open_door(actor, door),
                 self.close_door(actor, door)
         ):
             mock_fov_compute.reset_mock()

@@ -24,6 +24,10 @@ class Request(dict):
         return cls(session_key=cls.session_key, type='ACT', data=d)
 
     @classmethod
+    def prompt_response(cls, data):
+        return cls(session_key=cls.session_key, type='PROMPT', data=data or {})
+
+    @classmethod
     def get(cls): pass # stub
 
     @classmethod

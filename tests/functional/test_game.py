@@ -161,6 +161,69 @@ class TestGameLoop(BaseGameTest):
             self.assertEqual(0, len(Event.queue))
             self.assertEqual(3, self.game.ticks)
 
+    def test_input_request_returned_by_a_system_is_passed_to_the_caller(self):
+
+        self.build_dummy_game()
+
+        with patch(
+            'barbarian.systems.movement.move_actor',
+            return_value=Action(ActionType.REQUEST_INPUT, data={"lol": "woot"})
+        ):
+            res = self.advance_gameloop(Action(ActionType.MOVE))
+            self.assertEqual(ActionType.REQUEST_INPUT, res.type)
+            self.assertDictEqual({'lol': 'woot'}, res.data)
+
+    def test_last_action(self):
+
+        dir_data = {'dir': (0, 0)}
+        self.build_dummy_game()
+
+        action = Action(ActionType.MOVE, actor=self.game.player, data=dir_data)
+        self.advance_gameloop(action)
+        self.assertEqual(action, self.game.last_action)
+
+        # Last action in a chain is stored
+        returned_action = Action(ActionType.IDLE)
+        with patch(
+            'barbarian.systems.movement.move_actor',
+            return_value=returned_action
+        ):
+            action = Action(ActionType.MOVE, actor=self.game.player, data=dir_data)
+            self.advance_gameloop(action)
+            self.assertEqual(returned_action, self.game.last_action)
+
+    def test_last_action_ignores_input_requests(self):
+
+        self.build_dummy_game()
+
+        action = Action(ActionType.REQUEST_INPUT)
+        self.advance_gameloop(action)
+        self.assertEqual(None, self.game.last_action)
+
+        # Open door with no target will return an input request, which
+        # should not be stored
+        action = Action(ActionType.OPEN_DOOR, actor=self.game.player)
+        self.advance_gameloop(action)
+        self.assertEqual(action, self.game.last_action)
+
+    def test_prompt_request_reuse_last_action(self):
+
+        self.build_dummy_game()
+
+        action = Action(
+            ActionType.OPEN_DOOR, actor=self.game.player, data={'wat': 'wut'})
+        self.advance_gameloop(action)
+
+        with patch.object(
+            self.game, 'process_act_request'
+        ) as mock_process_act_req:
+
+            self.game.process_prompt_request({'woo': 'wee'})
+            mock_process_act_req.assert_called_with({
+                'type': ActionType.OPEN_DOOR,
+                'data': {'wat': 'wut', 'woo': 'wee'}
+            })
+
     def test_turn_aborted(self):
 
         self.build_dummy_game()

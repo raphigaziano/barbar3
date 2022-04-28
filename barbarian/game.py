@@ -192,13 +192,15 @@ class Game:
         if (action := self.chose_action(actor)) is None:
             return
 
-        # Player action: wait for input
-        if action.type == ActionType.REQUEST_INPUT:
+        action = self._process_action(action)
+        # Player action or prompt: wait for input
+        while action.type == ActionType.REQUEST_INPUT:
             self.state.update(self)
             Event.clear_queue()
-            action = yield
+            action = yield action
+            # Run the action chain, which might return a new prompt request
+            action = self._process_action(action)
 
-        action = self._process_action(action)
         # Invalid action: request a new one.
         if action.processed and not action.valid:
             try:
@@ -218,11 +220,17 @@ class Game:
             return
 
         while not action.processed:
+            # Prompt request: end the chain without storing the request as a
+            # last action
+            if action.type == ActionType.REQUEST_INPUT:
+                return action
+            self.last_action = action
             try:
                 action = self.dispatch_action(action)
             except ActionError as e:
                 logger.exception(e)
                 break
+
         return action
 
     def chose_action(self, actor):
@@ -292,7 +300,7 @@ class Game:
                 systems.inventory.equip_items(action)
 
             case ActionType.OPEN_DOOR | ActionType.CLOSE_DOOR:
-                systems.props.open_or_close_door(action, self.current_level)
+                new_action = systems.props.open_or_close_door(action, self.current_level)
 
             case ActionType.CHANGE_LEVEL:
                 systems.movement.change_level(
@@ -317,8 +325,7 @@ class Game:
                 'action of type %s could not be processed', action.type)
             action.reject()
 
-        self.last_action = new_action or action
-        return self.last_action
+        return new_action or action
 
     def handle_events(self):
         """ Process game events. """
@@ -377,7 +384,9 @@ class Game:
         if not self.is_running:
             return self.response('error', err_code='NOT_RUNNING')
         try:
-            self.gameloop.send(Action.from_dict(data))
+            input_request = self.gameloop.send(Action.from_dict(data))
+            if input_request.data:
+                return self.response('prompt_input', data=input_request.data)
             return self.response('OK', gamestate=self.gs)
         except StopIteration:
             # Gameloop was aborted: yield the current gamestate so that
@@ -387,6 +396,17 @@ class Game:
         except ActionError as e:
             msg = e.args[0]
             return self.response('error', err_code='INVALID_CMD', msg=msg)
+
+    def process_prompt_request(self, data):
+        """
+        Process a prompt request: rerun last action with the received additional 
+        data.
+
+        """
+        action_data = self.last_action.data.copy()
+        action_data.update(data)
+        return self.process_act_request(
+            {'type': self.last_action.type, 'data': action_data})
 
     def process_get_request(self, d):
         """ Process a get request (ie return info to the client. """

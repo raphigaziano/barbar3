@@ -66,7 +66,7 @@ class BaseFunctionalTestCase(unittest.TestCase):
         action = action or Action(ActionType.IDLE)
         game = game or self.game
         try:
-            game.gameloop.send(action)
+            return game.gameloop.send(action)
         except StopIteration:
             # This is handled by the game during normal run.
             pass

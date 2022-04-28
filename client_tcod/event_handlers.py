@@ -193,9 +193,9 @@ class RunEventHandler(
             return self.mode.eat()
 
         if (e.mod & tcod.event.KMOD_CTRL and e.sym == tcod.event.K_o):
-            return self.mode.open_door()
+            return Request.action('open_door')
         if (e.mod & tcod.event.KMOD_CTRL and e.sym == tcod.event.K_c):
-            return self.mode.close_door()
+            return Request.action('close_door')
 
         if e.sym == tcod.event.K_LESS:
             if e.mod & tcod.event.KMOD_SHIFT:
