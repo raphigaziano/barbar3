@@ -38,8 +38,8 @@ trap:
         glyph: '^'
     trigger:
         activation_mode:  actor_on_tile
-        target: actor
         action_data:
             type: inflict_dmg
+            target_mode: actor
             data: {dmg: 3d2+2}  # 5-8
     consumable: {}

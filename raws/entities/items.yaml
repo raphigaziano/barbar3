@@ -19,9 +19,9 @@ health_potion:
     _parent: _base_potion
     named: { name: health potion }
     usable:
-      target: actor
       action_data:
         type: heal
+        target_mode: actor
         data: {amount: 2D3+4}   # 6-10
     consumable: {}
 _base_scroll:

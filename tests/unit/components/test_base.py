@@ -134,8 +134,8 @@ class TestComponent(BaseComponentTestCase):
 
     @unittest.expectedFailure
     def test_flyweight_fails_with_dict_attr(self):
-        """ 
-        Can't hash dicts, so Components aith an dict attribute can't be 
+        """
+        Can't hash dicts, so Components aith an dict attribute can't be
         flyweight for now. This may or may not be what we want in the long run, 
         but let's have a warning for now.
         """

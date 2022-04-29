@@ -26,6 +26,14 @@ class ActionDataError(TypeError, ActionError):
     """ Invalid data dictionary."""
 
 
+class TargetMode(StringAutoEnum):
+    """ Selection mode for actor and target. """
+    USABLE = auto()
+    ACTOR = auto()
+    DIR = auto()
+    POS = auto()
+
+
 class ActionType(StringAutoEnum):
 
     REQUEST_INPUT = auto()
@@ -81,11 +89,15 @@ class Action:
     type: ActionType
     actor: Entity = None
     target: Entity = None
-    data: dict = None
+    data: dict = field(default_factory=dict)
+    target_mode: TargetMode = TargetMode.USABLE
 
     processed: bool = field(init=False, repr=False, default=False)
     valid: bool = field(init=False, repr=False, default=None)
     msg: str = field(init=False, repr=False, default=None)
+
+    def __post_init__(self):
+        self.target_mode = TargetMode(self.target_mode)
 
     def unpack(self):
         """ Shortcut to quickly retrieve action data. """
@@ -115,6 +127,42 @@ class Action:
         # include action_data ?
 
         Event.emit(event_type, msg=msg, **kwargs)
+
+    @property
+    def requires_prompt(self):
+        """
+        Return whether or not `self.target_mode` requires additional
+        data.
+
+        """
+        return self.target_mode in (TargetMode.DIR, TargetMode.POS)
+
+    def check_target_data(self):
+        """
+        Return whether or nor action_data contains the right targetting
+        info, depending on `self.target_mode`.
+
+        """
+        if self.requires_prompt:
+            data = self.data or {}
+            return self.target_mode.value in data
+        return True
+
+    def set_actor_and_target(self, user, usable_entity):
+        """
+        Set the right actor and target depending on `self.target_mode`.
+
+        """
+        match self.target_mode:
+            case TargetMode.ACTOR:
+                self.actor = usable_entity
+                self.target =  user
+            case TargetMode.USABLE:
+                self.actor = user
+                self.target = usable_entity
+            case _:
+                self.actor = user
+                # self.target = self.target_mode
 
     ### Alternate constructors ###
 

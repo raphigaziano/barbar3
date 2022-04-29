@@ -11,12 +11,6 @@ from barbarian.components.base import Component
 from barbarian.actions import Action
 
 
-class UseTarget(StringAutoEnum):
-
-    SELF = auto()
-    ACTOR = auto()
-
-
 class PropActivationMode(StringAutoEnum):
 
     ACTOR_ON_TILE = auto()
@@ -28,11 +22,7 @@ class Usable(Component):
 
     action_data: dict
     _action_data: FrozenDict = field(default=None, init=False, repr=False)
-    target: UseTarget = UseTarget.SELF
     use_key: str = ""
-
-    def __post_init__(self):
-        self.target = UseTarget(self.target)
 
     @property
     def action_data(self):
@@ -49,23 +39,9 @@ class Usable(Component):
 
         """
         new_action_args = self.action_data
-        new_action_args.update(
-            self.get_actor_and_target(actor, entity))
-        return Action.from_dict(new_action_args)
-
-    def get_actor_and_target(self, user, usable_entity):
-        """
-        Return the right actor and target depending on `self.target` mode.
-
-        Return data as a dict it order to easily update an `Action`
-        argument dict.
-
-        """
-        match self.target:
-            case UseTarget.ACTOR:
-                return {'actor': usable_entity, 'target': user}
-            case UseTarget.SELF:
-                return {'actor': user, 'target': usable_entity}
+        action = Action.from_dict(new_action_args)
+        action.set_actor_and_target(actor, entity)
+        return action
 
     def new_action(self, new_action_data):
         """
@@ -91,7 +67,6 @@ class Trigger(Usable):
     activation_mode: PropActivationMode
 
     def __post_init__(self):
-        super().__post_init__()
         self.activation_mode = PropActivationMode(self.activation_mode)
 
 
