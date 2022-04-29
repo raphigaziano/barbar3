@@ -19,6 +19,11 @@ class Position(Component):
     def serialize(self):
         return [self.x, self.y]
 
+    def __eq__(self, other):
+        if isinstance(other, tuple):
+            return (self.x, self.y) == other
+        return super().__eq__(other)
+
 
 class Solid(Component):
 
