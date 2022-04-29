@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from barbarian.utils.types import StringAutoEnum
 from barbarian.entity import Entity
 from barbarian.events import Event, EventType
+from barbarian.targetting import TargettingInfo, TargetMode
 
 
 logger = logging.getLogger(__name__)
@@ -24,14 +25,6 @@ class UnknownActionTypeError(ValueError, ActionError):
 
 class ActionDataError(TypeError, ActionError):
     """ Invalid data dictionary."""
-
-
-class TargetMode(StringAutoEnum):
-    """ Selection mode for actor and target. """
-    USABLE = auto()
-    ACTOR = auto()
-    DIR = auto()
-    POS = auto()
 
 
 class ActionType(StringAutoEnum):
@@ -90,14 +83,15 @@ class Action:
     actor: Entity = None
     target: Entity = None
     data: dict = field(default_factory=dict)
-    target_mode: TargetMode = TargetMode.USABLE
+
+    targetting: TargettingInfo = field(default_factory=dict)
 
     processed: bool = field(init=False, repr=False, default=False)
     valid: bool = field(init=False, repr=False, default=None)
     msg: str = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
-        self.target_mode = TargetMode(self.target_mode)
+        self.targetting = TargettingInfo(**self.targetting)
 
     def unpack(self):
         """ Shortcut to quickly retrieve action data. """
@@ -128,32 +122,22 @@ class Action:
 
         Event.emit(event_type, msg=msg, **kwargs)
 
-    @property
-    def requires_prompt(self):
-        """
-        Return whether or not `self.target_mode` requires additional
-        data.
-
-        """
-        return self.target_mode in (TargetMode.DIR, TargetMode.POS)
-
     def check_target_data(self):
         """
         Return whether or nor action_data contains the right targetting
-        info, depending on `self.target_mode`.
+        info, depending on `self.targetting.mode`.
 
         """
-        if self.requires_prompt:
-            data = self.data or {}
-            return self.target_mode.value in data
+        if self.targetting.requires_prompt:
+            return self.targetting.mode.value in self.data
         return True
 
     def set_actor_and_target(self, user, usable_entity):
         """
-        Set the right actor and target depending on `self.target_mode`.
+        Set the right actor and target depending on `self.targetting.mode`.
 
         """
-        match self.target_mode:
+        match self.targetting.mode:
             case TargetMode.ACTOR:
                 self.actor = usable_entity
                 self.target =  user
@@ -162,7 +146,7 @@ class Action:
                 self.target = usable_entity
             case _:
                 self.actor = user
-                # self.target = self.target_mode
+                # self.target = self.targetting.mode
 
     ### Alternate constructors ###
 

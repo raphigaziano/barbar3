@@ -158,7 +158,7 @@ class TestActionTargeting(unittest.TestCase):
 
     def test_target_mode_usable(self):
 
-        action = Action(ActionType.IDLE, target_mode=TargetMode.USABLE)
+        action = Action(ActionType.IDLE, targetting={'mode': TargetMode.USABLE})
         user  = Mock(name='mocked_user')
         usable_entity = Mock(name='mocked_entity')
 
@@ -168,7 +168,7 @@ class TestActionTargeting(unittest.TestCase):
 
     def test_target_mode_actor(self):
 
-        action = Action(ActionType.IDLE, target_mode=TargetMode.ACTOR)
+        action = Action(ActionType.IDLE, targetting={'mode': TargetMode.ACTOR})
         user  = Mock(name='mocked_user')
         usable_entity = Mock(name='mocked_entity')
 
@@ -178,7 +178,7 @@ class TestActionTargeting(unittest.TestCase):
 
     def test_target_mode_dir(self):
 
-        action = Action(ActionType.IDLE, target_mode=TargetMode.DIR)
+        action = Action(ActionType.IDLE, targetting={'mode': TargetMode.DIR})
         user  = Mock(name='mocked_user')
         usable_entity = Mock(name='mocked_entity')
 
@@ -188,7 +188,7 @@ class TestActionTargeting(unittest.TestCase):
 
     def test_target_mode_pos(self):
 
-        action = Action(ActionType.IDLE, target_mode=TargetMode.POS)
+        action = Action(ActionType.IDLE, targetting={'mode': TargetMode.POS})
         user  = Mock(name='mocked_user')
         usable_entity = Mock(name='mocked_entity')
 
@@ -196,38 +196,20 @@ class TestActionTargeting(unittest.TestCase):
         self.assertEqual(user, action.actor)
         self.assertIsNone(action.target)
 
-    def test_target_mode_defaults_to_usable(self):
-        action = Action(ActionType.IDLE)
-        self.assertEqual(TargetMode.USABLE, action.target_mode)
-
-    def test_requires_prompt(self):
-
-        action = Action(ActionType.IDLE, target_mode=TargetMode.USABLE)
-        self.assertFalse(action.requires_prompt)
-
-        action = Action(ActionType.IDLE, target_mode=TargetMode.ACTOR)
-        self.assertFalse(action.requires_prompt)
-
-        action = Action(ActionType.IDLE, target_mode=TargetMode.DIR)
-        self.assertTrue(action.requires_prompt)
-
-        action = Action(ActionType.IDLE, target_mode=TargetMode.POS)
-        self.assertTrue(action.requires_prompt)
-
     def test_check_targeting_data(self):
 
-        action = Action(ActionType.IDLE, target_mode=TargetMode.USABLE)
+        action = Action(ActionType.IDLE, targetting={'mode': TargetMode.USABLE})
         self.assertTrue(action.check_target_data())
 
-        action = Action(ActionType.IDLE, target_mode=TargetMode.ACTOR)
+        action = Action(ActionType.IDLE, targetting={'mode': TargetMode.ACTOR})
         self.assertTrue(action.check_target_data())
 
-        action = Action(ActionType.IDLE, target_mode=TargetMode.DIR)
+        action = Action(ActionType.IDLE, targetting={'mode': TargetMode.DIR})
         self.assertFalse(action.check_target_data())
         action.data['dir'] = (1, 1)
         self.assertTrue(action.check_target_data())
 
-        action = Action(ActionType.IDLE, target_mode=TargetMode.POS)
+        action = Action(ActionType.IDLE, targetting={'mode': TargetMode.POS})
         self.assertFalse(action.check_target_data())
         action.data['pos'] = (1, 1)
         self.assertTrue(action.check_target_data())

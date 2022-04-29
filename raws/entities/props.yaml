@@ -40,6 +40,7 @@ trap:
         activation_mode:  actor_on_tile
         action_data:
             type: inflict_dmg
-            target_mode: actor
+            targetting:
+                mode: actor
             data: {dmg: 3d2+2}  # 5-8
     consumable: {}

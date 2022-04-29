@@ -21,7 +21,8 @@ health_potion:
     usable:
       action_data:
         type: heal
-        target_mode: actor
+        targetting:
+            mode: actor
         data: {amount: 2D3+4}   # 6-10
     consumable: {}
 _base_scroll:
