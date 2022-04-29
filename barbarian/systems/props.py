@@ -109,7 +109,7 @@ def _open_or_close_surrounding_door(action, level):
         action.target = surrounding_doors[0]
         return action
     else:
-        return Action(ActionType.REQUEST_INPUT, data={'input_type': 'dir'})
+        return Action.request_input('dir')
 
 
 def open_or_close_door(action, level):

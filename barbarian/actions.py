@@ -197,3 +197,9 @@ class Action:
     def inflict_dmg(cls, a, t, d):
         """ Short hand constructor for an INFLICT_DMG actin. """
         return cls(ActionType.INFLICT_DMG, a, t, d)
+
+    @classmethod
+    def request_input(cls, input_type=None):
+        """ Short hand constructor for a REQUEST_INPUT actin. """
+        d = {'input_type': input_type} if input_type else {}
+        return cls(ActionType.REQUEST_INPUT, None, None, d)

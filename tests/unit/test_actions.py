@@ -139,6 +139,20 @@ class TestActionHelpers(unittest.TestCase):
         self.assertEqual(action.target, 't')
         self.assertEqual(action.data, {'dmg': 1})
 
+    def test_request_input_shortcut(self):
+        action = Action.request_input(input_type='lol')
+        self.assertEqual(action.type, ActionType.REQUEST_INPUT)
+        self.assertIsNone(action.actor)
+        self.assertIsNone(action.target)
+        self.assertEqual(action.data, {'input_type': 'lol'})
+
+    def test_request_input_shortcut_no_niput_type(self):
+        action = Action.request_input()
+        self.assertEqual(action.type, ActionType.REQUEST_INPUT)
+        self.assertIsNone(action.actor)
+        self.assertIsNone(action.target)
+        self.assertEqual(action.data, {})
+
 
 class TestActionTargeting(unittest.TestCase):
 

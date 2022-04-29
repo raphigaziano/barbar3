@@ -249,7 +249,7 @@ class Game:
         if actor.is_player:
             self.state.update(self)
             Event.clear_queue()
-            return Action(ActionType.REQUEST_INPUT)
+            return Action.request_input()
         return systems.ai.tmp_ai(actor, self)
 
     def dispatch_action(self, action):
