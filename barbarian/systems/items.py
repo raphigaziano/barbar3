@@ -22,15 +22,15 @@ def use_item(action):
     if not item.usable:
         return action.reject(msg=f'Item {item.name} cannot be used')
 
-    if item.consumable:
-        event_data = {'entity': item, 'owner': actor}
-        Event.emit(EventType.ENTITY_CONSUMED, data=event_data)
-
     try:
         item_action = item.usable.get_action(actor, item)
     except UnknownActionTypeError:
         action.reject()
         raise   # Let the game catch and log the error
+
+    if item.consumable:
+        event_data = {'entity': item, 'owner': actor, 'action': item_action}
+        Event.emit(EventType.ENTITY_CONSUMED, data=event_data)
 
     action.accept()
     return item_action

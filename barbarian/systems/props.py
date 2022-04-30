@@ -18,12 +18,13 @@ def _use_prop(actor, prop, use_component):
     Check charges and return a new action if prop is still charged.
 
     """
+    action = use_component.get_action(actor, prop)
     if prop.consumable:
         if prop.consumable.charges <= 0:
             return None
-        event_data = {'entity': prop}
+        event_data = {'entity': prop, 'action': action}
         Event.emit(EventType.ENTITY_CONSUMED, data=event_data)
-    return use_component.get_action(actor, prop)
+    return action
 
 
 def use_prop(action, level):

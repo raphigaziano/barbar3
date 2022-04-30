@@ -21,9 +21,19 @@ def consume_entity(event_data, last_action=None):
         logger.debug('Entity %s has no Consumable component', e)
         return
 
+    event_action = event_data['action']
+    if (
+        last_action.type != event_action.type or
+        last_action.actor != event_action.actor or
+        last_action.target != event_action.target
+        # Ignore action data, as it may have changed since the consume event
+        # was emitted (ie adding targetting info).
+    ):
+        return
+
     if last_action and not last_action.valid:
         logger.debug(
-            'Last action (typs <%s>) was rejected: skip depleting charges.', 
+            'Last action (type <%s>) was rejected: skip depleting charges.',
             last_action)
         return
 
