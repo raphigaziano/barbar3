@@ -247,7 +247,7 @@ class OpenCloseDoorTest(BaseFunctionalTestCase):
 
                 # Open door
                 initial_open_action = self.open_door(
-                    actor, d={'dx': dx, 'dy': dy})
+                    actor, d={'dir': (dx, dy)})
                 new_open_action = open_or_close_door(initial_open_action, level)
                 self.assertEqual(new_open_action.type, ActionType.OPEN_DOOR)
                 self.assertEqual(new_open_action.target, door)
@@ -257,7 +257,7 @@ class OpenCloseDoorTest(BaseFunctionalTestCase):
 
                  # Close door
                 initial_close_action = self.close_door(
-                    actor, d={'dx': dx, 'dy': dy})
+                    actor, d={'dir': (dx, dy)})
                 new_close_action = open_or_close_door(initial_close_action, level)
                 self.assertEqual(new_close_action.type, ActionType.CLOSE_DOOR)
                 self.assertEqual(new_close_action.target, door)
