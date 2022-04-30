@@ -250,7 +250,6 @@ class Game:
             return
         if actor.is_player:
             self.state.update(self)
-            Event.clear_queue()
             return Action.request_input()
         return systems.ai.tmp_ai(actor, self)
 
@@ -347,6 +346,8 @@ class Game:
             if e.type == EventType.ENTITY_CONSUMED:
                 systems.consumables.consume_entity(e.data, self.last_action)
                 e.processed = True
+
+        Event.clear_queue()
 
     ### NETWORK ###
     ###############
