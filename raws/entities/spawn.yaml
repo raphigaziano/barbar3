@@ -11,6 +11,7 @@
 - {name: health_potion, weight: 7}
 - {name: scroll_teleport, weight: 2}
 - {name: scroll_blink, weight: 2}
+- {name: scroll_ctrl_blink, weight: 1}
 - {name: sword, weight: 3}
 - {name: axe, weight: 1}
 - {name: leather_armor, weight: 3}

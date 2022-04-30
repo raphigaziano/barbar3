@@ -1,7 +1,8 @@
 from ..modes.base import BaseGameMode, GameOverMode
 from ..modes.mixins import CursorMixin, GameLogMixin, BloodstainsMixin
 from ..modes.ui import (
-    DbgMapMode, PromptDirectionMode, ItemMenuMode, InventoryMenuMode,
+    DbgMapMode, PromptDirectionMode, TargetMode,
+    ItemMenuMode, InventoryMenuMode,
 )
 from ..nw import Request
 from ..event_handlers import (
@@ -128,6 +129,17 @@ class RunMode(CursorMixin, GameLogMixin, BloodstainsMixin, BaseGameMode):
                     on_leaving=lambda _, dir:
                         self.client.send_request(
                             Request.prompt_response({'dir': dir}))
+                ))
+            elif r.data['input_type'] == 'pos':
+                px, py = self.client.gamestate.player['pos']
+                self.push(TargetMode(
+                    px, py,
+                    clear_path_on_confirm=True,
+                    restrict_to_visible_cells=True,
+                    on_leaving=lambda m:
+                        self.client.send_request(
+                            Request.prompt_response(
+                                {'pos': (m.cursor_x, m.cursor_y)}))
                 ))
         elif r.status == 'error':
             self.log_error(r)

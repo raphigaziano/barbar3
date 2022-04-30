@@ -138,17 +138,34 @@ def blink(action, level):
     actor = action.actor
 
     if not actor.fov:
-        return action.reject(msg=f'{actor} cant blink: no fov')
+        return action.reject(msg=f'{actor.name} cant blink: no fov')
 
     cells_in_range = list(actor.fov.visible_cells)
-    while dest := Rng.choice(cells_in_range):
 
-        dest_x, dest_y = dest
-        if distance_from(actor.pos.x, actor.pos.y, dest_x, dest_y) <= 1:
-            continue
+    if 'pos' in action.data:
 
-        if _teleport(actor, level, dest_x, dest_y):
+        dx, dy = action.data['pos']
+        if (dx, dy) == actor.pos:
+            return action.reject(msg=f'{actor.name} is already there')
+
+        if (dx, dy) not in cells_in_range:
+            return action.reject(msg='Targeted cell is out of range')
+
+        if _teleport(actor, level, dx, dy):
             return action.accept()
+        else:
+            return action.reject(msg='Targeted cell is occupied')
+
+    else:
+
+        while dest := Rng.choice(cells_in_range):
+
+            dest_x, dest_y = dest
+            if distance_from(actor.pos.x, actor.pos.y, dest_x, dest_y) <= 1:
+                continue
+
+            if _teleport(actor, level, dest_x, dest_y):
+                return action.accept()
 
 
 def teleport(action, level):
@@ -156,7 +173,7 @@ def teleport(action, level):
     actor = action.actor
 
     if not actor.fov:
-        return action.reject(msg=f'{actor} cant teleport: no fov')
+        return action.reject(msg=f'{actor.name} cant teleport: no fov')
 
     while dest := Rng.choice([(x, y) for x, y, _ in level.map]):
 

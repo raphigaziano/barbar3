@@ -223,6 +223,8 @@ class Game:
             if action.type == ActionType.REQUEST_INPUT:
                 return action
             self.last_action = action
+            if not action.check_target_data():
+                return Action.request_input(action.targetting.mode.value)
             try:
                 action = self.dispatch_action(action)
             except ActionError as e:

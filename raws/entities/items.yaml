@@ -42,6 +42,11 @@ scroll_blink:
     usable:
         action_data: { type: blink }
     consumable: {}
+scroll_ctrl_blink:
+    _parent: scroll_blink
+    named: { name: scroll of controlled blink }
+    usable: 
+        action_data: { targetting: { mode: pos } }
 _base_weapon:
     equipable: { inventory_slot: weapon }
     usable:

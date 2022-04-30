@@ -11,6 +11,7 @@ from ..event_handlers import (
     MenuEventHandler,
     TargetingEventHandler,
 )
+from ..utils import c_to_idx, closest_open_cell
 from .. import constants
 
 
@@ -80,8 +81,23 @@ class TargetMode(CursorMixin, BaseGameMode):
             self.entity_list = cycle(entity_list)
         else:
             self.entity_list = None
+        self.clear_path_on_confirm = kwargs.pop('clear_path_on_confirm', False)
+        self.restrict_to_visible_cells = kwargs.pop('restrict_to_visible_cells', False)
         super().__init__(*args, **kwargs)
         self.confirmed = False
+
+    def set_cursor_pos(self, x, y):
+        if self.restrict_to_visible_cells:
+            gs = self.client.gamestate
+            mapw, maph = gs.map['width'], gs.map['height']
+            if not gs.visible_cells[c_to_idx(x, y, gs.map['width'])]:
+                x, y = closest_open_cell(
+                    x, y, mapw, maph, gs.distance_map,
+                    predicate=lambda map_idx:
+                        # FIXME: disallow targetting doors
+                        gs.map['cells'][map_idx] != '#' and gs.visible_cells[map_idx]
+                )
+        super().set_cursor_pos(x, y)
 
     def target_next_entity(self):
         if self.entity_list:
@@ -98,6 +114,8 @@ class TargetMode(CursorMixin, BaseGameMode):
     def on_leaving(self):
         if self.confirmed:
             super().on_leaving()
+            if self.clear_path_on_confirm:
+                self.clear_path()
         else:
             self.clear_path()
 

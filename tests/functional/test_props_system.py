@@ -157,7 +157,9 @@ class TestTrigger(BaseFunctionalTestCase):
             self.assertEqual(ActionType.INFLICT_DMG, triggered_action.type)
 
             mocked_event_emit.assert_called_once_with(
-                EventType.ENTITY_CONSUMED, data={'entity': prop})
+                EventType.ENTITY_CONSUMED,
+                data={'entity': prop,
+                      'action': prop.trigger.get_action(actor, prop)})
 
     def test_trap_dont_trigger_if_depleted(self):
 

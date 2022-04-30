@@ -407,6 +407,91 @@ class TestBlink(BaseFunctionalTestCase):
         self.assert_action_rejected(blink, action, level)
 
 
+class TestCtrlBlink(BaseFunctionalTestCase):
+
+    dummy_map = (
+        '###########',
+        '#.........#',
+        '#..+......#',  # spawn door at 3, 2
+        '#.........#',  # spawn player at 5, 3
+        '#..#......#',  # wall at 3, 4
+        '#......o..#',  # orc at 7, 5
+        '###########',
+    )
+    valid_cells = (
+        (3, 1), (4, 1), (5, 1), (6, 1), (7, 1),
+        (7, 2),
+        (2, 3), (3, 3), (7, 3), (8, 3),
+        (7, 4),
+        (3, 5), (4, 5), (5, 5), (6, 5)
+    )
+
+    def blink_action(self, actor, x, y):
+        return Action(ActionType.BLINK, actor=actor, data={'pos': (x, y)})
+
+    def test_controlled_blink(self):
+
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(5, 3, 'player')
+        actor.fov.range = 3
+        level.enter(actor)
+        actor.fov.compute(level, actor.pos.x, actor.pos.y)
+
+        action = self.blink_action(actor, 7, 1)
+        self.assert_action_accepted(blink, action, level)
+
+        self.assertEqual((7, 1), actor.pos)
+
+    def test_controlled_blink_occupied_cell(self):
+
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(5, 3, 'player')
+        actor.fov.range = 3
+        level.enter(actor)
+        actor.fov.compute(level, actor.pos.x, actor.pos.y)
+
+        # Cell occupied: closed door
+        action = self.blink_action(actor, 3, 2)
+        self.assert_action_rejected(blink, action, level)
+        self.assertEqual((5, 3), actor.pos)
+
+        # Cell occupied: wall
+        action = self.blink_action(actor, 3, 4)
+        self.assert_action_rejected(blink, action, level)
+        self.assertEqual((5, 3), actor.pos)
+
+        # Cell occupied: actor
+        action = self.blink_action(actor, 7, 5)
+        self.assert_action_rejected(blink, action, level)
+        self.assertEqual((5, 3), actor.pos)
+
+    def test_controlled_blink_targets_actor_cell(self):
+
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(5, 3, 'player')
+        actor.fov.range = 3
+        level.enter(actor)
+        actor.fov.compute(level, actor.pos.x, actor.pos.y)
+
+        # Cell occupied: closed door
+        action = self.blink_action(actor, 5, 3)
+        self.assert_action_rejected(blink, action, level)
+        self.assertEqual((5, 3), actor.pos)
+
+    def test_controlled_blink_out_of_range(self):
+
+        level = self.build_dummy_level()
+        actor = self.spawn_actor(5, 3, 'player')
+        actor.fov.range = 3
+        level.enter(actor)
+        actor.fov.compute(level, actor.pos.x, actor.pos.y)
+
+        # Cell occupied: closed door
+        action = self.blink_action(actor, 8, 5)
+        self.assert_action_rejected(blink, action, level)
+        self.assertEqual((5, 3), actor.pos)
+
+
 class TestTeleport(BaseFunctionalTestCase):
 
     dummy_map = (
