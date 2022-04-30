@@ -117,7 +117,7 @@ class Event:
         return events
 
     def serialize(self):
-        return {
+        serialized = {
             'type': self.type.value,
             'msg': self.msg,
             'data': {
@@ -125,3 +125,12 @@ class Event:
                 for k, v in self.data.items()
             },
         }
+        # Some avents include an action object (so that it may be cancelled
+        # later on if needed), which breaks response encoding.
+        #
+        # We may decide in the future that we're okay with sending this
+        # information back to the client, but let's just remove it for now.
+        if 'action' in serialized['data']:
+            del serialized['data']['action']
+
+        return serialized
