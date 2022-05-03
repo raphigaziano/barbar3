@@ -94,8 +94,6 @@ class BSPMapBuilder(BaseMapBuilder):
             self.take_snapshot(self.map)
 
     def add_subrects(self, rect):
-        if self.rects:
-            self.rects.pop(-1)
 
         w = abs(rect.x - rect.x2)
         h = abs(rect.y - rect.y2)
