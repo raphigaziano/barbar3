@@ -3,6 +3,7 @@ import logging
 
 from barbarian.utils.rng import Rng
 from barbarian.utils.geometry import Rect
+from barbarian.utils.structures.grid import Grid
 from barbarian.genmap.common import BaseMapBuilder
 from barbarian.map import TileType
 
@@ -291,11 +292,11 @@ class CellularAutomataMapBuilder(BaseMapBuilder):
         # Will be needed for the next step, so let's go ahead
         # and store it to avoid recomputing it later
         self.start_pos = self.get_starting_position()
+        self.take_snapshot(self.map)
 
         # Cull unreachable areas and place the exit as far from the
         # start as possible
         self.exit_pos = self.cull_unreachable_areas(self.start_pos)
-
         self.take_snapshot(self.map)
 
         # Create spawn zones
@@ -433,3 +434,123 @@ class DrunkardWalkBuilder(BaseMapBuilder):
             drunkard_lifetime=100,
             floor_percentage=45,
         )
+
+
+class MazeMapBuilder(BaseMapBuilder):
+
+    SNAPSHOT_FREQUENCY = 25
+
+    class MazeCell:
+
+        def __init__(self, x, y):
+            self.x, self.y = x, y
+            self.walls = {
+                'TOP': True, 'RIGHT': True, 'BOTTOM': True, 'LEFT': True}
+            self.visited = False
+
+        def remove_walls(self, other_cell):
+            x = self.x - other_cell.x
+            y = self.y - other_cell.y
+
+            if x == 1:
+                self.walls['LEFT'] = False
+                other_cell.walls['RIGHT'] = False
+            elif x == -1:
+                self.walls['RIGHT'] = False
+                other_cell.walls['LEFT'] = False
+            elif y == 1:
+                self.walls['TOP'] = False
+                other_cell.walls['BOTTOM'] = False
+            elif y == -1:
+                self.walls['BOTTOM'] = False
+                other_cell.walls['TOP'] = False
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start_pos = None
+        self.exit_pos = None
+
+        self.noise_areas = {}
+
+    def build(self, depth):
+
+        maze = Grid((self.map.w // 2) - 2, (self.map.h // 2) - 2)
+        self.generate_maze(maze)
+
+        self.start_pos = self.get_starting_position()
+        self.take_snapshot(self.map)
+        self.exit_pos = self.cull_unreachable_areas(self.start_pos)
+        self.take_snapshot(self.map)
+
+        # Create spawn zones
+        self.noise_areas = self.generate_voronoi_regions()
+
+    def generate_maze(self, maze_grid):
+
+        for x, y, _ in maze_grid:
+            maze_grid[x, y] = self.MazeCell(x, y)
+
+        current = (0, 0)
+        backtrace = []
+
+        i = 0
+        while True:
+            cur_cell = maze_grid[current]
+            cur_cell.visited = True
+            next_ = self.find_next_cell(current, maze_grid)
+
+            if next_:
+                next_x, next_y, next_cell = next_
+                backtrace.append((next_x, next_y))
+
+                cur_cell.remove_walls(next_cell)
+                current = (next_x, next_y)
+            else:
+                if backtrace:
+                    current = backtrace.pop(0)
+                else:
+                    break
+
+            if self.debug and i % self.SNAPSHOT_FREQUENCY == 0:
+                self.update_map(maze_grid)
+                self.take_snapshot(self.map)
+            i += 1
+
+        self.update_map(maze_grid)
+
+    def find_next_cell(self, current_cell, maze_grid):
+        neighbors = list(maze_grid.get_neighbors(
+            *current_cell, cardinal_only=True,
+            predicate=lambda _, __, c: not c.visited
+        ))
+        if neighbors:
+            return Rng.dungeon.choice(neighbors)
+        return None
+
+    def update_map(self, maze_grid):
+
+        for maze_x, maze_y, maze_cell in maze_grid:
+
+            map_x, map_y = (maze_x + 1) * 2, (maze_y + 1) * 2
+            self.map[map_x, map_y] = TileType.FLOOR
+            if not maze_cell.walls['TOP']:
+                self.map[map_x, map_y - 1] = TileType.FLOOR
+            if not maze_cell.walls['RIGHT']:
+                self.map[map_x + 1, map_y] = TileType.FLOOR
+            if not maze_cell.walls['BOTTOM']:
+                self.map[map_x, map_y + 1] = TileType.FLOOR
+            if not maze_cell.walls['LEFT']:
+                self.map[map_x - 1, map_y] = TileType.FLOOR
+
+    def get_starting_position(self):
+        startx, starty = self.map.w // 2, self.map.h // 2
+        while self.map[startx, starty] != TileType.FLOOR:
+            startx -= 1
+        return startx, starty
+
+    def get_exit_position(self):
+        # Was calculated during generation
+        return self.exit_pos
+
+    def get_spawn_zones(self):
+        return list(self.noise_areas.values())
