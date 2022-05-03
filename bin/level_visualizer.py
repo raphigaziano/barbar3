@@ -57,6 +57,9 @@ builders = {
     'bsp': builders.BSPMapBuilder,
     'bsp_interior': builders.BSPInteriorMapBuilder,
     'cellular': builders.CellularAutomataMapBuilder,
+    'drunkard_open': builders.DrunkardWalkBuilder.open_area,
+    'drunkard_halls': builders.DrunkardWalkBuilder.open_halls,
+    'drunkard_winding': builders.DrunkardWalkBuilder.winding_passages,
 }
 
 def build_map(rng, builder):

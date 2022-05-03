@@ -33,6 +33,9 @@ LOGCONFIG = {
         'barbarian.events': {
             'level': 'INFO',
         },
+        'barbarian.genmap': {
+            'level': 'DEBUG',
+        },
     },
 }
 

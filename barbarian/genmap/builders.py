@@ -1,9 +1,13 @@
+from enum import Enum, auto
+import logging
+
 from barbarian.utils.rng import Rng
 from barbarian.utils.geometry import Rect
-from barbarian.utils.noise import get_cellular_voronoi_noise_generator
-from barbarian.utils.structures.dijkstra import DijkstraGrid
 from barbarian.genmap.common import BaseMapBuilder
 from barbarian.map import TileType
+
+
+logger = logging.getLogger(__name__)
 
 
 class SimpleMapBuilder(BaseMapBuilder):
@@ -290,37 +294,12 @@ class CellularAutomataMapBuilder(BaseMapBuilder):
 
         # Cull unreachable areas and place the exit as far from the
         # start as possible
-
-        cur_dist = 0
-        self.exit_pos = (0, 0)
-
-        dg = DijkstraGrid.new(
-            self.map.w, self.map.h,
-            self.start_pos,
-            predicate=lambda x, y, _: self.map[x,y] != TileType.WALL)
-
-        for x, y, dist_to_start in dg:
-            if self.map.cell_blocks(x, y):
-                continue
-            if dist_to_start == dg.inf:
-                # Can't reach (x,y), so make it a wall
-                self.map[x, y] = TileType.WALL
-            elif dist_to_start > cur_dist:
-                # Push exit further and further from the start
-                self.exit_pos = (x, y)
-                cur_dist = dist_to_start
+        self.exit_pos = self.cull_unreachable_areas(self.start_pos)
 
         self.take_snapshot(self.map)
 
         # Create spawn zones
-        noise = get_cellular_voronoi_noise_generator(Rng.dungeon)
-        for x, y, c in self.map:
-            if not self.map.in_bounds(x, y, border_width=1):
-                continue
-            if c == TileType.FLOOR:
-                fnoise_val = noise.get_noise(float(x), float(y))
-                noise_val = int(fnoise_val * 10240.0)
-                self.noise_areas.setdefault(noise_val, []).append((x, y))
+        self.noise_areas = self.generate_voronoi_regions()
 
     def get_starting_position(self):
         if self.start_pos:
@@ -336,3 +315,121 @@ class CellularAutomataMapBuilder(BaseMapBuilder):
 
     def get_spawn_zones(self):
         return list(self.noise_areas.values())
+
+
+class DrunkardSpawnMode(Enum):
+
+    STARTING_POINT = auto()
+    RANDOM = auto()
+
+
+class DrunkardWalkBuilder(BaseMapBuilder):
+
+    DEFAULT_DRUNKARD_LIFETIME = 400
+    DEFAULT_FLOOR_PERCENTAGE = 50
+
+    def __init__(self,
+                 spawn_mode=DrunkardSpawnMode.STARTING_POINT,
+                 drunkard_lifetime=None, floor_percentage=None, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+        self.start_pos = None
+        self.exit_pos = None
+
+        self.noise_areas = {}
+        self.spawn_mode = spawn_mode
+        self.drunkard_lifetime = (
+            drunkard_lifetime or self.DEFAULT_DRUNKARD_LIFETIME)
+        self.floor_percentage = (
+            floor_percentage or self.DEFAULT_FLOOR_PERCENTAGE)
+
+    def build(self, depth):
+
+        self.start_pos = self.map.w // 2, self.map.h // 2
+        self.map[self.start_pos] = TileType.FLOOR
+
+        desired_floor_cells_count = (
+            (self.map.w * self.map.h) * (self.floor_percentage / 100))
+        floor_cells_count = len([c for c in self.map.cells if c == TileType.FLOOR])
+        digger_count = active_digger_count = 0
+
+        while floor_cells_count < desired_floor_cells_count:
+
+            did_something = False
+
+            if self.spawn_mode is DrunkardSpawnMode.STARTING_POINT:
+                drunk_x, drunk_y = self.start_pos
+            elif self.spawn_mode is DrunkardSpawnMode.RANDOM:
+                if digger_count == 0:
+                    drunk_x, drunk_y = self.start_pos
+                else:
+                    drunk_x = Rng.dungeon.randint(1, self.map.w - 3) + 1
+                    drunk_y = Rng.dungeon.randint(1, self.map.h - 3) + 1
+
+            drunk_life = self.drunkard_lifetime
+
+            while drunk_life > 0:
+
+                if self.map[drunk_x, drunk_y] == TileType.WALL:
+                    did_something = True
+                # TMP value for snapshotting
+                self.map[drunk_x, drunk_y] = (
+                    TileType.TMP if self.debug else TileType.FLOOR)
+
+                stagger_x, stagger_y = Rng.dungeon.choice(self.map.CARDINAL_DIRS)
+                drunk_x = max(2, min(self.map.w - 2, drunk_x + stagger_x))
+                drunk_y = max(2, min(self.map.h - 2, drunk_y + stagger_y))
+
+                drunk_life -= 1
+
+            if did_something:
+                self.take_snapshot(self.map)
+                active_digger_count += 1
+
+            digger_count += 1
+
+            if self.debug:
+                # Turn tmp values into floor.
+                for x, y, c in self.map:
+                    if c == TileType.TMP:
+                        self.map[x, y] = TileType.FLOOR
+
+            floor_cells_count = len([c for c in self.map.cells if c == TileType.FLOOR])
+
+        logger.debug(
+            "%s dwarves gave up their sobrierty, of whom %s actually found a wall",
+            digger_count, active_digger_count)
+
+        self.exit_pos = self.cull_unreachable_areas(self.start_pos)
+        self.take_snapshot(self.map)
+        self.noise_areas = self.generate_voronoi_regions()
+
+    def get_starting_position(self):
+        # Was calculated during generation
+        return self.start_pos
+
+    def get_exit_position(self):
+        # Was calculated during generation
+        return self.exit_pos
+
+    def get_spawn_zones(self):
+        return list(self.noise_areas.values())
+
+    # Alternate constructors
+
+    @classmethod
+    def open_area(cls, debug=False):
+        return cls(debug=debug)
+
+    @classmethod
+    def open_halls(cls, debug=False):
+        return cls(debug=debug, spawn_mode=DrunkardSpawnMode.RANDOM)
+
+    @classmethod
+    def winding_passages(cls, debug=False):
+        return cls(
+            debug=debug,
+            spawn_mode=DrunkardSpawnMode.RANDOM,
+            drunkard_lifetime=100,
+            floor_percentage=45,
+        )

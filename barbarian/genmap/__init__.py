@@ -7,6 +7,9 @@ _MAP_BUILDERS = (
     builders.BSPMapBuilder,
     builders.BSPInteriorMapBuilder,
     builders.CellularAutomataMapBuilder,
+    builders.DrunkardWalkBuilder.open_area,
+    builders.DrunkardWalkBuilder.open_halls,
+    builders.DrunkardWalkBuilder.winding_passages,
 )
 
 

@@ -53,6 +53,7 @@ IGNORE_FOV_ENTITY_TYPES = (
 AUTO_REST_N_TURNS = 50
 
 class TileType(Enum):
+    TMP = 'X'
     FLOOR = '.'
     WALL = '#'
 

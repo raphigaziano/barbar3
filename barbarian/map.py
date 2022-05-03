@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class TileType(Enum):
     """ Type for a map cell. """
+    TMP = 'X'
     FLOOR = '.'
     WALL = '#'
 

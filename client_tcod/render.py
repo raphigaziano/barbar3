@@ -25,12 +25,14 @@ TILESHEET_CELL_W, TILESHEET_CELL_H = 32, 8
 TILESHEET_CHARMAP = tcod.tileset.CHARMAP_TCOD
 
 TileGlyphs = {
+    C.TileType.TMP: 'X',
     C.TileType.FLOOR: '.',
     C.TileType.WALL: '#',
 }
 
 # fg
 TileColors = {
+    C.TileType.TMP: tcod.amber,
     C.TileType.FLOOR: tcod.Color(0, 127, 0),
     C.TileType.WALL: tcod.Color(0, 255, 0),
 }
