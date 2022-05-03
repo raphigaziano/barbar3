@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import patch, Mock
 
-from barbarian.actions import Action, ActionType, TargetMode
+from barbarian.actions import Action, ActionType
+from barbarian.targetting import TargetMode
 from barbarian.actions import ActionDataError, UnknownActionTypeError
 from barbarian.events import EventType
 
