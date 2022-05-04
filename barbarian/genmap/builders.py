@@ -4,7 +4,7 @@ import logging
 from barbarian.utils.rng import Rng
 from barbarian.utils.geometry import Rect, bresenham
 from barbarian.utils.structures.grid import Grid
-from barbarian.genmap.common import BaseMapBuilder
+from barbarian.genmap.common import BaseMapBuilder, Symmetry
 from barbarian.map import TileType
 
 
@@ -374,7 +374,8 @@ class DrunkardWalkBuilder(BaseMapBuilder):
                 if self.map[digger_x, digger_y] == TileType.WALL:
                     did_something = True
                 # TMP value for snapshotting
-                self.map[digger_x, digger_y] = (
+                self.paint(
+                    digger_x, digger_y,
                     TileType.TMP if self.debug else TileType.FLOOR)
 
                 stagger_x, stagger_y = Rng.dungeon.choice(self.map.CARDINAL_DIRS)
@@ -433,6 +434,26 @@ class DrunkardWalkBuilder(BaseMapBuilder):
             spawn_mode=DrunkardSpawnMode.RANDOM,
             drunkard_lifetime=100,
             floor_percentage=45,
+        )
+
+    @classmethod
+    def fat_passages(cls, debug=False):
+        return cls(
+            debug=debug,
+            spawn_mode=DrunkardSpawnMode.RANDOM,
+            drunkard_lifetime=100,
+            floor_percentage=45,
+            brush_size=2,
+        )
+
+    @classmethod
+    def fearful_symmetry(cls, debug=False):
+        return cls(
+            debug=debug,
+            spawn_mode=DrunkardSpawnMode.RANDOM,
+            drunkard_lifetime=100,
+            floor_percentage=50,
+            symmetry=Symmetry.BOTH,
         )
 
 
@@ -562,23 +583,13 @@ class DLAAlgorithm(Enum):
     CENTRAL_ATTRACTOR = auto()
 
 
-class DLASymmetry(Enum):
-    NONE = auto()
-    HORIZONTAL = auto()
-    VERTICAL = auto()
-    BOTH = auto()
-
-
 class DLAMapBuilder(BaseMapBuilder):
 
     DEFAULT_ALGORITHM = DLAAlgorithm.WALK_INWARDS
-    DEFAULT_BRUSH_SIZE = 1
-    DEFAULT_SYMMETRY = DLASymmetry.NONE
     DEFAULT_FLOOR_PERCENTAGE = 30
 
     def __init__(
-            self, algorithm=None, brush_size=None, symmetry=None, floor_percentage=None,
-            *args, **kwargs):
+            self, algorithm=None, floor_percentage=None, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
         self.start_pos = None
@@ -587,8 +598,6 @@ class DLAMapBuilder(BaseMapBuilder):
         self.noise_areas = {}
 
         self.algorithm = algorithm or self.DEFAULT_ALGORITHM
-        self.brush_size = brush_size or self.DEFAULT_BRUSH_SIZE
-        self.symmetry = symmetry or self.DEFAULT_SYMMETRY
         self.floor_percentage = floor_percentage or self.DEFAULT_FLOOR_PERCENTAGE
 
     def build(self, depth):
@@ -664,57 +673,6 @@ class DLAMapBuilder(BaseMapBuilder):
         self.take_snapshot(self.map)
         self.noise_areas = self.generate_voronoi_regions()
 
-    def paint(self, x, y):
-
-        match self.symmetry:
-
-            case DLASymmetry.NONE:
-                self.apply_paint(x, y)
-
-            case DLASymmetry.HORIZONTAL:
-                center_x = self.map.w // 2
-                if x == center_x:
-                    self.apply_paint(x, y)
-                else:
-                    dist_x = abs(center_x - x)
-                    self.apply_paint(center_x + dist_x, y)
-                    self.apply_paint(center_x - dist_x, y)
-
-            case DLASymmetry.VERTICAL:
-                center_y = self.map.h // 2
-                if y == center_y:
-                    self.apply_paint(x, y)
-                else:
-                    dist_y = abs(center_y - y)
-                    self.apply_paint(x, center_y + dist_y)
-                    self.apply_paint(x, center_y - dist_y)
-
-            case DLASymmetry.BOTH:
-                center_x = self.map.w // 2
-                center_y = self.map.h // 2
-                if x == center_x and y == center_y:
-                    self.apply_paint(x, y)
-                else:
-                    dist_x = abs(center_x - x)
-                    dist_y = abs(center_y - y)
-                    self.apply_paint(center_x + dist_x, center_y + dist_y)
-                    self.apply_paint(center_x - dist_x, center_y - dist_y)
-                    self.apply_paint(center_x - dist_x, center_y + dist_y)
-                    self.apply_paint(center_x + dist_x, center_y - dist_y)
-
-    def apply_paint(self, x, y):
-        if self.brush_size == 1:
-            self.map[x, y] = TileType.FLOOR
-        else:
-            half_brush_size = self.brush_size // 2
-            for brush_x in range(x-half_brush_size, x+half_brush_size):
-                for brush_y in range(y - half_brush_size, y + half_brush_size):
-                    if (
-                        1 <= brush_x < self.map.w - 1 and
-                        1 <= brush_y < self.map.h - 1
-                    ):
-                        self.map[brush_x, brush_y] = TileType.FLOOR
-
     def get_starting_position(self):
         # Was calculated during generation
         return self.start_pos
@@ -732,7 +690,7 @@ class DLAMapBuilder(BaseMapBuilder):
             debug=debug,
             algorithm=DLAAlgorithm.WALK_INWARDS,
             brush_size=1,
-            symmetry=DLASymmetry.NONE)
+            symmetry=Symmetry.NONE)
 
     @classmethod
     def walk_outwards(cls, debug=False):
@@ -740,7 +698,7 @@ class DLAMapBuilder(BaseMapBuilder):
             debug=debug,
             algorithm=DLAAlgorithm.WALK_OUTWARDS,
             brush_size=2,
-            symmetry=DLASymmetry.NONE)
+            symmetry=Symmetry.NONE)
 
     @classmethod
     def central_attractor(cls, debug=False):
@@ -748,7 +706,7 @@ class DLAMapBuilder(BaseMapBuilder):
             debug=debug,
             algorithm=DLAAlgorithm.CENTRAL_ATTRACTOR,
             brush_size=2,
-            symmetry=DLASymmetry.NONE)
+            symmetry=Symmetry.NONE)
 
     @classmethod
     def insectoid(cls, debug=False):
@@ -756,4 +714,4 @@ class DLAMapBuilder(BaseMapBuilder):
             debug=debug,
             algorithm=DLAAlgorithm.CENTRAL_ATTRACTOR,
             brush_size=2,
-            symmetry=DLASymmetry.HORIZONTAL)
+            symmetry=Symmetry.HORIZONTAL)

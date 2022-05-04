@@ -10,6 +10,8 @@ _MAP_BUILDERS = (
     builders.DrunkardWalkBuilder.open_area,
     builders.DrunkardWalkBuilder.open_halls,
     builders.DrunkardWalkBuilder.winding_passages,
+    builders.DrunkardWalkBuilder.fat_passages,
+    builders.DrunkardWalkBuilder.fearful_symmetry,
     builders.MazeMapBuilder,
     # Too slow
     # builders.DLAMapBuilder.walk_inwards,
@@ -22,5 +24,5 @@ _MAP_BUILDERS = (
 
 def get_map_builder(map_debug):
     """ Return a randomly chosen map builder. """
-    # return builders.DLAMapBuilder(debug=map_debug)
+    # return builders.DrunkardWalkBuilder.fearful_symmetry(debug=map_debug)
     return Rng.dungeon.choice(_MAP_BUILDERS)(debug=map_debug)
