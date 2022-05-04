@@ -2,7 +2,7 @@ from enum import Enum, auto
 import logging
 
 from barbarian.utils.rng import Rng
-from barbarian.utils.geometry import Rect
+from barbarian.utils.geometry import Rect, bresenham
 from barbarian.utils.structures.grid import Grid
 from barbarian.genmap.common import BaseMapBuilder
 from barbarian.map import TileType
@@ -359,27 +359,27 @@ class DrunkardWalkBuilder(BaseMapBuilder):
             did_something = False
 
             if self.spawn_mode is DrunkardSpawnMode.STARTING_POINT:
-                drunk_x, drunk_y = self.start_pos
+                digger_x, digger_y = self.start_pos
             elif self.spawn_mode is DrunkardSpawnMode.RANDOM:
                 if digger_count == 0:
-                    drunk_x, drunk_y = self.start_pos
+                    digger_x, digger_y = self.start_pos
                 else:
-                    drunk_x = Rng.dungeon.randint(1, self.map.w - 3) + 1
-                    drunk_y = Rng.dungeon.randint(1, self.map.h - 3) + 1
+                    digger_x = Rng.dungeon.randint(1, self.map.w - 3) + 1
+                    digger_y = Rng.dungeon.randint(1, self.map.h - 3) + 1
 
             drunk_life = self.drunkard_lifetime
 
             while drunk_life > 0:
 
-                if self.map[drunk_x, drunk_y] == TileType.WALL:
+                if self.map[digger_x, digger_y] == TileType.WALL:
                     did_something = True
                 # TMP value for snapshotting
-                self.map[drunk_x, drunk_y] = (
+                self.map[digger_x, digger_y] = (
                     TileType.TMP if self.debug else TileType.FLOOR)
 
                 stagger_x, stagger_y = Rng.dungeon.choice(self.map.CARDINAL_DIRS)
-                drunk_x = max(2, min(self.map.w - 2, drunk_x + stagger_x))
-                drunk_y = max(2, min(self.map.h - 2, drunk_y + stagger_y))
+                digger_x = max(2, min(self.map.w - 2, digger_x + stagger_x))
+                digger_y = max(2, min(self.map.h - 2, digger_y + stagger_y))
 
                 drunk_life -= 1
 
@@ -554,3 +554,206 @@ class MazeMapBuilder(BaseMapBuilder):
 
     def get_spawn_zones(self):
         return list(self.noise_areas.values())
+
+
+class DLAAlgorithm(Enum):
+    WALK_INWARDS = auto()
+    WALK_OUTWARDS = auto()
+    CENTRAL_ATTRACTOR = auto()
+
+
+class DLASymmetry(Enum):
+    NONE = auto()
+    HORIZONTAL = auto()
+    VERTICAL = auto()
+    BOTH = auto()
+
+
+class DLAMapBuilder(BaseMapBuilder):
+
+    DEFAULT_ALGORITHM = DLAAlgorithm.WALK_INWARDS
+    DEFAULT_BRUSH_SIZE = 1
+    DEFAULT_SYMMETRY = DLASymmetry.NONE
+    DEFAULT_FLOOR_PERCENTAGE = 30
+
+    def __init__(
+            self, algorithm=None, brush_size=None, symmetry=None, floor_percentage=None,
+            *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+        self.start_pos = None
+        self.exit_pos = None
+
+        self.noise_areas = {}
+
+        self.algorithm = algorithm or self.DEFAULT_ALGORITHM
+        self.brush_size = brush_size or self.DEFAULT_BRUSH_SIZE
+        self.symmetry = symmetry or self.DEFAULT_SYMMETRY
+        self.floor_percentage = floor_percentage or self.DEFAULT_FLOOR_PERCENTAGE
+
+    def build(self, depth):
+
+        # Dig a starting "seed" area
+        start_x, start_y = self.map.w // 2, self.map.h // 2
+        self.start_pos = start_x, start_y
+        self.take_snapshot(self.map)
+
+        self.map[self.start_pos] = TileType.FLOOR
+        self.map[start_x + 1, start_y] = TileType.FLOOR
+        self.map[start_x - 1, start_y] = TileType.FLOOR
+        self.map[start_x, start_y + 1] = TileType.FLOOR
+        self.map[start_x, start_y - 1] = TileType.FLOOR
+        self.take_snapshot(self.map)
+
+        desired_floor_cells_count = (
+            (self.map.w * self.map.h) * (self.floor_percentage / 100))
+        floor_cells_count = len([c for c in self.map.cells if c == TileType.FLOOR])
+
+        while floor_cells_count < desired_floor_cells_count:
+
+            # Works, but painfully slow :(
+            if self.algorithm == DLAAlgorithm.WALK_INWARDS:
+
+                digger_x = Rng.dungeon.randint(1, self.map.w - 3) + 1
+                digger_y = Rng.dungeon.randint(1, self.map.h - 3) + 1
+                prev_x, prev_y = digger_x, digger_y
+                while self.map[digger_x, digger_y] == TileType.WALL:
+                    prev_x, prev_y = digger_x, digger_y
+                    stagger_x, stagger_y = Rng.dungeon.choice(self.map.CARDINAL_DIRS)
+                    digger_x = max(
+                        2, min(self.map.w - 2, digger_x + stagger_x))
+                    digger_y = max(
+                        2, min(self.map.h - 2, digger_y + stagger_y))
+                self.paint(prev_x, prev_y)
+
+            # This doesn't work right.
+            # Confirmed at https://github.com/amethyst/rustrogueliketutorial/issues/129
+            # but no fix yet.
+            elif self.algorithm == DLAAlgorithm.WALK_OUTWARDS:
+
+                digger_x, digger_y = self.start_pos
+                while self.map[digger_x, digger_y] == TileType.FLOOR:
+                    stagger_x, stagger_y = Rng.dungeon.choice(self.map.CARDINAL_DIRS)
+                    digger_x = max(
+                        2, min(self.map.w - 2, digger_x + stagger_x))
+                    digger_y = max(
+                        2, min(self.map.h - 2, digger_y + stagger_y))
+                self.paint(digger_x, digger_y)
+
+            elif self.algorithm == DLAAlgorithm.CENTRAL_ATTRACTOR:
+
+                start_pos_x, start_pos_y = self.start_pos
+                digger_x = Rng.dungeon.randint(1, self.map.w - 3) + 1
+                digger_y = Rng.dungeon.randint(1, self.map.h - 3) + 1
+                prev_x, prev_y = digger_x, digger_y
+
+                path_to_center = bresenham(
+                    digger_x, digger_y, start_pos_x, start_pos_y)
+
+                for px, py in path_to_center:
+                    if self.map[px, py] != TileType.WALL:
+                        break
+                    prev_x, prev_y = px, py
+
+                self.paint(prev_x, prev_y)
+
+            self.take_snapshot(self.map)
+            floor_cells_count = len([c for c in self.map.cells if c == TileType.FLOOR])
+
+        self.exit_pos = self.cull_unreachable_areas(self.start_pos)
+        self.take_snapshot(self.map)
+        self.noise_areas = self.generate_voronoi_regions()
+
+    def paint(self, x, y):
+
+        match self.symmetry:
+
+            case DLASymmetry.NONE:
+                self.apply_paint(x, y)
+
+            case DLASymmetry.HORIZONTAL:
+                center_x = self.map.w // 2
+                if x == center_x:
+                    self.apply_paint(x, y)
+                else:
+                    dist_x = abs(center_x - x)
+                    self.apply_paint(center_x + dist_x, y)
+                    self.apply_paint(center_x - dist_x, y)
+
+            case DLASymmetry.VERTICAL:
+                center_y = self.map.h // 2
+                if y == center_y:
+                    self.apply_paint(x, y)
+                else:
+                    dist_y = abs(center_y - y)
+                    self.apply_paint(x, center_y + dist_y)
+                    self.apply_paint(x, center_y - dist_y)
+
+            case DLASymmetry.BOTH:
+                center_x = self.map.w // 2
+                center_y = self.map.h // 2
+                if x == center_x and y == center_y:
+                    self.apply_paint(x, y)
+                else:
+                    dist_x = abs(center_x - x)
+                    dist_y = abs(center_y - y)
+                    self.apply_paint(center_x + dist_x, center_y + dist_y)
+                    self.apply_paint(center_x - dist_x, center_y - dist_y)
+                    self.apply_paint(center_x - dist_x, center_y + dist_y)
+                    self.apply_paint(center_x + dist_x, center_y - dist_y)
+
+    def apply_paint(self, x, y):
+        if self.brush_size == 1:
+            self.map[x, y] = TileType.FLOOR
+        else:
+            half_brush_size = self.brush_size // 2
+            for brush_x in range(x-half_brush_size, x+half_brush_size):
+                for brush_y in range(y - half_brush_size, y + half_brush_size):
+                    if (
+                        1 <= brush_x < self.map.w - 1 and
+                        1 <= brush_y < self.map.h - 1
+                    ):
+                        self.map[brush_x, brush_y] = TileType.FLOOR
+
+    def get_starting_position(self):
+        # Was calculated during generation
+        return self.start_pos
+
+    def get_exit_position(self):
+        # Was calculated during generation
+        return self.exit_pos
+
+    def get_spawn_zones(self):
+        return list(self.noise_areas.values())
+
+    @classmethod
+    def walk_inwards(cls, debug=False):
+        return cls(
+            debug=debug,
+            algorithm=DLAAlgorithm.WALK_INWARDS,
+            brush_size=1,
+            symmetry=DLASymmetry.NONE)
+
+    @classmethod
+    def walk_outwards(cls, debug=False):
+        return cls(
+            debug=debug,
+            algorithm=DLAAlgorithm.WALK_OUTWARDS,
+            brush_size=2,
+            symmetry=DLASymmetry.NONE)
+
+    @classmethod
+    def central_attractor(cls, debug=False):
+        return cls(
+            debug=debug,
+            algorithm=DLAAlgorithm.CENTRAL_ATTRACTOR,
+            brush_size=2,
+            symmetry=DLASymmetry.NONE)
+
+    @classmethod
+    def insectoid(cls, debug=False):
+        return cls(
+            debug=debug,
+            algorithm=DLAAlgorithm.CENTRAL_ATTRACTOR,
+            brush_size=2,
+            symmetry=DLASymmetry.HORIZONTAL)
