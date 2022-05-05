@@ -2,6 +2,7 @@
 import sys
 import random
 import logging
+import re
 
 
 logger = logging.getLogger(__name__)
@@ -63,6 +64,10 @@ class _Rng(random.Random):
 
         return max(1, res)
 
+    dice_rgx = re.compile(
+        r'^(?P<num>\d+)d(?P<faces>\d+)(?P<mod>[\+\-]\d+)?$',
+        re.IGNORECASE)
+
     def roll_dice_str(self, dice_string):
         """
         Parse a diceroll string and roll the corresponding dice.
@@ -73,27 +78,17 @@ class _Rng(random.Random):
         real world (-> 1D7).
 
         """
-        # TODO: just use a regex to find our values.
         try:
-            num, faces = dice_string.upper().split('D')
-        except (ValueError, AttributeError) as e:
-            raise RngDiceError(
-                f"Invalid dice string: {dice_string}") from e
-        try:
-            faces, mod = faces.split('+')
-        except ValueError:
-            try:
-                faces, mod = faces.split('-')
-                mod = f'-{mod}'
-            except ValueError:
-                mod = 0
-
-        try:
-            num, faces, mod = int(num), int(faces), int(mod)
-        except ValueError as e:
+            m = self.dice_rgx.match(dice_string)
+        except TypeError as e:
             raise RngDiceError(f"Invalid dice string: {dice_string}") from e
 
-        return self.roll_dice(num, faces, mod)
+        if m:
+            num, faces = int(m.group('num')), int(m.group('faces'))
+            mod = int(m.group('mod')) if m.group('mod') else 0
+            return self.roll_dice(num, faces, mod)
+
+        raise RngDiceError(f"Invalid dice string: {dice_string}")
 
     def try_roll_dice_str(self, int_or_str):
         """
