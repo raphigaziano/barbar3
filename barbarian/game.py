@@ -57,8 +57,15 @@ class Game:
 
     @property
     def actors(self):
-        """ Shotcut """
-        return self.current_level.actors.all[:]
+        """ Shortcut """
+        # Sort actor list by entity id for now, just to ensure ordering stays
+        # consistent (EntityComponent.all's ordering varies slightly
+        # depending on entity's position, which causes actors to skip
+        # their turn depending on their position relative to the player's.
+        # Since we'll want a proper scheduling system at some point, let's
+        # just reorder them here for now.
+        return sorted(
+            self.current_level.actors.all[:], key=lambda a: a._id)
 
     @property
     def gs(self):

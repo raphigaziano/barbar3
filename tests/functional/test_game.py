@@ -39,7 +39,11 @@ class TestGame(BaseGameTest):
         self.assertEqual(1, game.current_level.depth)
 
         # Actors shortcut points to the current level
-        self.assertListEqual(game.actors, game.current_level.actors.all)
+        self.assertEqual(
+            game.actors,
+            # Reproduce tmp ordering done by game.actors
+            sorted(game.current_level.actors.all, key=lambda a: a._id)
+        )
 
         # Player created and entered current level
         self.assertIsNotNone(game.player)
@@ -145,21 +149,31 @@ class TestGameLoop(BaseGameTest):
             begin_turn=DEFAULT, take_turn=DEFAULT, end_turn=DEFAULT,
         ) as mocks:
 
-            # spawning at 0,0 seems to move the new actor first in the
-            # actor queue... We need a scheduler...
             new_actor = self.spawn_actor(0, 0, 'orc')
             self.game.current_level.actors.add_e(new_actor)
 
             self.advance_gameloop()
 
-            # 2 actors => 2 calls
-            self.assertEqual(2, mocks['begin_turn'].call_count)
-            self.assertEqual(2, mocks['take_turn'].call_count)
-            self.assertEqual(2, mocks['end_turn'].call_count)
+            # Player acts first, so second actor hasn't taken its turn yet
+            self.assertEqual(1, mocks['begin_turn'].call_count)
+            self.assertEqual(1, mocks['take_turn'].call_count)
+            self.assertEqual(1, mocks['end_turn'].call_count)
 
             # Event queue cleared, turn counter incremented
             self.assertEqual(0, len(Event.queue))
             self.assertEqual(3, self.game.ticks)
+
+            self.advance_gameloop()
+
+            # Second turn, both actors are processed (hence 3 calls:
+            # one each for last turn, + the player's previous turn)
+            self.assertEqual(3, mocks['begin_turn'].call_count)
+            self.assertEqual(3, mocks['take_turn'].call_count)
+            self.assertEqual(3, mocks['end_turn'].call_count)
+
+            # Event queue cleared, turn counter incremented
+            self.assertEqual(0, len(Event.queue))
+            self.assertEqual(4, self.game.ticks)
 
     def test_input_request_returned_by_a_system_is_passed_to_the_caller(self):
 
@@ -271,6 +285,9 @@ class TestGameLoop(BaseGameTest):
         def reject_action(a):
             a.accept() if a.actor.is_player else a.reject()
             return a
+
+        # Eat player's turn so that mob act on the next call
+        self.advance_gameloop()
 
         with patch.object(
             self.game, 'dispatch_action', wraps=reject_action
