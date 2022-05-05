@@ -58,6 +58,7 @@ class TestInflictDmg(BaseFunctionalTestCase):
 
         hurter = self.spawn_actor(0, 0, 'orc')
         hurted = self.spawn_actor(0, 0, 'player')
+        hurted.health.hp = hurted.health.max_hp = 15
 
         # starting hp should be 15 for player
 
