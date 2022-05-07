@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import patch, Mock
 
 from barbarian.actions import Action, ActionType
-from barbarian.targetting import TargetMode
 from barbarian.actions import ActionDataError, UnknownActionTypeError
+from barbarian.targetting import TargetMode
 from barbarian.events import EventType
 
 
@@ -116,10 +116,6 @@ class TestActionHelpers(unittest.TestCase):
                 ActionDataError,
                 Action.from_dict, {'type': 'move', 'invalid_key': 'lol'}
             )
-            # self.assertRaises(
-            #     ActionDataError,
-            #     Action.from_dict, 
-            #     {'type': 'move', 'data': {'invalid_key': 'wut'}},)
 
     def test_attack_shortcut(self):
         action = Action.attack(a='a', t='t')

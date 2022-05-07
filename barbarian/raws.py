@@ -23,9 +23,16 @@ _entity_tables = {
 }
 
 
-def load_raws():
+def load_raws_file(raw_file_name):
+    """ Open `raw_file_name` and load its YAML content. """
+    raw_path = os.path.join(RAWS_ROOT, raw_file_name)
+    with open(raw_path, 'r', encoding='utf-8') as f:
+        return yaml.safe_load(f.read())
+
+
+def load_entities():
     """
-    Load all raw files:
+    Load all raw files related to entities:
     - actors, items & props definitions
     - entity spawn table.
 
@@ -36,17 +43,15 @@ def load_raws():
 
 
 def load_raw_table(table_key, raw_file_name):
-    """ Load individual data from raw file. """
-    raw_path = os.path.join(RAWS_ROOT, raw_file_name)
+    """ Load individual table data from raw file. """
     logger.debug('loading %s entities from disk', table_key)
-    with open(raw_path, 'r', encoding='utf-8') as f:
-        _entity_tables[table_key] = yaml.safe_load(f.read())
+    _entity_tables[table_key] = load_raws_file(raw_file_name)
 
 
 def get_spawn_data():
     """ Return the spawn data, loading it if needed from `spawn.yaml`. """
     if not _entity_tables['spawn']:
-        load_raws()
+        load_entities()
 
     return _entity_tables['spawn']
 
@@ -62,7 +67,7 @@ def get_entity_data(entity_name, table_key):
         return
 
     if not _entity_tables[table_key]:
-        load_raws()
+        load_entities()
 
     table = _entity_tables[table_key]
 

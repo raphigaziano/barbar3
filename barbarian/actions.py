@@ -84,14 +84,15 @@ class Action:
     target: Entity = None
     data: dict = field(default_factory=dict)
 
-    targetting: TargettingInfo = field(default_factory=dict)
+    targetting: TargettingInfo = None
 
     processed: bool = field(init=False, repr=False, default=False)
     valid: bool = field(init=False, repr=False, default=None)
     msg: str = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
-        self.targetting = TargettingInfo(**self.targetting)
+        if self.targetting:
+            self.targetting = TargettingInfo(**self.targetting)
 
     def unpack(self):
         """ Shortcut to quickly retrieve action data. """
@@ -128,7 +129,7 @@ class Action:
         info, depending on `self.targetting.mode`.
 
         """
-        if self.targetting.requires_prompt:
+        if self.targetting and self.targetting.requires_prompt:
             return self.targetting.mode.value in self.data
         return True
 
@@ -137,6 +138,12 @@ class Action:
         Set the right actor and target depending on `self.targetting.mode`.
 
         """
+        if self.targetting is None:
+            # Default to USABLE mode
+            self.actor = user
+            self.target = usable_entity
+            return
+
         match self.targetting.mode:
             case TargetMode.ACTOR:
                 self.actor = usable_entity
