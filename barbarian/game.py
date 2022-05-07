@@ -313,8 +313,7 @@ class Game:
                 new_action = systems.props.open_or_close_door(action, self.current_level)
 
             case ActionType.CHANGE_LEVEL:
-                systems.movement.change_level(
-                    action, self.world, self.player, debug=MAP_DEBUG)
+                systems.movement.change_level(action, self.world, debug=MAP_DEBUG)
                 if action.valid:
                     raise EndTurn
 

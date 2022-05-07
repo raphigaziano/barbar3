@@ -105,9 +105,7 @@ def xplore(action, level):
         return Action.move(actor, d={'dir': (dx, dy)})
 
 
-_delta_map = {'up': -1, 'down': 1, None: 0}
-
-def change_level(action, world, player, debug=False):
+def change_level(action, world, debug=False):
     """
     Move up or down (depending on action data's `dir` key) a
     single level.
@@ -115,11 +113,11 @@ def change_level(action, world, player, debug=False):
     Actual level change is handled by the world object.
 
     """
-    delta = _delta_map[action.data.get('dir')]
+    delta = action.data.get('depth_delta', 0)
     if delta < 0 and world.current_depth == 1:
         return action.reject(msg="You are already on the first level!")
 
-    world.change_level(delta, player, debug)
+    world.change_level(delta, action.actor, debug)
     action.accept(msg='You enter a new level!')
 
 

@@ -208,7 +208,7 @@ class World:
 
         return level
 
-    def change_level(self, depth_delta, player, debug=False):
+    def change_level(self, depth_delta, actor, debug=False):
         """
         Change the current level.
 
@@ -227,16 +227,16 @@ class World:
         """
         assert self.levels
 
-        self.current_level.actors.remove_e(player)
+        self.current_level.actors.remove_e(actor)
 
         if depth_delta >= 0:
             if depth_delta >= 1:
                 self.current_depth += 1
             new_level = self.new_level(self.current_depth, debug=debug)
             self.insert_level(new_level, replace_current=depth_delta == 0)
-            player.pos.x, player.pos.y = self.current_level.start_pos
+            actor.pos.x, actor.pos.y = self.current_level.start_pos
         else:
             self.current_depth -= 1
-            player.pos.x, player.pos.y = self.current_level.exit_pos
+            actor.pos.x, actor.pos.y = self.current_level.exit_pos
 
-        self.current_level.enter(player)
+        self.current_level.enter(actor)

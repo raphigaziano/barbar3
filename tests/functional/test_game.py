@@ -99,13 +99,13 @@ class TestGame(BaseGameTest):
         action = Action(ActionType.CHANGE_LEVEL)
         game.dispatch_action(action)
         patched_change_level.assert_called_with(
-            action, game.world, game.player, debug=True)
+            action, game.world, debug=True)
 
         game.process_set_request({'key': 'MAP_DEBUG', 'val': False})
         action = Action(ActionType.CHANGE_LEVEL)
         game.dispatch_action(action)
         patched_change_level.assert_called_with(
-            action, game.world, game.player, debug=False)
+            action, game.world, debug=False)
 
 
 class TestGameLoop(BaseGameTest):

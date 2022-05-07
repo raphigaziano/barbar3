@@ -11,14 +11,14 @@ stairs_down:
         glyph: '>'
     usable:
         use_key: 'down'
-        action_data: { data: {dir: down} }
+        action_data: { data: {depth_delta: 1} }
 stairs_up:
     _parent: _stairs
     visible:
         glyph: '<'
     usable:
         use_key: 'up'
-        action_data: { data: {dir: up} }
+        action_data: { data: {depth_delta: -1} }
 # All doors are spawned closed
 door:
     _parent: _base_prop

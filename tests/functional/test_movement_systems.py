@@ -315,20 +315,23 @@ class TestChangeLevel(BaseFunctionalTestCase):
         '##########',
     ]
 
-    def change_action(self, dir_):
-        return Action(ActionType.CHANGE_LEVEL, data={'dir': dir_})
+    def change_action(self, actor, delta):
+        return Action(
+            ActionType.CHANGE_LEVEL,
+            actor=actor,
+            data={'depth_delta': delta})
 
     def test_change_level(self, mock_world):
 
         for actor in self.actor_list(1, 1, 'player', 'kobold'):
 
-            for dir_, delta in (('down', 1), (None, 0), ('up', -1)):
+            for delta in (1, 0, -1):
 
                 mock_world.reset_mock()
 
-                change_l_action = self.change_action(dir_)
+                change_l_action = self.change_action(actor, delta)
                 self.assert_action_accepted(
-                    change_level, change_l_action, mock_world, actor)
+                    change_level, change_l_action, mock_world)
 
                 mock_world.change_level.assert_called_once_with(
                     delta, actor, False)
@@ -339,9 +342,9 @@ class TestChangeLevel(BaseFunctionalTestCase):
 
             mock_world.current_depth = 1
 
-            change_l_action = self.change_action('up')
+            change_l_action = self.change_action(actor, -1)
             self.assert_action_rejected(
-                change_level, change_l_action, mock_world, actor)
+                change_level, change_l_action, mock_world)
 
             mock_world.change_level.assert_not_called()
 
