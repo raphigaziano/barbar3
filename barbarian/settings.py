@@ -5,6 +5,9 @@ This is just a constants file for now, but we should add
 logic to load and handle config from data files.
 
 """
+import os
+
+
 DEBUG = False
 MAP_DEBUG = False
 MAP_W = 80
@@ -39,7 +42,7 @@ LOGCONFIG = {
     },
 }
 
-RAWS_ROOT = 'raws'
+RAWS_ROOT = os.path.join(os.path.dirname(__file__), 'data', 'raws')
 
 MAX_SPAWNS = 4  # per zone
 DISABLE_SPAWNING = False

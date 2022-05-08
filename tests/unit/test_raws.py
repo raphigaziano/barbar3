@@ -1,9 +1,11 @@
+import os
 import unittest
 from unittest.mock import patch, mock_open
 from contextlib import contextmanager
 
 from tests.unit.base import DummyRawsMixin
 
+from barbarian.settings import RAWS_ROOT
 from barbarian.raws import get_spawn_data, get_entity_data
 
 
@@ -58,13 +60,13 @@ class TestEntityRaws(DummyRawsMixin, unittest.TestCase):
                 ed = get_entity_data('prop_1', 'props')
                 # One call per table
                 self.assertEqual(4, m_open.call_count)
-                # Check all raws pathes are read, each prefixed with 
+                # Check all raws pathes are read, each prefixed with
                 # RAWS_ROOT
                 for path in (
-                    'raws/entities/actors.yaml',
-                    'raws/entities/props.yaml',
-                    'raws/entities/items.yaml',
-                    'raws/entities/spawn.yaml',
+                    os.path.join(RAWS_ROOT, 'entities/actors.yaml'),
+                    os.path.join(RAWS_ROOT, 'entities/props.yaml'),
+                    os.path.join(RAWS_ROOT, 'entities/items.yaml'),
+                    os.path.join(RAWS_ROOT, 'entities/spawn.yaml'),
                 ):
                     m_open.assert_any_call(path, 'r', encoding='utf-8')
 
@@ -120,13 +122,13 @@ class TestEntityRaws(DummyRawsMixin, unittest.TestCase):
                 sd = get_spawn_data()
                 # All tables are loaded, just like loadind entity data
                 self.assertEqual(4, m_open.call_count)
-                # Check all raws pathes are read, each prefixed with 
+                # Check all raws pathes are read, each prefixed with
                 # RAWS_ROOT
                 for path in (
-                    'raws/entities/actors.yaml',
-                    'raws/entities/props.yaml',
-                    'raws/entities/items.yaml',
-                    'raws/entities/spawn.yaml',
+                    os.path.join(RAWS_ROOT, 'entities/actors.yaml'),
+                    os.path.join(RAWS_ROOT, 'entities/props.yaml'),
+                    os.path.join(RAWS_ROOT, 'entities/items.yaml'),
+                    os.path.join(RAWS_ROOT, 'entities/spawn.yaml'),
                 ):
                     m_open.assert_any_call(path, 'r', encoding='utf-8')
 
