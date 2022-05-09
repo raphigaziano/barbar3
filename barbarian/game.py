@@ -100,6 +100,7 @@ class Game:
         player on the first level.
 
         """
+        self.ticks = 1
         self.init_rng(seed)
         self.state.clear()
 
