@@ -10,7 +10,8 @@ from barbarian.game import Game
 g = Game()
 # g.MAP_DEBUG = True
 g.init_game()
-g.start_game(seed='3078681389793250219')
+g.start_game(seed='1628088563624636737')
+# g.start_game(seed=None)
 
 print('Map cells sum:', sum(ord(c.value) for c in g.current_level.map.cells))
 

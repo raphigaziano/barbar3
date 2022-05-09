@@ -104,15 +104,19 @@ class Level:
         otherwise.
 
         """
+        if not (0 <= x < self.map.w and 0 <= y < self.map.h):
+            return True
+
         def _cell_occupied(entity):
             return entity is not None and entity.physics.blocks
 
-        try:
-            if _cell_occupied(self.props[x,y]):     return True
-            if _cell_occupied(self.actors[x,y]):    return True
-            return self.map.cell_blocks(x, y)
-        except OutOfBoundGridError:
-            return True
+        idx = x + (y * self.map.w)
+
+        if self.map.cell_blocks(x, y):                return True
+        if _cell_occupied(self.props.cells[idx]):     return True
+        if _cell_occupied(self.actors.cells[idx]):    return True
+
+        return False
 
     def move_actor(self, actor, dx, dy):
         """

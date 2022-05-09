@@ -53,7 +53,9 @@ class Map(Grid):
         occupy the cell (This check is the Level's job).
 
         """
-        return self.get_cell(x, y) in self.BLOCKING_TILE_TYPES
+        if not (0 <= x < self.w and 0 <= y < self.h):
+            return True
+        return self.cells[x + (y * self.w)] in self.BLOCKING_TILE_TYPES
 
     def compute_bitmask_grid(self):
         """ Build a bitmask grid of the map cells. Used for rendering. """

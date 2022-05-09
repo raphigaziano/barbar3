@@ -89,8 +89,8 @@ def xplore(action, level):
         *((x, y) for x, y, _ in level.map
           if (x, y) not in explored_cells),
         predicate=lambda x, y, _: (
-            (level.props[x,y] is not None and
-             level.props[x,y].openable) or
+            ((prop := level.props.cells[x+(y*level.w)]) is not None and
+             prop.openable) or
             not level.is_blocked(x, y)
         )
     )

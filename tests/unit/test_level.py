@@ -130,8 +130,7 @@ class TestLevel(unittest.TestCase):
 
         for is_player in (True, False):
             l = Level(10, 10)
-            l.map = Mock()
-            l.map.cell_blocks.return_value = True
+            l.map = Map(l.w, l.h, [TileType.FLOOR] * (l.w * l.h))
 
             actor = self._get_entity_mock()
             actor.pos.x = 5
