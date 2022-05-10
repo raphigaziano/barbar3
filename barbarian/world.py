@@ -4,11 +4,10 @@ Level and world storage.
 """
 import logging
 
-import tcod
-
 from barbarian.pathfinding import get_path_map
 from barbarian.utils.structures.grid import (
     EntityGrid, GridContainer, OutOfBoundGridError)
+from barbarian.fov import FovMap
 from barbarian.genmap import get_map_builder
 from barbarian.spawn import spawn_level
 
@@ -78,19 +77,14 @@ class Level:
 
         """
         if self.fov_map is None:
-            self.fov_map = tcod.map.Map(self.map.w, self.map.h)
-        for x, y, _ in self.map:
-            self.fov_map.transparent[y,x] = (
-                not self.map.cell_blocks(x, y) and
-                not (self.actors[x,y] is not None
-                 and self.actors[x,y].physics.blocks_sight) and
-                not (self.props[x,y] is not None
-                 and self.props[x,y].physics.blocks_sight)
-            )
-            # self.fov_map.walkable[y,x] = (
-            #     not self.map.cell_blocks(x, y) and
-            #     not any(e.physics.blocks for e in self.props[x,y])
-            # )
+            self.fov_map = FovMap(self.map.w, self.map.h)
+        self.fov_map.set_all_cells(lambda x, y:
+            self.map.cell_blocks(x, y) or
+            (self.actors[x,y] is not None
+                and self.actors[x,y].physics.blocks_sight) or
+            (self.props[x,y] is not None
+                and self.props[x,y].physics.blocks_sight)
+        )
 
     def compute_distance_map(self, from_x, from_y):
         self.distance_map = get_path_map(

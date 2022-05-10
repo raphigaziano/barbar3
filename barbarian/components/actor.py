@@ -128,17 +128,15 @@ class Fov(Component):
         """
         self.visible_cells.clear()
 
-        # TODO: use settings constants.
-        level.fov_map.compute_fov(
-            from_x, from_y, radius=self.range, light_walls=True, algorithm=0)
+        level.fov_map.compute(
+            from_x, from_y, radius=self.range, light_walls=True)
 
-        for y in range(level.fov_map.height):
-            for x in range(level.fov_map.width):
-                if level.fov_map.fov[y,x]:
-                    self.visible_cells.add((x,y))
-                    self.explored.add((x, y))
-                    if update_level:
-                        level.explored.add((x,y))
+        for x, y, c in level.fov_map:
+            if c.in_fov:
+                self.visible_cells.add((x,y))
+                self.explored.add((x, y))
+                if update_level:
+                    level.explored.add((x,y))
 
     def is_in_fov(self, x, y):
         return (x, y) in self.visible_cells

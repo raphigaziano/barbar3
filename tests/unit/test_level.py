@@ -39,14 +39,14 @@ class TestLevel(unittest.TestCase):
 
         l.init_fov_map()
 
-        self.assertFalse(l.fov_map.transparent[5,5])
+        self.assertTrue(l.fov_map[5,5].blocks_sight)
 
-        self.assertFalse(l.fov_map.transparent[0,0])
-        self.assertTrue(l.fov_map.transparent[1,1])
-        self.assertFalse(l.fov_map.transparent[2,2])
-        self.assertTrue(l.fov_map.transparent[3,3])
+        self.assertTrue(l.fov_map[0,0].blocks_sight)
+        self.assertFalse(l.fov_map[1,1].blocks_sight)
+        self.assertTrue(l.fov_map[2,2].blocks_sight)
+        self.assertFalse(l.fov_map[3,3].blocks_sight)
 
-        self.assertFalse(l.fov_map.transparent[9, 9])
+        self.assertTrue(l.fov_map[9,9].blocks_sight)
 
     def test_is_blocked(self):
 

@@ -160,7 +160,7 @@ def open_or_close_door(action, level):
 
     action.accept()
 
-    level.init_fov_map()
+    level.fov_map.set_cell(door.pos.x, door.pos.y, not door.openable.open)
     if actor.fov:
         actor.fov.compute(
             level, actor.pos.x, actor.pos.y,

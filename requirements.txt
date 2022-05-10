@@ -1,3 +1,3 @@
-tcod==13.6.0
+tcod==13.6.0    # Not needed by the game lib anymore, only kept for client.
 PyYAML
 pyfastnoiselite
