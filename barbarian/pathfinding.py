@@ -31,18 +31,18 @@ def get_path_map(level, start_pos, *goals, predicate=None, cost_function=None):
     )
     return path_map
 
-# Optimization ideas:
-# - Compute path map on a slice of the actual map, restrained by FOV
-#   range ?
 
-def get_path_to_target(start_pos, target_pos, level):
+def get_path_to_target(start_pos, target_pos, level, path_map=None):
     """
     Compute shortest path to `target_pos` and yields all cells on said path.
 
     `start_pos` and `target_pos` should both be (x, y) tupples.
 
+    Will use the given, precomputed `path_map` if given, otherwise we'll
+    compute a new one.
+
     """
-    path_map = get_path_map(level, target_pos)
+    path_map = path_map or get_path_map(level, target_pos)
 
     x, y = start_pos
     while (x, y) != target_pos:
@@ -60,5 +60,22 @@ def get_step_to_target(start_pos, target_pos, level):
     pointing towards it.
 
     """
-    step_x, step_y = next(get_path_to_target(start_pos, target_pos, level))
-    return step_x, step_y
+    return next(get_path_to_target(start_pos, target_pos, level))
+
+
+def get_step_to_player(start_pos, player_pos, level):
+    """
+    Specialized pather to find the player:
+    Try and use the general distance map (stored on the level and recomputed
+    after each player move) and only compute a new path if the first one is 
+    blocked.
+
+    """
+    step_x, step_y, _ = min(
+        level.distance_map.get_neighbors(*start_pos),
+        key=lambda pos_dist_tupple: pos_dist_tupple[2])
+    if (level.distance_map[step_x,step_y] != level.distance_map.inf and
+        not level.is_blocked(step_x, step_y)
+    ):
+        return step_x, step_y
+    return next(get_path_to_target(start_pos, player_pos, level))

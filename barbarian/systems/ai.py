@@ -6,7 +6,7 @@ from barbarian.utils.rng import Rng
 from barbarian.utils.geometry import distance_from, vector_to
 from barbarian.actions import Action, ActionType
 from barbarian.systems.visibility import spot_player
-from barbarian.pathfinding import PathBlockedError, get_step_to_target
+from barbarian.pathfinding import PathBlockedError, get_step_to_player
 
 
 def tmp_ai(actor, game):
@@ -23,7 +23,7 @@ def tmp_ai(actor, game):
 
         # Move towards player
         try:
-            dx, dy = get_step_to_target((ap.x, ap.y), (tp.x, tp.y), level)
+            dx, dy = get_step_to_player((ap.x, ap.y), (tp.x, tp.y), level)
             vx, vy = vector_to(ap.x, ap.y, dx, dy)
             return Action.move(actor, d={'dir': (vx, vy)})
         except PathBlockedError:

@@ -1,8 +1,8 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from .base import BaseFunctionalTestCase
 
 from barbarian.pathfinding import (
-    PathBlockedError, get_path_to_target, get_step_to_target)
+    PathBlockedError, get_path_to_target, get_step_to_target, get_step_to_player)
 
 
 class TestPathfinding(BaseFunctionalTestCase):
@@ -160,3 +160,33 @@ class TestPathfinding(BaseFunctionalTestCase):
             (player.pos.x, player.pos.y), level)
         # Need to consume generator
         self.assertRaises(PathBlockedError, next, path)
+
+    @patch('barbarian.pathfinding.get_path_to_target', wraps=get_path_to_target)
+    def test_get_step_to_player(self, mock_get_path):
+
+        level = self.build_dummy_level((
+            '.....',
+            '.....',
+            '.....',
+            '.....',
+            '.....',
+        ))
+        level.compute_distance_map(4, 3)
+
+        _ = get_step_to_player((0, 0), (4, 3), level)
+        mock_get_path.assert_not_called()
+
+    @patch('barbarian.pathfinding.get_path_to_target', wraps=get_path_to_target)
+    def test_get_step_to_player_general_path_is_blocked(self, mock_get_path):
+
+        level = self.build_dummy_level((
+            '.....',
+            '.....',
+            '...o.',
+            '.....',
+            '.....',
+        ))
+        level.compute_distance_map(4, 3)
+
+        _ = get_step_to_player((2, 1), (4, 3), level)
+        mock_get_path.assert_called_once()
